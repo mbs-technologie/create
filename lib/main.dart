@@ -2,7 +2,7 @@
 
 import 'package:sky/widgets.dart';
 
-enum Facets { Modules, Schema, Library, Views, Styles, Parameters, Data, Launch }
+enum Dimensions { Modules, Schema, Paramaters, Library, Services, Views, Styles, Data, Launch }
 enum Modules { Core, Meta, Demo }
 
 class HelloWorldApp extends App {
