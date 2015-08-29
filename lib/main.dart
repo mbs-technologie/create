@@ -2,6 +2,9 @@
 
 import 'package:sky/widgets.dart';
 
+enum Facets { Modules, Schema, Library, Views, Styles, Parameters, Data, Launch }
+enum Modules { Core, Meta, Demo }
+
 class HelloWorldApp extends App {
   Widget build() {
     return new Center(child: new Text('Hello, world!',
