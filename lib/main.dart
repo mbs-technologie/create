@@ -1,5 +1,7 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 
+import 'elements.dart';
+
 import 'package:sky/widgets.dart';
 import 'package:sky/theme/colors.dart' as colors;
 
@@ -10,16 +12,17 @@ class CreateApp extends App {
   static const String APP_TITLE = "Create!";
   static const EdgeDims MAIN_VIEW_PADDING = const EdgeDims.all(10.0);
 
-  int counter = 68;
+  Context context = new BaseContext(null);
+  Ref<int> counter = new State<int>(68);
 
-  Widget makeButton(String buttonText, Function action) {
+  Widget makeButton(String buttonText, Operation action) {
     return new RaisedButton(
       child: new Text(
         buttonText,
         style: Theme.of(this).text.button
       ),
       enabled: true,
-      onPressed: action
+      onPressed: () => action.schedule()
     );
   }
 
@@ -31,15 +34,13 @@ class CreateApp extends App {
   }
 
   void buttonPressed() {
-    setState(() {
-      counter += 1;
-    });
+    counter.write(counter.read() + 1);
   }
 
   Widget buildMainView() {
     return new Column([
-      makeLabel('The counter is $counter'),
-      makeButton('And here is the button', buttonPressed)
+      makeLabel('The counter is ${counter.read()}'),
+      makeButton('And here is the button', new BaseOperation(buttonPressed, context))
     ], alignItems: FlexAlignItems.start);
   }
 
@@ -84,7 +85,13 @@ class CreateApp extends App {
     );
   }
 
-  Widget build() {
+  void _rebuild() {
+    setState(() { });
+  }
+
+  @override Widget build() {
+    counter.observe(new BaseOperation(_rebuild, context), context);
+
     ThemeData theme = new ThemeData(
       brightness: ThemeBrightness.light,
       primarySwatch: colors.Teal
