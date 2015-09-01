@@ -132,7 +132,7 @@ packages:
   shelf:
     description: shelf
     source: hosted
-    version: "0.6.2+1"
+    version: "0.6.3"
   shelf_path:
     description: shelf_path
     source: hosted

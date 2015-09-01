@@ -10,14 +10,16 @@ class CreateApp extends App {
   static const String APP_TITLE = "Create!";
   static const EdgeDims MAIN_VIEW_PADDING = const EdgeDims.all(10.0);
 
-  Widget makeButton(String buttonText) {
+  int counter = 68;
+
+  Widget makeButton(String buttonText, Function action) {
     return new RaisedButton(
       child: new Text(
         buttonText,
         style: Theme.of(this).text.button
       ),
       enabled: true,
-      onPressed: () => print('Button pressed!')
+      onPressed: action
     );
   }
 
@@ -28,11 +30,17 @@ class CreateApp extends App {
     );
   }
 
+  void buttonPressed() {
+    setState(() {
+      counter += 1;
+    });
+  }
+
   Widget buildMainView() {
     return new Column([
-      makeLabel('Here is a label'),
-      makeButton('And here is the button')
-    ]);
+      makeLabel('The counter is $counter'),
+      makeButton('And here is the button', buttonPressed)
+    ], alignItems: FlexAlignItems.start);
   }
 
   Widget buildToolBar() {
