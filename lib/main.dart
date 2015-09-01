@@ -8,10 +8,31 @@ enum Modules { Core, Meta, Demo }
 
 class CreateApp extends App {
   static const String APP_TITLE = "Create!";
+  static const EdgeDims MAIN_VIEW_PADDING = const EdgeDims.all(10.0);
 
-  Widget buildBody() {
-    return new Center(child: new Text('Hello, world!',
-        style : new TextStyle(fontSize: 68.0)));
+  Widget makeButton(String buttonText) {
+    return new RaisedButton(
+      child: new Text(
+        buttonText,
+        style: Theme.of(this).text.button
+      ),
+      enabled: true,
+      onPressed: () => print('Button pressed!')
+    );
+  }
+
+  Widget makeLabel(String labelText) {
+    return new Text(
+      labelText,
+      style: Theme.of(this).text.subhead
+    );
+  }
+
+  Widget buildMainView() {
+    return new Column([
+      makeLabel('Here is a label'),
+      makeButton('And here is the button')
+    ]);
   }
 
   Widget buildToolBar() {
@@ -35,10 +56,20 @@ class CreateApp extends App {
   void _handleBeginSearch() => null; // TODO
   void _handleShowMenu() => null; // TODO
 
+  Widget buildMainCanvas() {
+    return new Material(
+      type: MaterialType.canvas,
+      child: new Container(
+        padding: MAIN_VIEW_PADDING,
+        child: buildMainView()
+      )
+    );
+  }
+
   Widget buildScaffold() {
     return new Scaffold(
       toolbar: buildToolBar(),
-      body: buildBody(),
+      body: buildMainCanvas(),
       snackBar: null,
       floatingActionButton: null,
       drawer: null
