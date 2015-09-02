@@ -18,19 +18,23 @@ abstract class View {
   Widget build();
 }
 
-class LabelView extends View {
+class LabelView implements View {
   final ReadRef<String> labelText;
   @override final ReadRef<Style> style;
   @override Context context;
-  Widget _widget = null;
+  Context _subcontext;
+  Widget _widget;
+  Zone get _zone => context.zone;
 
   LabelView(this.labelText, this.style, this.context);
 
   @override Widget build() {
     if (_widget == null) {
       assert (context != null);
+      _subcontext = context.makeSubContext();
+      Operation forceRefresh = _zone.makeOperation(_forceRefresh);
       _widget = render();
-      labelText.observe(new BaseOperation(_rebuild, context), context);
+      labelText.observe(forceRefresh, _subcontext);
     }
     return _widget;
   }
@@ -42,8 +46,10 @@ class LabelView extends View {
     );
   }
 
-  void _rebuild() {
-    assert (context != null);
+  void _forceRefresh() {
+    assert (_subcontext != null);
+    _subcontext.dispose();
+    _subcontext = null;
 
     // Traverse the component hierachy until we hit a component that we can mark as dirty
     // by using setState()
@@ -54,6 +60,8 @@ class LabelView extends View {
         break;
       }
     }
+
+    _widget = null;
   }
 }
 

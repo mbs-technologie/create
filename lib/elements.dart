@@ -155,7 +155,10 @@ abstract class BaseState<T> implements ReadRef<T> {
   void _setState(T newValue) {
     if (newValue != _value) {
       _value = newValue;
-      _observers.forEach((observer) => observer.scheduleObserver());
+      // We create a copy to avoid concurrent modification exceptions
+      // from the observer code.
+      // TODO: once event loops are introduced, we can stop doing it.
+      _observers.toSet().forEach((observer) => observer.scheduleObserver());
     }
   }
 
