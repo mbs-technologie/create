@@ -56,7 +56,7 @@ abstract class Observable {
 abstract class ReadRef<T> implements Observable {
 
   /// Dereference.
-  T read();
+  T get value;
 }
 
 /// Strongly typed reference with write access.
@@ -64,7 +64,7 @@ abstract class WriteRef<T> {
   /// Change the state of the reference to a new value.
   /// Typically if the new value is distinct from the old value
   /// (as specified by <code>Object.equals()</code>), the observers are invoked.
-  void write(T newValue);
+  void set value(T newValue);
 }
 
 /// Strongly typed observable reference with read and write access.
@@ -113,9 +113,9 @@ abstract class BaseState<T> implements ReadRef<T> {
   T _value;
   Set<Operation> _observers = new Set<Operation>();
 
-  BaseState(this._value);
+  BaseState([this._value]);
 
-  @override T read() => _value;
+  @override T get value => _value;
 
   /// Update the state to a new value.
   void _setState(T newValue) {
@@ -136,7 +136,7 @@ abstract class BaseState<T> implements ReadRef<T> {
 class State<T> extends BaseState<T> implements Ref<T> {
   State(T value): super(value);
 
-  @override void write(T newValue) => _setState(newValue);
+  @override void set value(T newValue) => _setState(newValue);
 }
 
 /// A simple operation
@@ -149,5 +149,21 @@ class BaseOperation implements Operation {
   void schedule() {
     // TODO: put on the queue instead of running directly
     _procedure();
+  }
+}
+
+/// A reactive function that converts a value of type S into a value of type T.
+class ReactiveFunction<S, T> extends BaseState<T> {
+  final ReadRef<S> _source;
+  final Context _context;
+  final Function _function;
+
+  ReactiveFunction(this._source, this._context, T function(S source)): _function = function {
+    _source.observe(new BaseOperation(_recompute,_context), _context);
+    _recompute();
+  }
+
+  void _recompute() {
+    _setState(_function(_source.value));
   }
 }

@@ -25,7 +25,7 @@ class LabelView {
       assert (context != null);
       labelText.observe(new BaseOperation(_rebuild, context), context);
       _widget = new Text(
-        labelText.read(),
+        labelText.value
         //style: Theme.of(this).text.subhead
       );
     }
@@ -38,11 +38,17 @@ class LabelView {
 }
 
 class CreateApp extends App {
-  static const String APP_TITLE = "Create!";
+  static const String APP_TITLE = 'Create!';
   static const EdgeDims MAIN_VIEW_PADDING = const EdgeDims.all(10.0);
 
-  Context context = new BaseContext(null);
-  Ref<int> counter = new State<int>(68);
+  final Context context = new BaseContext(null);
+  final Ref<int> counter = new State<int>(68);
+  ReadRef<String> label;
+
+  CreateApp() {
+    label = new ReactiveFunction<int, String>(counter, context,
+        (int counterValue) => 'The counter value is ${counterValue}');
+  }
 
   Widget makeButton(String buttonText, Operation action) {
     return new RaisedButton(
@@ -63,13 +69,13 @@ class CreateApp extends App {
   }
 
   void buttonPressed() {
-    counter.write(counter.read() + 1);
+    counter.value = counter.value + 1;
   }
 
   Widget buildMainView() {
     return new Column([
-      makeLabel('The counter is ${counter.read()}'),
-      makeButton('And here is the button', new BaseOperation(buttonPressed, context))
+      makeLabel(label.value),
+      makeButton('Increase the counter value', new BaseOperation(buttonPressed, context))
     ], alignItems: FlexAlignItems.start);
   }
 
