@@ -160,6 +160,7 @@ class ReactiveFunction<S, T> extends BaseState<T> {
 
   ReactiveFunction(this._source, this._context, T function(S source)): _function = function {
     _source.observe(new BaseOperation(_recompute,_context), _context);
+    // TODO: we should lazily compute the value when the priority increases.
     _recompute();
   }
 

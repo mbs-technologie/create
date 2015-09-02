@@ -12,28 +12,48 @@ class Style {
   double fontSize;
 }
 
-class LabelView {
+abstract class View {
+  void set context(Context newContext);
+  ReadRef<Style> get style;
+  Widget build();
+}
+
+class LabelView extends View {
   final ReadRef<String> labelText;
-  final ReadRef<Style> style;
-  final Context context;
+  @override final ReadRef<Style> style;
+  @override Context context;
   Widget _widget = null;
 
   LabelView(this.labelText, this.style, this.context);
 
-  Widget build() {
+  @override Widget build() {
     if (_widget == null) {
       assert (context != null);
+      _widget = render();
       labelText.observe(new BaseOperation(_rebuild, context), context);
-      _widget = new Text(
-        labelText.value
-        //style: Theme.of(this).text.subhead
-      );
     }
     return _widget;
   }
 
+  Widget render() {
+    return new Text(
+      labelText.value
+      //style: Theme.of(this).text.subhead
+    );
+  }
+
   void _rebuild() {
     assert (context != null);
+
+    // Traverse the component hierachy until we hit a component that we can mark as dirty
+    // by using setState()
+    for (Widget current = _widget; current != null; current = current.parent) {
+      // TODO: we should be able to repaint any StatefulComponent
+      if (current is App) {
+        current.setState(() { });
+        break;
+      }
+    }
   }
 }
 
@@ -61,20 +81,14 @@ class CreateApp extends App {
     );
   }
 
-  Widget makeLabel(String labelText) {
-    return new Text(
-      labelText,
-      style: Theme.of(this).text.subhead
-    );
-  }
-
   void buttonPressed() {
     counter.value = counter.value + 1;
   }
 
   Widget buildMainView() {
+    View labelView = new LabelView(label, null, context);
     return new Column([
-      makeLabel(label.value),
+      labelView.build(),
       makeButton('Increase the counter value', new BaseOperation(buttonPressed, context))
     ], alignItems: FlexAlignItems.start);
   }
@@ -120,13 +134,7 @@ class CreateApp extends App {
     );
   }
 
-  void _rebuild() {
-    setState(() { });
-  }
-
   @override Widget build() {
-    counter.observe(new BaseOperation(_rebuild, context), context);
-
     ThemeData theme = new ThemeData(
       brightness: ThemeBrightness.light,
       primarySwatch: colors.Teal
