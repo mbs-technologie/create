@@ -61,12 +61,12 @@ class CreateApp extends App {
   static const String APP_TITLE = 'Create!';
   static const EdgeDims MAIN_VIEW_PADDING = const EdgeDims.all(10.0);
 
-  final Context context = new BaseContext(null);
+  final Zone zone = new BaseZone();
   final Ref<int> counter = new State<int>(68);
   ReadRef<String> label;
 
   CreateApp() {
-    label = new ReactiveFunction<int, String>(counter, context,
+    label = new ReactiveFunction<int, String>(counter, zone,
         (int counterValue) => 'The counter value is ${counterValue}');
   }
 
@@ -77,7 +77,7 @@ class CreateApp extends App {
         style: Theme.of(this).text.button
       ),
       enabled: true,
-      onPressed: () => action.schedule()
+      onPressed: () => action.scheduleAction()
     );
   }
 
@@ -86,10 +86,10 @@ class CreateApp extends App {
   }
 
   Widget buildMainView() {
-    View labelView = new LabelView(label, null, context);
+    View labelView = new LabelView(label, null, zone);
     return new Column([
       labelView.build(),
-      makeButton('Increase the counter value', new BaseOperation(buttonPressed, context))
+      makeButton('Increase the counter value', zone.makeOperation(buttonPressed))
     ], alignItems: FlexAlignItems.start);
   }
 
