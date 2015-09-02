@@ -23,27 +23,23 @@ abstract class Disposable {
 abstract class Context implements Disposable {
 
   /// Parent of this context.
-  final Context parent;
+  Context get parent;
 
   /// Add a resource to this context's resource collection.
   void addResource(Disposable resource);
 
   /// Create a subcontext with this context as a parent.
   Context makeSubContext();
-
-  Context(this.parent);
 }
 
 /// An operation (a.k.a. procedure or callback) associated with a specific context
 abstract class Operation {
   /// Context in which this operation will run
   /// TODO: this should be a Zone
-  final Context context;
+  Context get context;
 
   /// Schedule this operation for execution
   void schedule();
-
-  Operation(this.context);
 }
 
 /// Interface for an observable object
@@ -90,10 +86,11 @@ class DisposeProcedure implements Disposable {
 }
 
 /// An implementation of a hierarchical context.
-class BaseContext extends Context {
+class BaseContext implements Context {
+  final Context parent;
   final Set<Disposable> _resources = new Set<Disposable>();
 
-  BaseContext(Context parent): super(parent) {
+  BaseContext(this.parent) {
     if (parent != null) {
       parent.addResource(this);
     }
@@ -143,10 +140,11 @@ class State<T> extends BaseState<T> implements Ref<T> {
 }
 
 /// A simple operation
-class BaseOperation extends Operation {
+class BaseOperation implements Operation {
   final Procedure _procedure;
+  final Context context;
 
-  BaseOperation(this._procedure, context): super(context);
+  BaseOperation(this._procedure, this.context);
 
   void schedule() {
     // TODO: put on the queue instead of running directly

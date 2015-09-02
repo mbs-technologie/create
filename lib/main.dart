@@ -8,6 +8,35 @@ import 'package:sky/theme/colors.dart' as colors;
 enum Dimensions { Modules, Schema, Paramaters, Library, Services, Views, Styles, Data, Launch }
 enum Modules { Core, Meta, Demo }
 
+class Style {
+  double fontSize;
+}
+
+class LabelView {
+  final ReadRef<String> labelText;
+  final ReadRef<Style> style;
+  final Context context;
+  Widget _widget = null;
+
+  LabelView(this.labelText, this.style, this.context);
+
+  Widget build() {
+    if (_widget == null) {
+      assert (context != null);
+      labelText.observe(new BaseOperation(_rebuild, context), context);
+      _widget = new Text(
+        labelText.read(),
+        //style: Theme.of(this).text.subhead
+      );
+    }
+    return _widget;
+  }
+
+  void _rebuild() {
+    assert (context != null);
+  }
+}
+
 class CreateApp extends App {
   static const String APP_TITLE = "Create!";
   static const EdgeDims MAIN_VIEW_PADDING = const EdgeDims.all(10.0);
