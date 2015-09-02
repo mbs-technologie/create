@@ -12,21 +12,24 @@ class Style {
   double fontSize;
 }
 
-abstract class View {
-  void set context(Context newContext);
+// A view of M, which is a model type (and must be Observable)
+abstract class View<M> {
+  M get model;
   ReadRef<Style> get style;
+  Context context;
   Widget build();
 }
 
-class LabelView implements View {
-  final ReadRef<String> labelText;
+// A view that builds a Sky widget and takes care of model updates
+abstract class BaseView<M> implements View<M> {
+  @override final M model;
   @override final ReadRef<Style> style;
-  @override Context context;
+  Context context;
   Context _subcontext;
   Widget _widget;
   Zone get _zone => context.zone;
 
-  LabelView(this.labelText, this.style, this.context);
+  BaseView(this.model, this.style);
 
   @override Widget build() {
     if (_widget == null) {
@@ -34,17 +37,13 @@ class LabelView implements View {
       _subcontext = context.makeSubContext();
       Operation forceRefresh = _zone.makeOperation(_forceRefresh);
       _widget = render();
-      labelText.observe(forceRefresh, _subcontext);
+      (model as Observable).observe(forceRefresh, _subcontext);
     }
     return _widget;
   }
 
-  Widget render() {
-    return new Text(
-      labelText.value
-      //style: Theme.of(this).text.subhead
-    );
-  }
+  /// Actual model rendering tha subclasses should implement
+  Widget render();
 
   void _forceRefresh() {
     assert (_subcontext != null);
@@ -65,17 +64,37 @@ class LabelView implements View {
   }
 }
 
+// A text view of String model
+class LabelView extends BaseView<ReadRef<String>> {
+  LabelView(ReadRef<String> labelText, ReadRef<Style> style) : super(labelText, style);
+
+  @override Widget render() {
+    return new Text(
+      model.value
+      //style: Theme.of(this).text.subhead
+    );
+  }
+}
+
+class CounterStore extends BaseZone {
+  // State
+  final Ref<int> counter = new State<int>(68);
+
+  // Business logic
+  Operation get increaseValue => makeOperation(() { counter.value = counter.value + 1; });
+}
+
 class CreateApp extends App {
   static const String APP_TITLE = 'Create!';
   static const EdgeDims MAIN_VIEW_PADDING = const EdgeDims.all(10.0);
 
+  final CounterStore datastore = new CounterStore();
   final Zone zone = new BaseZone();
-  final Ref<int> counter = new State<int>(68);
   ReadRef<String> label;
 
   CreateApp() {
-    label = new ReactiveFunction<int, String>(counter, zone,
-        (int counterValue) => 'The counter value is ${counterValue}');
+    label = new ReactiveFunction<int, String>(datastore.counter, zone,
+        (int counterValue) => 'The counter value is $counterValue');
   }
 
   Widget makeButton(String buttonText, Operation action) {
@@ -89,15 +108,12 @@ class CreateApp extends App {
     );
   }
 
-  void buttonPressed() {
-    counter.value = counter.value + 1;
-  }
-
   Widget buildMainView() {
-    View labelView = new LabelView(label, null, zone);
+    View labelView = new LabelView(label, null);
+    labelView.context = zone;
     return new Column([
       labelView.build(),
-      makeButton('Increase the counter value', zone.makeOperation(buttonPressed))
+      makeButton('Increase the counter value', datastore.increaseValue)
     ], alignItems: FlexAlignItems.start);
   }
 
