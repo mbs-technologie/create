@@ -66,13 +66,38 @@ abstract class BaseView<M> implements View<M> {
 
 // A text view of String model
 class LabelView extends BaseView<ReadRef<String>> {
-  LabelView(ReadRef<String> labelText, ReadRef<Style> style) : super(labelText, style);
+  LabelView(ReadRef<String> labelText, ReadRef<Style> style): super(labelText, style);
 
   @override Widget render() {
     return new Text(
       model.value
       //style: Theme.of(this).text.subhead
     );
+  }
+}
+
+// A button view
+class ButtonView extends BaseView<ReadRef<String>> {
+  final ReadRef<Operation> action;
+
+  ButtonView(ReadRef<String> buttonText, ReadRef<Style> style, this.action):
+    super(buttonText, style);
+
+  @override Widget render() {
+    return new RaisedButton(
+      child: new Text(
+        model.value
+        //style: Theme.of(this).text.button
+      ),
+      enabled: true,
+      onPressed: _buttonPressed
+    );
+  }
+
+  void _buttonPressed() {
+    if (action != null && action.value != null) {
+      action.value.scheduleAction();
+    }
   }
 }
 
@@ -97,23 +122,16 @@ class CreateApp extends App {
         (int counterValue) => 'The counter value is $counterValue');
   }
 
-  Widget makeButton(String buttonText, Operation action) {
-    return new RaisedButton(
-      child: new Text(
-        buttonText,
-        style: Theme.of(this).text.button
-      ),
-      enabled: true,
-      onPressed: () => action.scheduleAction()
-    );
-  }
-
   Widget buildMainView() {
     View labelView = new LabelView(label, null);
     labelView.context = zone;
+    View buttonView = new ButtonView(
+        new Constant<String>('Increase the counter value'), null,
+        new Constant<Operation>(datastore.increaseValue));
+    buttonView.context = zone;
     return new Column([
       labelView.build(),
-      makeButton('Increase the counter value', datastore.increaseValue)
+      buttonView.build(),
     ], alignItems: FlexAlignItems.start);
   }
 

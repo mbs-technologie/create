@@ -142,6 +142,15 @@ class BaseZone extends Zone with ResourceManager {
   @override Operation makeOperation(Procedure procedure) => new BaseOperation(procedure, this);
 }
 
+/// A constant is a reference whose value never changes.
+class Constant<T> implements ReadRef<T> {
+  final T value;
+
+  Constant(this.value);
+
+  @override void observe(Operation observer, Context context) => null; // Noop
+}
+
 /// Stores the value of type T, triggering observers when it changes.
 abstract class BaseState<T> implements ReadRef<T> {
   T _value;
