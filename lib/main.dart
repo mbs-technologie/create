@@ -10,14 +10,14 @@ enum Dimensions { Modules, Schema, Paramaters, Library, Services, Views, Styles,
 enum Modules { Core, Meta, Demo }
 
 // A view of M, which is a model type (and must be Observable)
-abstract class View<M> {
+abstract class View<M extends Observable> {
   M get model;
   ReadRef<Style> get style;
   Widget build(Context context);
 }
 
 // A view that builds a Sky widget and takes care of model updates
-abstract class BaseView<M> implements View<M> {
+abstract class BaseView<M extends Observable> implements View<M> {
   @override final M model;
   @override final ReadRef<Style> style;
   Context _subcontext;
@@ -32,7 +32,7 @@ abstract class BaseView<M> implements View<M> {
 
       _widget = render();
 
-      (model as Observable).observe(forceRefresh, _subcontext);
+      model.observe(forceRefresh, _subcontext);
       if (style != null) {
         style.observe(forceRefresh, _subcontext);
       }
