@@ -94,7 +94,7 @@ abstract class ReadList<E> implements Observable {
   List<E> get elements;
 }
 
-/// An alias for prcoedure with no arguments.
+/// An alias for procedure with no arguments.
 typedef void Procedure();
 
 /// Adapter for converting a procedure into a disposable object.
@@ -109,7 +109,7 @@ class DisposeProcedure implements Disposable {
 }
 
 /// A mixin that implements resourece management part of context.
-abstract class ResourceManager implements Context {
+abstract class _ResourceManager implements Context {
   final Set<Disposable> _resources = new Set<Disposable>();
 
   void addResource(Disposable resource) {
@@ -123,7 +123,7 @@ abstract class ResourceManager implements Context {
 }
 
 /// An implementation of a hierarchical context.
-class BaseContext extends Context with ResourceManager {
+class BaseContext extends Context with _ResourceManager {
   final Context parent;
   final Zone zone;
 
@@ -137,7 +137,7 @@ class BaseContext extends Context with ResourceManager {
 }
 
 /// An implementation of a zone.
-class BaseZone extends Zone with ResourceManager {
+class BaseZone extends Zone with _ResourceManager {
   final Zone parent;
   Zone get zone => this;
 
@@ -149,27 +149,27 @@ class BaseZone extends Zone with ResourceManager {
 
   @override Context makeSubContext() => new BaseContext(this, this);
 
-  @override Operation makeOperation(Procedure procedure) => new BaseOperation(procedure, this);
+  @override Operation makeOperation(Procedure procedure) => new _BaseOperation(procedure, this);
 }
 
 /// A mixin for immutable state.  Adding observer is an noop since state never changes.
 /// A constant is a reference whose value never changes.
-abstract class BaseImmutable implements Observable {
+abstract class _BaseImmutable implements Observable {
   @override void observe(Operation observer, Context context) => null;
 }
 
-class Constant<T> extends ReadRef<T> with BaseImmutable {
+class Constant<T> extends ReadRef<T> with _BaseImmutable {
   final T value;
 
   Constant(this.value);
 }
 
 /// Stores the value of type T, triggering observers when it changes.
-abstract class BaseState<T> implements ReadRef<T> {
+abstract class _BaseState<T> implements ReadRef<T> {
   T _value;
   Set<Operation> _observers = new Set<Operation>();
 
-  BaseState([this._value]);
+  _BaseState([this._value]);
 
   @override T get value => _value;
 
@@ -192,18 +192,18 @@ abstract class BaseState<T> implements ReadRef<T> {
 }
 
 /// State is a read-write value, exposing `WriteRef.set()`.
-class State<T> extends BaseState<T> implements Ref<T> {
-  State(T value): super(value);
+class State<T> extends _BaseState<T> implements Ref<T> {
+  State([T value]): super(value);
 
   @override void set value(T newValue) => _setState(newValue);
 }
 
 /// A simple operation
-class BaseOperation implements Operation {
+class _BaseOperation implements Operation {
   final Procedure _procedure;
   final Zone zone;
 
-  BaseOperation(this._procedure, this.zone);
+  _BaseOperation(this._procedure, this.zone);
 
   @override void scheduleAction() {
     // TODO: put on the queue instead of running directly
@@ -217,7 +217,7 @@ class BaseOperation implements Operation {
 }
 
 /// A reactive function that converts a value of type S into a value of type T.
-class ReactiveFunction<S, T> extends BaseState<T> {
+class ReactiveFunction<S, T> extends _BaseState<T> {
   final ReadRef<S> _source;
   final Context _context;
   final Function _function;
@@ -234,7 +234,7 @@ class ReactiveFunction<S, T> extends BaseState<T> {
 }
 
 /// An immutable list that implements ReadList interface.
-class ImmutableList<E> extends ReadList<E> with BaseImmutable {
+class ImmutableList<E> extends ReadList<E> with _BaseImmutable {
   final List<E> elements;
 
   ImmutableList(this.elements);
@@ -244,12 +244,15 @@ class ImmutableList<E> extends ReadList<E> with BaseImmutable {
 }
 
 /// Since Dart doesn't have generic functions, we have to declare a special type here.
-/// TODO: update this live.
-class MappedList<S, T> extends ReadList<T> with BaseImmutable {
+class MappedList<S, T> implements ReadList<T> {
   final ReadList<S> _source;
   final Function _function;
 
   MappedList(this._source, T function(S source)): _function = function;
+
+  /// TODO: implement this efficiently.
+  @override void observe(Operation observer, Context context) =>
+      _source.observe(observer, context);
 
   ReadRef<int> get size => _source.size;
 

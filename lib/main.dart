@@ -20,13 +20,14 @@ abstract class View<M extends Observable> {
 abstract class BaseView<M extends Observable> implements View<M> {
   @override final M model;
   @override final ReadRef<Style> style;
+  bool get _cacheWidget => true;
   Context _subcontext;
   Widget _widget;
 
   BaseView(this.model, this.style);
 
   @override Widget build(Context context) {
-    if (_widget == null) {
+    if (_widget == null || !_cacheWidget) {
       _subcontext = context.makeSubContext();
       Operation forceRefresh = context.zone.makeOperation(_forceRefresh);
 
@@ -55,8 +56,8 @@ abstract class BaseView<M extends Observable> implements View<M> {
     // by using setState()
     for (Widget current = _widget; current != null; current = current.parent) {
       // TODO: we should be able to repaint any StatefulComponent
-      if (current is App) {
-        current.setState(() { });
+      if (current is SkyApp) {
+        current.markDirty();
         break;
       }
     }
@@ -101,11 +102,19 @@ List<Widget> _buildWidgetList(ReadList<View> views, Context context) {
 
 // A column view
 class ColumnView extends BaseView<ReadList<View>> {
+  @override bool get _cacheWidget => false;
+
   ColumnView(ReadList<View> rows, ReadRef<Style> style): super(rows, style);
 
   @override Widget render(Context context) {
     return new Column(_buildWidgetList(model, context), alignItems: FlexAlignItems.start);
   }
+}
+
+// Application state
+abstract class AppState implements Zone {
+  ReadRef<String> get appTitle;
+  ReadRef<View> get mainView;
 }
 
 class CounterStore extends BaseZone {
@@ -119,14 +128,16 @@ class CounterStore extends BaseZone {
       counter, this, (int counterValue) => 'The counter value is $counterValue');
 }
 
-class CreateApp extends App {
-  static const String APP_TITLE = 'Create!';
-  static const EdgeDims MAIN_VIEW_PADDING = const EdgeDims.all(10.0);
-
+class CounterAppState extends BaseZone implements AppState {
   final CounterStore datastore = new CounterStore();
-  final Zone viewZone = new BaseZone();
+  final ReadRef<String> appTitle = new Constant<String>('Create!');
+  final Ref<View> mainView = new State<View>();
 
-  View buildMainView() {
+  CounterAppState() {
+    mainView.value = makeMainView();
+  }
+
+  View makeMainView() {
     return new ColumnView(new ImmutableList<View>([
           new LabelView(
             datastore.describeState,
@@ -138,13 +149,30 @@ class CreateApp extends App {
         ]
       ), null);
   }
+}
 
-  Widget buildToolBar() {
+class SkyApp extends App {
+  static const EdgeDims MAIN_VIEW_PADDING = const EdgeDims.all(10.0);
+
+  final AppState appState;
+  final Zone viewZone = new BaseZone();
+
+  SkyApp(this.appState);
+
+  void run() {
+    runApp(this);
+  }
+
+  void markDirty() {
+    setState(() { });
+  }
+
+  Widget _buildToolBar() {
     return new ToolBar(
         left: new IconButton(
           icon: "navigation/menu",
           onPressed: _handleOpenDrawer),
-        center: new Text(APP_TITLE),
+        center: new Text(appState.appTitle.value),
         right: [
           new IconButton(
             icon: "action/search",
@@ -160,20 +188,20 @@ class CreateApp extends App {
   void _handleBeginSearch() => null; // TODO
   void _handleShowMenu() => null; // TODO
 
-  Widget buildMainCanvas() {
+  Widget _buildMainCanvas() {
     return new Material(
       type: MaterialType.canvas,
       child: new Container(
         padding: MAIN_VIEW_PADDING,
-        child: buildMainView().build(viewZone)
+        child: appState.mainView.value.build(viewZone)
       )
     );
   }
 
-  Widget buildScaffold() {
+  Widget _buildScaffold() {
     return new Scaffold(
-      toolbar: buildToolBar(),
-      body: buildMainCanvas(),
+      toolbar: _buildToolBar(),
+      body: _buildMainCanvas(),
       snackBar: null,
       floatingActionButton: null,
       drawer: null
@@ -189,13 +217,13 @@ class CreateApp extends App {
     return new Theme(
       data: theme,
       child: new Title(
-        title: APP_TITLE,
-        child: buildScaffold()
+        title: appState.appTitle.value,
+        child: _buildScaffold()
       )
     );
   }
 }
 
 void main() {
-  runApp(new CreateApp());
+  new SkyApp(new CounterAppState()).run();
 }
