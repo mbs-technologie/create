@@ -180,7 +180,7 @@ packages:
   stack_trace:
     description: stack_trace
     source: hosted
-    version: "1.4.1"
+    version: "1.4.2"
   string_scanner:
     description: string_scanner
     source: hosted

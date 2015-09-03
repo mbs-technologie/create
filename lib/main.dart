@@ -13,35 +13,37 @@ enum Modules { Core, Meta, Demo }
 abstract class View<M> {
   M get model;
   ReadRef<Style> get style;
-  Context context;
-  Widget build();
+  Widget build(Context context);
 }
 
 // A view that builds a Sky widget and takes care of model updates
 abstract class BaseView<M> implements View<M> {
   @override final M model;
   @override final ReadRef<Style> style;
-  Context context;
   Context _subcontext;
   Widget _widget;
-  Zone get _zone => context.zone;
-  TextStyle get textStyle => (style != null && style.value != null) ?
-      style.value.toTextStyle : null;
 
   BaseView(this.model, this.style);
 
-  @override Widget build() {
+  @override Widget build(Context context) {
     if (_widget == null) {
-      assert (context != null);
       _subcontext = context.makeSubContext();
-      Operation forceRefresh = _zone.makeOperation(_forceRefresh);
+      Operation forceRefresh = context.zone.makeOperation(_forceRefresh);
+
       _widget = render();
+
       (model as Observable).observe(forceRefresh, _subcontext);
+      if (style != null) {
+        style.observe(forceRefresh, _subcontext);
+      }
     }
     return _widget;
   }
 
-  /// Actual model rendering tha subclasses should implement
+  TextStyle get textStyle => (style != null && style.value != null) ?
+      style.value.toTextStyle : null;
+
+  /// Actual model rendering that subclasses should implement
   Widget render();
 
   void _forceRefresh() {
@@ -109,21 +111,19 @@ class CreateApp extends App {
   static const EdgeDims MAIN_VIEW_PADDING = const EdgeDims.all(10.0);
 
   final CounterStore datastore = new CounterStore();
-  final Zone zone = new BaseZone();
+  final Zone viewZone = new BaseZone();
 
   Widget buildMainView() {
     View labelView = new LabelView(
         datastore.describeState,
         new Constant<Style>(BODY1_STYLE));
-    labelView.context = zone;
     View buttonView = new ButtonView(
         new Constant<String>('Increase the counter value'),
         new Constant<Style>(BUTTON_STYLE),
         new Constant<Operation>(datastore.increaseValue));
-    buttonView.context = zone;
     return new Column([
-      labelView.build(),
-      buttonView.build(),
+      labelView.build(viewZone),
+      buttonView.build(viewZone),
     ], alignItems: FlexAlignItems.start);
   }
 
