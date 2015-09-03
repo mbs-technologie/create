@@ -1,16 +1,13 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 
 import 'elements.dart';
+import 'styles.dart';
 
 import 'package:sky/widgets.dart';
 import 'package:sky/theme/colors.dart' as colors;
 
 enum Dimensions { Modules, Schema, Paramaters, Library, Services, Views, Styles, Data, Launch }
 enum Modules { Core, Meta, Demo }
-
-class Style {
-  double fontSize;
-}
 
 // A view of M, which is a model type (and must be Observable)
 abstract class View<M> {
@@ -28,6 +25,8 @@ abstract class BaseView<M> implements View<M> {
   Context _subcontext;
   Widget _widget;
   Zone get _zone => context.zone;
+  TextStyle get textStyle => (style != null && style.value != null) ?
+      style.value.toTextStyle : null;
 
   BaseView(this.model, this.style);
 
@@ -69,34 +68,27 @@ class LabelView extends BaseView<ReadRef<String>> {
   LabelView(ReadRef<String> labelText, ReadRef<Style> style): super(labelText, style);
 
   @override Widget render() {
-    return new Text(
-      model.value
-      //style: Theme.of(this).text.subhead
-    );
+    return new Text(model.value, style: textStyle);
   }
 }
 
 // A button view
 class ButtonView extends BaseView<ReadRef<String>> {
-  final ReadRef<Operation> action;
+  final ReadRef<Operation> _action;
 
-  ButtonView(ReadRef<String> buttonText, ReadRef<Style> style, this.action):
+  ButtonView(ReadRef<String> buttonText, ReadRef<Style> style, this._action):
     super(buttonText, style);
 
   @override Widget render() {
     return new RaisedButton(
-      child: new Text(
-        model.value
-        //style: Theme.of(this).text.button
-      ),
-      enabled: true,
+      child: new Text(model.value, style: textStyle),
       onPressed: _buttonPressed
     );
   }
 
   void _buttonPressed() {
-    if (action != null && action.value != null) {
-      action.value.scheduleAction();
+    if (_action != null && _action.value != null) {
+      _action.value.scheduleAction();
     }
   }
 }
@@ -107,6 +99,9 @@ class CounterStore extends BaseZone {
 
   // Business logic
   Operation get increaseValue => makeOperation(() { counter.value = counter.value + 1; });
+
+  ReadRef<String> get describeState => new ReactiveFunction<int, String>(
+      counter, this, (int counterValue) => 'The counter value is $counterValue');
 }
 
 class CreateApp extends App {
@@ -115,18 +110,15 @@ class CreateApp extends App {
 
   final CounterStore datastore = new CounterStore();
   final Zone zone = new BaseZone();
-  ReadRef<String> label;
-
-  CreateApp() {
-    label = new ReactiveFunction<int, String>(datastore.counter, zone,
-        (int counterValue) => 'The counter value is $counterValue');
-  }
 
   Widget buildMainView() {
-    View labelView = new LabelView(label, null);
+    View labelView = new LabelView(
+        datastore.describeState,
+        new Constant<Style>(BODY1_STYLE));
     labelView.context = zone;
     View buttonView = new ButtonView(
-        new Constant<String>('Increase the counter value'), null,
+        new Constant<String>('Increase the counter value'),
+        new Constant<Style>(BUTTON_STYLE),
         new Constant<Operation>(datastore.increaseValue));
     buttonView.context = zone;
     return new Column([
