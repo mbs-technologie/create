@@ -156,11 +156,11 @@ packages:
   sky_engine:
     description: sky_engine
     source: hosted
-    version: "0.0.17"
+    version: "0.0.18"
   sky_services:
     description: sky_services
     source: hosted
-    version: "0.0.17"
+    version: "0.0.18"
   sky_tools:
     description: sky_tools
     source: hosted

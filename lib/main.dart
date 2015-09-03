@@ -30,7 +30,7 @@ abstract class BaseView<M extends Observable> implements View<M> {
       _subcontext = context.makeSubContext();
       Operation forceRefresh = context.zone.makeOperation(_forceRefresh);
 
-      _widget = render();
+      _widget = render(context);
 
       model.observe(forceRefresh, _subcontext);
       if (style != null) {
@@ -44,7 +44,7 @@ abstract class BaseView<M extends Observable> implements View<M> {
       style.value.toTextStyle : null;
 
   /// Actual model rendering that subclasses should implement
-  Widget render();
+  Widget render(Context context);
 
   void _forceRefresh() {
     assert (_subcontext != null);
@@ -69,7 +69,7 @@ abstract class BaseView<M extends Observable> implements View<M> {
 class LabelView extends BaseView<ReadRef<String>> {
   LabelView(ReadRef<String> labelText, ReadRef<Style> style): super(labelText, style);
 
-  @override Widget render() {
+  @override Widget render(Context context) {
     return new Text(model.value, style: textStyle);
   }
 }
@@ -81,7 +81,7 @@ class ButtonView extends BaseView<ReadRef<String>> {
   ButtonView(ReadRef<String> buttonText, ReadRef<Style> style, this._action):
     super(buttonText, style);
 
-  @override Widget render() {
+  @override Widget render(Context conext) {
     return new RaisedButton(
       child: new Text(model.value, style: textStyle),
       onPressed: _buttonPressed
@@ -92,6 +92,19 @@ class ButtonView extends BaseView<ReadRef<String>> {
     if (_action != null && _action.value != null) {
       _action.value.scheduleAction();
     }
+  }
+}
+
+List<Widget> _buildWidgetList(ReadList<View> views, Context context) {
+  return new MappedList<View, Widget>(views, (view) => view.build(context)).elements;
+}
+
+// A column view
+class ColumnView extends BaseView<ReadList<View>> {
+  ColumnView(ReadList<View> rows, ReadRef<Style> style): super(rows, style);
+
+  @override Widget render(Context context) {
+    return new Column(_buildWidgetList(model, context), alignItems: FlexAlignItems.start);
   }
 }
 
@@ -113,18 +126,17 @@ class CreateApp extends App {
   final CounterStore datastore = new CounterStore();
   final Zone viewZone = new BaseZone();
 
-  Widget buildMainView() {
-    View labelView = new LabelView(
-        datastore.describeState,
-        new Constant<Style>(BODY1_STYLE));
-    View buttonView = new ButtonView(
-        new Constant<String>('Increase the counter value'),
-        new Constant<Style>(BUTTON_STYLE),
-        new Constant<Operation>(datastore.increaseValue));
-    return new Column([
-      labelView.build(viewZone),
-      buttonView.build(viewZone),
-    ], alignItems: FlexAlignItems.start);
+  View buildMainView() {
+    return new ColumnView(new ImmutableList<View>([
+          new LabelView(
+            datastore.describeState,
+            new Constant<Style>(BODY1_STYLE)),
+          new ButtonView(
+            new Constant<String>('Increase the counter value'),
+            new Constant<Style>(BUTTON_STYLE),
+            new Constant<Operation>(datastore.increaseValue))
+        ]
+      ), null);
   }
 
   Widget buildToolBar() {
@@ -153,7 +165,7 @@ class CreateApp extends App {
       type: MaterialType.canvas,
       child: new Container(
         padding: MAIN_VIEW_PADDING,
-        child: buildMainView()
+        child: buildMainView().build(viewZone)
       )
     );
   }

@@ -84,6 +84,16 @@ abstract class WriteRef<T> {
 abstract class Ref<T> implements ReadRef<T>, WriteRef<T> {
 }
 
+/// Read-only observable typed list.
+abstract class ReadList<E> implements Observable {
+  /// List size as a readonly reference
+  ReadRef<int> get size;
+
+  /// Elements as a Dart list.
+  /// Modifying the returned list will lead to undefined behaviour!
+  List<E> get elements;
+}
+
 /// An alias for prcoedure with no arguments.
 typedef void Procedure();
 
@@ -102,7 +112,7 @@ class DisposeProcedure implements Disposable {
 abstract class ResourceManager implements Context {
   final Set<Disposable> _resources = new Set<Disposable>();
 
-  addResource(Disposable resource) {
+  void addResource(Disposable resource) {
     _resources.add(resource);
   }
 
@@ -142,13 +152,16 @@ class BaseZone extends Zone with ResourceManager {
   @override Operation makeOperation(Procedure procedure) => new BaseOperation(procedure, this);
 }
 
+/// A mixin for immutable state.  Adding observer is an noop since state never changes.
 /// A constant is a reference whose value never changes.
-class Constant<T> implements ReadRef<T> {
+abstract class BaseImmutable implements Observable {
+  @override void observe(Operation observer, Context context) => null;
+}
+
+class Constant<T> extends ReadRef<T> with BaseImmutable {
   final T value;
 
   Constant(this.value);
-
-  @override void observe(Operation observer, Context context) => null; // Noop
 }
 
 /// Stores the value of type T, triggering observers when it changes.
@@ -218,4 +231,28 @@ class ReactiveFunction<S, T> extends BaseState<T> {
   void _recompute() {
     _setState(_function(_source.value));
   }
+}
+
+/// An immutable list that implements ReadList interface.
+class ImmutableList<E> extends ReadList<E> with BaseImmutable {
+  final List<E> elements;
+
+  ImmutableList(this.elements);
+
+  // TODO: cache the constant?
+  ReadRef<int> get size => new Constant<int>(elements.length);
+}
+
+/// Since Dart doesn't have generic functions, we have to declare a special type here.
+/// TODO: update this live.
+class MappedList<S, T> extends ReadList<T> with BaseImmutable {
+  final ReadList<S> _source;
+  final Function _function;
+
+  MappedList(this._source, T function(S source)): _function = function;
+
+  ReadRef<int> get size => _source.size;
+
+  /// TODO: implement this efficiently.
+  List<T> get elements => new List<T>.from(_source.elements.map(_function));
 }
