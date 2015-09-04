@@ -11,35 +11,26 @@ enum Modules { Core, Meta, Demo }
 
 // A view of M, which is a model type (and must be Observable)
 abstract class View<M extends Observable> {
-  M get model;
-  ReadRef<Style> get style;
-  Widget build(Context context);
-}
+  final M model;
+  final ReadRef<Style> style;
 
-// A view that builds a Sky widget and takes care of model updates
-abstract class BaseView<M extends Observable> implements View<M> {
-  @override final M model;
-  @override final ReadRef<Style> style;
-  Context _subcontext;
-  Widget _widget;
+  // Fields for internal use by the toolkit implementation
+  Context cachedSubContext;
+  Object cachedWidget;
 
-  BaseView(this.model, this.style);
-
-  @override Widget build(Context context) {
-    return new SkyToolkit().build(this, context);
-  }
+  View(this.model, this.style);
 
   TextStyle get textStyle => (style != null && style.value != null) ?
       style.value.toTextStyle : null;
 }
 
 // A text view of String model
-class LabelView extends BaseView<ReadRef<String>> {
+class LabelView extends View<ReadRef<String>> {
   LabelView(ReadRef<String> labelText, ReadRef<Style> style): super(labelText, style);
 }
 
 // A button view
-class ButtonView extends BaseView<ReadRef<String>> {
+class ButtonView extends View<ReadRef<String>> {
   final ReadRef<Operation> _action;
 
   ButtonView(ReadRef<String> buttonText, ReadRef<Style> style, this._action):
@@ -47,40 +38,44 @@ class ButtonView extends BaseView<ReadRef<String>> {
 }
 
 // A column view
-class ColumnView extends BaseView<ReadList<View>> {
+class ColumnView extends View<ReadList<View>> {
   ColumnView(ReadList<View> rows, ReadRef<Style> style): super(rows, style);
 }
 
 class SkyToolkit {
   Widget build(View view, Context context) {
-    BaseView baseView = view as BaseView;
+    Widget result;
 
-    if (baseView._widget == null || !_shouldCacheWidget(baseView)) {
-      baseView._subcontext = context.makeSubContext();
-      Operation forceRefresh = context.zone.makeOperation(() => _forceRefresh(baseView));
+    if (view.cachedWidget != null && _shouldCacheWidget(view)) {
+      result = view.cachedWidget as Widget;
+    } else {
+      view.cachedSubContext = context.makeSubContext();
+      Operation forceRefresh = context.zone.makeOperation(() => _forceRefresh(view));
 
-      baseView._widget = renderView(baseView, context);
+      result = renderView(view, context);
+      view.cachedWidget = result;
 
-      baseView.model.observe(forceRefresh, baseView._subcontext);
-      if (baseView.style != null) {
-        baseView.style.observe(forceRefresh, baseView._subcontext);
+      view.model.observe(forceRefresh, view.cachedSubContext);
+      if (view.style != null) {
+        view.style.observe(forceRefresh, view.cachedSubContext);
       }
     }
-    return baseView._widget;
+
+    return view.cachedWidget;
   }
 
-  bool _shouldCacheWidget(BaseView view) {
+  bool _shouldCacheWidget(View view) {
     return !(view is ColumnView);
   }
 
-  void _forceRefresh(BaseView view) {
-    assert (view._subcontext != null);
-    view._subcontext.dispose();
-    view._subcontext = null;
+  void _forceRefresh(View view) {
+    assert (view.cachedSubContext != null);
+    view.cachedSubContext.dispose();
+    view.cachedSubContext = null;
 
     // Traverse the component hierachy until we hit a component that we can mark as dirty
     // by using setState()
-    for (Widget current = view._widget; current != null; current = current.parent) {
+    for (Widget current = view.cachedWidget as Widget; current != null; current = current.parent) {
       // TODO: we should be able to rebuild any StatefulComponent
       if (current is SkyApp) {
         current.rebuild();
@@ -88,7 +83,7 @@ class SkyToolkit {
       }
     }
 
-    view._widget = null;
+    view.cachedWidget = null;
   }
 
   Widget renderView(View view, Context context) {
@@ -128,7 +123,7 @@ class SkyToolkit {
   }
 
   List<Widget> _buildWidgetList(ReadList<View> views, Context context) {
-    return new MappedList<View, Widget>(views, (view) => view.build(context)).elements;
+    return new MappedList<View, Widget>(views, (view) => build(view, context)).elements;
   }
 }
 
@@ -218,7 +213,7 @@ class SkyApp extends App {
       type: MaterialType.canvas,
       child: new Container(
         padding: MAIN_VIEW_PADDING,
-        child: appState.mainView.value.build(viewZone)
+        child: new SkyToolkit().build(appState.mainView.value, viewZone)
       )
     );
   }
