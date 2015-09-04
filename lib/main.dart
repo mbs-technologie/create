@@ -20,59 +20,22 @@ abstract class View<M extends Observable> {
 abstract class BaseView<M extends Observable> implements View<M> {
   @override final M model;
   @override final ReadRef<Style> style;
-  bool get _cacheWidget => true;
   Context _subcontext;
   Widget _widget;
 
   BaseView(this.model, this.style);
 
   @override Widget build(Context context) {
-    if (_widget == null || !_cacheWidget) {
-      _subcontext = context.makeSubContext();
-      Operation forceRefresh = context.zone.makeOperation(_forceRefresh);
-
-      _widget = render(context);
-
-      model.observe(forceRefresh, _subcontext);
-      if (style != null) {
-        style.observe(forceRefresh, _subcontext);
-      }
-    }
-    return _widget;
+    return new SkyToolkit().build(this, context);
   }
 
   TextStyle get textStyle => (style != null && style.value != null) ?
       style.value.toTextStyle : null;
-
-  /// Actual model rendering that subclasses should implement
-  Widget render(Context context);
-
-  void _forceRefresh() {
-    assert (_subcontext != null);
-    _subcontext.dispose();
-    _subcontext = null;
-
-    // Traverse the component hierachy until we hit a component that we can mark as dirty
-    // by using setState()
-    for (Widget current = _widget; current != null; current = current.parent) {
-      // TODO: we should be able to repaint any StatefulComponent
-      if (current is SkyApp) {
-        current.markDirty();
-        break;
-      }
-    }
-
-    _widget = null;
-  }
 }
 
 // A text view of String model
 class LabelView extends BaseView<ReadRef<String>> {
   LabelView(ReadRef<String> labelText, ReadRef<Style> style): super(labelText, style);
-
-  @override Widget render(Context context) {
-    return new Text(model.value, style: textStyle);
-  }
 }
 
 // A button view
@@ -81,33 +44,91 @@ class ButtonView extends BaseView<ReadRef<String>> {
 
   ButtonView(ReadRef<String> buttonText, ReadRef<Style> style, this._action):
     super(buttonText, style);
-
-  @override Widget render(Context conext) {
-    return new RaisedButton(
-      child: new Text(model.value, style: textStyle),
-      onPressed: _buttonPressed
-    );
-  }
-
-  void _buttonPressed() {
-    if (_action != null && _action.value != null) {
-      _action.value.scheduleAction();
-    }
-  }
-}
-
-List<Widget> _buildWidgetList(ReadList<View> views, Context context) {
-  return new MappedList<View, Widget>(views, (view) => view.build(context)).elements;
 }
 
 // A column view
 class ColumnView extends BaseView<ReadList<View>> {
-  @override bool get _cacheWidget => false;
-
   ColumnView(ReadList<View> rows, ReadRef<Style> style): super(rows, style);
+}
 
-  @override Widget render(Context context) {
-    return new Column(_buildWidgetList(model, context), alignItems: FlexAlignItems.start);
+class SkyToolkit {
+  Widget build(View view, Context context) {
+    BaseView baseView = view as BaseView;
+
+    if (baseView._widget == null || !_shouldCacheWidget(baseView)) {
+      baseView._subcontext = context.makeSubContext();
+      Operation forceRefresh = context.zone.makeOperation(() => _forceRefresh(baseView));
+
+      baseView._widget = renderView(baseView, context);
+
+      baseView.model.observe(forceRefresh, baseView._subcontext);
+      if (baseView.style != null) {
+        baseView.style.observe(forceRefresh, baseView._subcontext);
+      }
+    }
+    return baseView._widget;
+  }
+
+  bool _shouldCacheWidget(BaseView view) {
+    return !(view is ColumnView);
+  }
+
+  void _forceRefresh(BaseView view) {
+    assert (view._subcontext != null);
+    view._subcontext.dispose();
+    view._subcontext = null;
+
+    // Traverse the component hierachy until we hit a component that we can mark as dirty
+    // by using setState()
+    for (Widget current = view._widget; current != null; current = current.parent) {
+      // TODO: we should be able to rebuild any StatefulComponent
+      if (current is SkyApp) {
+        current.rebuild();
+        break;
+      }
+    }
+
+    view._widget = null;
+  }
+
+  Widget renderView(View view, Context context) {
+    if (view is LabelView) {
+      return renderLabel(view, context);
+    } else if (view is ButtonView) {
+      return renderButton(view, context);
+    } else if (view is ColumnView) {
+      return renderColumn(view, context);
+    }
+
+    throw new UnimplementedError("Unknown view: " + view.runtimeType.toString());
+  }
+
+  Widget renderLabel(LabelView label, Context context) {
+    return new Text(label.model.value, style: label.textStyle);
+  }
+
+  Widget renderButton(ButtonView button, Context conext) {
+    void buttonPressed() {
+      if (button._action != null && button._action.value != null) {
+        button._action.value.scheduleAction();
+      }
+    }
+
+    return new RaisedButton(
+      child: new Text(button.model.value, style: button.textStyle),
+      onPressed: buttonPressed
+    );
+  }
+
+  Widget renderColumn(ColumnView columnView, Context context) {
+    return new Column(
+      _buildWidgetList(columnView.model, context),
+      alignItems: FlexAlignItems.start
+    );
+  }
+
+  List<Widget> _buildWidgetList(ReadList<View> views, Context context) {
+    return new MappedList<View, Widget>(views, (view) => view.build(context)).elements;
   }
 }
 
@@ -157,13 +178,17 @@ class SkyApp extends App {
   final AppState appState;
   final Zone viewZone = new BaseZone();
 
-  SkyApp(this.appState);
+  SkyApp(this.appState) {
+    Operation rebuildOp = viewZone.makeOperation(rebuild);
+    appState.appTitle.observe(rebuildOp, viewZone);
+    appState.mainView.observe(rebuildOp, viewZone);
+  }
 
   void run() {
     runApp(this);
   }
 
-  void markDirty() {
+  void rebuild() {
     setState(() { });
   }
 
