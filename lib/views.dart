@@ -30,9 +30,19 @@ class ButtonView extends View<ReadRef<String>> {
     super(buttonText, style);
 }
 
+/// A container view has subviews
+abstract class ContainerView extends View<ReadList<View>> {
+  ContainerView(ReadList<View> subviews, [ReadRef<Style> style]): super(subviews, style);
+}
+
 /// A column view
-class ColumnView extends View<ReadList<View>> {
+class ColumnView extends ContainerView {
   ColumnView(ReadList<View> rows, ReadRef<Style> style): super(rows, style);
+}
+
+/// A header item (which can be rendered as a DrawerHeader)
+class HeaderView extends View<ReadRef<String>> {
+  HeaderView(ReadRef<String> headerText): super(headerText, null);
 }
 
 /// An item (which can be rendered as a DrawerItem)
@@ -44,14 +54,20 @@ class ItemView extends View<ReadRef<String>> {
   ItemView(ReadRef<String> itemText, this.icon, this.action): super(itemText, null);
 }
 
+/// A divider
+class DividerView extends View<Observable> {
+  // TODO: different styles?
+  DividerView(): super(null, null);
+}
+
 /// A drawer
-class DrawerView extends View<ReadList<ItemView>> {
-  DrawerView(ReadList<ItemView> items): super(items, null);
+class DrawerView extends ContainerView {
+  DrawerView(ReadList<View> items): super(items);
 }
 
 /// Application state
 abstract class AppState implements Zone {
   ReadRef<String> get appTitle;
   ReadRef<View> get mainView;
-  ReadList<ItemView> makeDrawerItems();
+  DrawerView makeDrawer();
 }

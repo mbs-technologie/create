@@ -78,7 +78,9 @@ class SkyApp extends App {
     Widget result = _renderView(view, context);
     view.cachedWidget = result;
 
-    view.model.observe(forceRefresh, view.cachedSubContext);
+    if (view.model != null) {
+      view.model.observe(forceRefresh, view.cachedSubContext);
+    }
     if (view.style != null) {
       view.style.observe(forceRefresh, view.cachedSubContext);
     }
@@ -90,7 +92,7 @@ class SkyApp extends App {
   bool _canCacheWidget(View view) {
     // For simplicity, don't cache container widgets at all.
     // TODO: detect when the child widgets are updated.
-    return !(view is ColumnView);
+    return !(view is ContainerView);
   }
 
   // Dispose of cached widget and associated resources
@@ -115,8 +117,12 @@ class SkyApp extends App {
       return _renderLabel(view);
     } else if (view is ButtonView) {
       return _renderButton(view);
+    } else if (view is HeaderView) {
+      return _renderHeader(view);
     } else if (view is ItemView) {
       return _renderItem(view);
+    } else if (view is DividerView) {
+      return _renderDivider(view);
     } else if (view is ColumnView) {
       return _renderColumn(view, context);
     } else if (view is DrawerView) {
@@ -137,6 +143,12 @@ class SkyApp extends App {
     );
   }
 
+  DrawerHeader _renderHeader(HeaderView header) {
+    return new DrawerHeader(
+      child: new Text(header.model.value, style: _textStyleOf(header))
+    );
+  }
+
   DrawerItem _renderItem(ItemView item) {
     return new DrawerItem(
       child: new Text(item.model.value, style: _textStyleOf(item)),
@@ -151,6 +163,10 @@ class SkyApp extends App {
     );
   }
 
+  DrawerDivider _renderDivider(DividerView divider) {
+    return new DrawerDivider();
+  }
+
   Column _renderColumn(ColumnView column, Context context) {
     return new Column(
       _buildWidgetList(column.model, context),
@@ -159,12 +175,11 @@ class SkyApp extends App {
   }
 
   Drawer _renderDrawer(DrawerView drawer, Context context) {
-    List<Widget> content = [ new DrawerHeader(child: new Text(appState.appTitle.value)) ];
-    content.addAll(_buildWidgetList(drawer.model, context));
-    content.add(new DrawerDivider());
-    content.add(new DrawerItem(icon: ICON_HELP.id, child: new Text('Help & Feedback')));
-
-    return new Drawer(showing: true, onDismissed: _dismissDrawer, children: content);
+    return new Drawer(
+      children: _buildWidgetList(drawer.model, context),
+      showing: true,
+      onDismissed: _dismissDrawer
+    );
   }
 
   TextStyle _textStyleOf(View view) {
@@ -203,7 +218,7 @@ class SkyApp extends App {
   }
 
   void _openDrawer() {
-    drawer.value = new DrawerView(appState.makeDrawerItems());
+    drawer.value = appState.makeDrawer();
   }
 
   void _dismissDrawer() {

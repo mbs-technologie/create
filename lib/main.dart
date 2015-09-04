@@ -26,37 +26,45 @@ class CounterAppState extends BaseZone implements AppState {
   final Ref<View> mainView = new State<View>();
 
   CounterAppState() {
-    mainView.value = makeMainView();
+    mainView.value = new ColumnView(
+      new ImmutableList<View>([
+        new LabelView(
+          datastore.describeState,
+          new Constant<Style>(BODY1_STYLE)
+        ),
+        new ButtonView(
+          new Constant<String>('Increase the counter value'),
+          new Constant<Style>(BUTTON_STYLE),
+          new Constant<Operation>(datastore.increaseValue)
+        )
+      ]
+    ), null);
   }
 
-  View makeMainView() {
-    return new ColumnView(new ImmutableList<View>([
-          new LabelView(
-            datastore.describeState,
-            new Constant<Style>(BODY1_STYLE)
-          ),
-          new ButtonView(
-            new Constant<String>('Increase the counter value'),
-            new Constant<Style>(BUTTON_STYLE),
-            new Constant<Operation>(datastore.increaseValue)
-          )
-        ]
-      ), null);
-  }
-
-  @override ReadList<ItemView> makeDrawerItems() {
-    return new ImmutableList<ItemView>([
-      new ItemView(
-        new Constant<String>('Increase by one'),
-        new Constant<IconId>(ICON_EXPOSURE_PLUS_1),
-        new Constant<Operation>(increaseByOne)
-      ),
-      new ItemView(
-        new Constant<String>('Increase by two'),
-        new Constant<IconId>(ICON_EXPOSURE_PLUS_2),
-        new Constant<Operation>(increaseByTwo)
-      )
-    ]);
+  @override DrawerView makeDrawer() {
+    return new DrawerView(
+      new ImmutableList<ItemView>([
+        new HeaderView(
+          new Constant<String>('Counter Demo')
+        ),
+        new ItemView(
+          new Constant<String>('Increase by one'),
+          new Constant<IconId>(ICON_EXPOSURE_PLUS_1),
+          new Constant<Operation>(increaseByOne)
+        ),
+        new ItemView(
+          new Constant<String>('Increase by two'),
+          new Constant<IconId>(ICON_EXPOSURE_PLUS_2),
+          new Constant<Operation>(increaseByTwo)
+        ),
+        new DividerView(),
+        new ItemView(
+          new Constant<String>('Help & Feedback'),
+          new Constant<IconId>(ICON_HELP),
+          null
+        ),
+      ])
+    );
   }
 
   // UI Logic
