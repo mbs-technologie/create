@@ -106,7 +106,7 @@ class SkyApp extends App {
   }
 
   Widget _renderView(View view, Context context) {
-    // TODO: use visitor pattern here?
+    // TODO: use the visitor pattern here?
     if (view is LabelView) {
       return _renderLabel(view, context);
     } else if (view is ButtonView) {
@@ -119,7 +119,7 @@ class SkyApp extends App {
   }
 
   Widget _renderLabel(LabelView label, Context context) {
-    return new Text(label.model.value, style: textStyleOf(label));
+    return new Text(label.model.value, style: _textStyleOf(label));
   }
 
   Widget _renderButton(ButtonView button, Context conext) {
@@ -130,7 +130,7 @@ class SkyApp extends App {
     }
 
     return new RaisedButton(
-      child: new Text(button.model.value, style: textStyleOf(button)),
+      child: new Text(button.model.value, style: _textStyleOf(button)),
       onPressed: buttonPressed
     );
   }
@@ -142,7 +142,7 @@ class SkyApp extends App {
     );
   }
 
-  TextStyle textStyleOf(View view) {
+  TextStyle _textStyleOf(View view) {
     if (view.style != null && view.style.value != null) {
       return view.style.value.toTextStyle;
     } else {
