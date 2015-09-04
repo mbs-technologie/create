@@ -8,21 +8,20 @@ import 'views.dart';
 import 'package:sky/widgets.dart';
 import 'package:sky/theme/colors.dart' as colors;
 
+ThemeData _APP_THEME = new ThemeData(
+  brightness: ThemeBrightness.light,
+  primarySwatch: colors.Teal
+);
+const EdgeDims _MAIN_VIEW_PADDING = const EdgeDims.all(10.0);
+
 class SkyApp extends App {
-
-  static ThemeData APP_THEME = new ThemeData(
-    brightness: ThemeBrightness.light,
-    primarySwatch: colors.Teal
-  );
-  static const EdgeDims MAIN_VIEW_PADDING = const EdgeDims.all(10.0);
-
   final AppState appState;
   final Zone viewZone = new BaseZone();
 
   SkyApp(this.appState) {
-    Operation rebuildOp = viewZone.makeOperation(_rebuild);
-    appState.appTitle.observe(rebuildOp, viewZone);
-    appState.mainView.observe(rebuildOp, viewZone);
+    Operation rebuildOperation = viewZone.makeOperation(_rebuild);
+    appState.appTitle.observe(rebuildOperation, viewZone);
+    appState.mainView.observe(rebuildOperation, viewZone);
   }
 
   void run() {
@@ -31,7 +30,7 @@ class SkyApp extends App {
 
   @override Widget build() {
     return new Theme(
-      data: APP_THEME,
+      data: _APP_THEME,
       child: new Title(
         title: appState.appTitle.value,
         child: _buildScaffold()
@@ -40,48 +39,74 @@ class SkyApp extends App {
   }
 
   void _rebuild() {
+    // This is Sky's way of forcing widgets to refresh.
     setState(() { });
   }
 
+  Widget _buildScaffold() {
+    return new Scaffold(
+      toolbar: _buildToolBar(),
+      body: _buildMainCanvas(),
+      snackBar: null,
+      floatingActionButton: null,
+      drawer: null
+    );
+  }
+
+  Widget _buildMainCanvas() {
+    return new Material(
+      type: MaterialType.canvas,
+      child: new Container(
+        padding: _MAIN_VIEW_PADDING,
+        child: _viewToWidget(appState.mainView.value, viewZone)
+      )
+    );
+  }
+
   Widget _viewToWidget(View view, Context context) {
-    Widget result;
+    if (view.cachedWidget != null && _canCacheWidget(view)) {
+      return  view.cachedWidget as Widget;
+    }
 
-    if (view.cachedWidget != null && _shouldCacheWidget(view)) {
-      result = view.cachedWidget as Widget;
-    } else {
-      view.cachedSubContext = context.makeSubContext();
-      Operation forceRefresh = context.zone.makeOperation(() => _forceRefresh(view));
+    _cleanupView(view);
+    view.cachedSubContext = context.makeSubContext();
+    Operation forceRefresh = context.zone.makeOperation(() => _forceRefresh(view));
 
-      result = _renderView(view, context);
-      view.cachedWidget = result;
+    Widget result = _renderView(view, context);
+    view.cachedWidget = result;
 
-      view.model.observe(forceRefresh, view.cachedSubContext);
-      if (view.style != null) {
-        view.style.observe(forceRefresh, view.cachedSubContext);
-      }
+    view.model.observe(forceRefresh, view.cachedSubContext);
+    if (view.style != null) {
+      view.style.observe(forceRefresh, view.cachedSubContext);
     }
 
     return result;
   }
 
-  bool _shouldCacheWidget(View view) {
-    // For simplicity, don't cache container widgets (yet).
+  bool _canCacheWidget(View view) {
+    // For simplicity, don't cache container widgets at all.
+    // TODO: detect when the child widgets are updated.
     return !(view is ColumnView);
   }
 
-  void _forceRefresh(View view) {
-    assert (view.cachedSubContext != null);
-    view.cachedSubContext.dispose();
-    view.cachedSubContext = null;
-
-    // TODO: implement finer-grained refreshing
-    _rebuild();
-
+  // Dispose of cached widget and associated resources
+  void _cleanupView(View view) {
+    if (view.cachedSubContext != null) {
+      view.cachedSubContext.dispose();
+      view.cachedSubContext = null;
+    }
     view.cachedWidget = null;
   }
 
+  void _forceRefresh(View view) {
+    _cleanupView(view);
+
+    // TODO: implement finer-grained refreshing.
+    _rebuild();
+  }
+
   Widget _renderView(View view, Context context) {
-    // TODO: use visitor here?
+    // TODO: use visitor pattern here?
     if (view is LabelView) {
       return _renderLabel(view, context);
     } else if (view is ButtonView) {
@@ -149,24 +174,4 @@ class SkyApp extends App {
   void _handleOpenDrawer() => null; // TODO
   void _handleBeginSearch() => null; // TODO
   void _handleShowMenu() => null; // TODO
-
-  Widget _buildMainCanvas() {
-    return new Material(
-      type: MaterialType.canvas,
-      child: new Container(
-        padding: MAIN_VIEW_PADDING,
-        child: _viewToWidget(appState.mainView.value, viewZone)
-      )
-    );
-  }
-
-  Widget _buildScaffold() {
-    return new Scaffold(
-      toolbar: _buildToolBar(),
-      body: _buildMainCanvas(),
-      snackBar: null,
-      floatingActionButton: null,
-      drawer: null
-    );
-  }
 }

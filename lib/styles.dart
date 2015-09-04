@@ -7,6 +7,7 @@ import 'package:sky/theme/typography.dart' as typography;
 
 class Style {
   final TextStyle style;
+  // TODO: add colors
 
   Style(this.style);
 
