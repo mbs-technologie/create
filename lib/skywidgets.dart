@@ -3,6 +3,7 @@
 library skywidgets;
 
 import 'elements.dart';
+import 'styles.dart';
 import 'views.dart';
 
 import 'package:sky/widgets.dart';
@@ -140,7 +141,13 @@ class SkyApp extends App {
     return new DrawerItem(
       child: new Text(item.model.value, style: _textStyleOf(item)),
       icon: item.icon.value != null ? item.icon.value.id : null,
-      onPressed: _scheduleAction(item.action)
+      onPressed: () {
+        if (isNotNull(item.action)) {
+          // We dismiss the drawer as a side effect of an item selection.
+          _dismissDrawer();
+          item.action.value.scheduleAction();
+        }
+      }
     );
   }
 
@@ -157,11 +164,11 @@ class SkyApp extends App {
     content.add(new DrawerDivider());
     content.add(new DrawerItem(icon: ICON_HELP.id, child: new Text('Help & Feedback')));
 
-    return new Drawer(showing: true, onDismissed: _handleDrawerDismissed, children: content);
+    return new Drawer(showing: true, onDismissed: _dismissDrawer, children: content);
   }
 
   TextStyle _textStyleOf(View view) {
-    if (view.style != null && view.style.value != null) {
+    if (isNotNull(view.style)) {
       return view.style.value.toTextStyle;
     } else {
       return null;
@@ -169,7 +176,7 @@ class SkyApp extends App {
   }
 
   Function _scheduleAction(ReadRef<Operation> action) => () {
-    if (action != null && action.value != null) {
+    if (isNotNull(action)) {
       action.value.scheduleAction();
     }
   };
@@ -182,7 +189,7 @@ class SkyApp extends App {
     return new ToolBar(
         left: new IconButton(
           icon: ICON_MENU.id,
-          onPressed: _handleOpenDrawer),
+          onPressed: _openDrawer),
         center: new Text(appState.appTitle.value),
         right: [
           new IconButton(
@@ -195,11 +202,11 @@ class SkyApp extends App {
       );
   }
 
-  void _handleOpenDrawer() {
-    drawer.value = new DrawerView(appState.makeDrawerItems(viewZone));
+  void _openDrawer() {
+    drawer.value = new DrawerView(appState.makeDrawerItems());
   }
 
-  void _handleDrawerDismissed() {
+  void _dismissDrawer() {
     drawer.value = null;
   }
 

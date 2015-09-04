@@ -44,7 +44,7 @@ class CounterAppState extends BaseZone implements AppState {
       ), null);
   }
 
-  @override ReadList<ItemView> makeDrawerItems(Context context) {
+  @override ReadList<ItemView> makeDrawerItems() {
     return new ImmutableList<ItemView>([
       new ItemView(
         new Constant<String>('Increase by one'),

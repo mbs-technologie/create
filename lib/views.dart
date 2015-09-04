@@ -5,20 +5,6 @@ library views;
 import 'elements.dart';
 import 'styles.dart';
 
-class IconId {
-  final String id;
-
-  const IconId(this.id);
-}
-
-const ICON_MENU = const IconId("navigation/menu");
-const ICON_SEARCH = const IconId("action/search");
-const ICON_MORE_VERT = const IconId("navigation/more_vert");
-const ICON_EXPOSURE_PLUS_1 = const IconId('image/exposure_plus_1');
-const ICON_EXPOSURE_PLUS_2 = const IconId('image/exposure_plus_2');
-const ICON_SETTINGS = const IconId('action/settings');
-const ICON_HELP = const IconId('action/help');
-
 /// A view of M, which is a model type (and must be Observable)
 abstract class View<M extends Observable> {
   final M model;
@@ -67,5 +53,5 @@ class DrawerView extends View<ReadList<ItemView>> {
 abstract class AppState implements Zone {
   ReadRef<String> get appTitle;
   ReadRef<View> get mainView;
-  ReadList<ItemView> makeDrawerItems(Context context);
+  ReadList<ItemView> makeDrawerItems();
 }
