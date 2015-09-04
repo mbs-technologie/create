@@ -9,8 +9,12 @@ class CounterStore extends BaseZone {
   // State
   final Ref<int> counter = new State<int>(68);
 
+  final Ref<int> increaseBy = new State<int>(1);
+
   // Business logic
-  Operation get increaseValue => makeOperation(() { counter.value = counter.value + 1; });
+  Operation get increaseValue => makeOperation(() {
+    counter.value = counter.value + increaseBy.value;
+  });
 
   ReadRef<String> get describeState => new ReactiveFunction<int, String>(
       counter, this, (int counterValue) => 'The counter value is $counterValue');
@@ -29,14 +33,40 @@ class CounterAppState extends BaseZone implements AppState {
     return new ColumnView(new ImmutableList<View>([
           new LabelView(
             datastore.describeState,
-            new Constant<Style>(BODY1_STYLE)),
+            new Constant<Style>(BODY1_STYLE)
+          ),
           new ButtonView(
             new Constant<String>('Increase the counter value'),
             new Constant<Style>(BUTTON_STYLE),
-            new Constant<Operation>(datastore.increaseValue))
+            new Constant<Operation>(datastore.increaseValue)
+          )
         ]
       ), null);
   }
+
+  @override ReadList<ItemView> makeDrawerItems(Context context) {
+    return new ImmutableList<ItemView>([
+      new ItemView(
+        new Constant<String>('Increase by one'),
+        new Constant<IconId>(ICON_EXPOSURE_PLUS_1),
+        new Constant<Operation>(increaseByOne)
+      ),
+      new ItemView(
+        new Constant<String>('Increase by two'),
+        new Constant<IconId>(ICON_EXPOSURE_PLUS_2),
+        new Constant<Operation>(increaseByTwo)
+      )
+    ]);
+  }
+
+  // UI Logic
+  Operation get increaseByOne => makeOperation(() {
+    datastore.increaseBy.value = 1;
+  });
+
+  Operation get increaseByTwo => makeOperation(() {
+    datastore.increaseBy.value = 2;
+  });
 }
 
 void main() {

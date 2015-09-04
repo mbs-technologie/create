@@ -17,11 +17,13 @@ const EdgeDims _MAIN_VIEW_PADDING = const EdgeDims.all(10.0);
 class SkyApp extends App {
   final AppState appState;
   final Zone viewZone = new BaseZone();
+  final Ref<DrawerView> drawer = new State<DrawerView>(null);
 
   SkyApp(this.appState) {
     Operation rebuildOperation = viewZone.makeOperation(_rebuild);
     appState.appTitle.observe(rebuildOperation, viewZone);
     appState.mainView.observe(rebuildOperation, viewZone);
+    drawer.observe(rebuildOperation, viewZone);
   }
 
   void run() {
@@ -49,7 +51,7 @@ class SkyApp extends App {
       body: _buildMainCanvas(),
       snackBar: null,
       floatingActionButton: null,
-      drawer: null
+      drawer: drawer.value != null ? _renderDrawer(drawer.value, viewZone) : null
     );
   }
 
@@ -79,6 +81,7 @@ class SkyApp extends App {
     if (view.style != null) {
       view.style.observe(forceRefresh, view.cachedSubContext);
     }
+    // TODO: observe icon for ItemView, etc.
 
     return result;
   }
@@ -108,38 +111,53 @@ class SkyApp extends App {
   Widget _renderView(View view, Context context) {
     // TODO: use the visitor pattern here?
     if (view is LabelView) {
-      return _renderLabel(view, context);
+      return _renderLabel(view);
     } else if (view is ButtonView) {
-      return _renderButton(view, context);
+      return _renderButton(view);
+    } else if (view is ItemView) {
+      return _renderItem(view);
     } else if (view is ColumnView) {
       return _renderColumn(view, context);
+    } else if (view is DrawerView) {
+      return _renderDrawer(view, context);
     }
 
     throw new UnimplementedError("Unknown view: " + view.runtimeType.toString());
   }
 
-  Widget _renderLabel(LabelView label, Context context) {
+  Text _renderLabel(LabelView label) {
     return new Text(label.model.value, style: _textStyleOf(label));
   }
 
-  Widget _renderButton(ButtonView button, Context conext) {
-    void buttonPressed() {
-      if (button.action != null && button.action.value != null) {
-        button.action.value.scheduleAction();
-      }
-    }
-
+  MaterialButton _renderButton(ButtonView button) {
     return new RaisedButton(
       child: new Text(button.model.value, style: _textStyleOf(button)),
-      onPressed: buttonPressed
+      onPressed: _scheduleAction(button.action)
     );
   }
 
-  Widget _renderColumn(ColumnView columnView, Context context) {
+  DrawerItem _renderItem(ItemView item) {
+    return new DrawerItem(
+      child: new Text(item.model.value, style: _textStyleOf(item)),
+      icon: item.icon.value != null ? item.icon.value.id : null,
+      onPressed: _scheduleAction(item.action)
+    );
+  }
+
+  Column _renderColumn(ColumnView column, Context context) {
     return new Column(
-      _buildWidgetList(columnView.model, context),
+      _buildWidgetList(column.model, context),
       alignItems: FlexAlignItems.start
     );
+  }
+
+  Drawer _renderDrawer(DrawerView drawer, Context context) {
+    List<Widget> content = [ new DrawerHeader(child: new Text(appState.appTitle.value)) ];
+    content.addAll(_buildWidgetList(drawer.model, context));
+    content.add(new DrawerDivider());
+    content.add(new DrawerItem(icon: ICON_HELP.id, child: new Text('Help & Feedback')));
+
+    return new Drawer(showing: true, onDismissed: _handleDrawerDismissed, children: content);
   }
 
   TextStyle _textStyleOf(View view) {
@@ -150,6 +168,12 @@ class SkyApp extends App {
     }
   }
 
+  Function _scheduleAction(ReadRef<Operation> action) => () {
+    if (action != null && action.value != null) {
+      action.value.scheduleAction();
+    }
+  };
+
   List<Widget> _buildWidgetList(ReadList<View> views, Context context) {
     return new MappedList<View, Widget>(views, (view) => _viewToWidget(view, context)).elements;
   }
@@ -157,21 +181,28 @@ class SkyApp extends App {
   Widget _buildToolBar() {
     return new ToolBar(
         left: new IconButton(
-          icon: "navigation/menu",
+          icon: ICON_MENU.id,
           onPressed: _handleOpenDrawer),
         center: new Text(appState.appTitle.value),
         right: [
           new IconButton(
-            icon: "action/search",
+            icon: ICON_SEARCH.id,
             onPressed: _handleBeginSearch),
           new IconButton(
-            icon: "navigation/more_vert",
+            icon: ICON_MORE_VERT.id,
             onPressed: _handleShowMenu)
         ]
       );
   }
 
-  void _handleOpenDrawer() => null; // TODO
+  void _handleOpenDrawer() {
+    drawer.value = new DrawerView(appState.makeDrawerItems(viewZone));
+  }
+
+  void _handleDrawerDismissed() {
+    drawer.value = null;
+  }
+
   void _handleBeginSearch() => null; // TODO
   void _handleShowMenu() => null; // TODO
 }
