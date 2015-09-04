@@ -260,5 +260,5 @@ class MappedList<S, T> implements ReadList<T> {
   List<T> get elements => new List<T>.from(_source.elements.map(_function));
 }
 
-/// Check whether a reference holds a valid value.
+/// Check whether a reference is not null and holds a non-null value.
 bool isNotNull(ReadRef ref) => (ref != null && ref.value != null);

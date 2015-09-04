@@ -11,7 +11,7 @@ Simple application included, more complex use case coming up.
   abstract widgets: view = (observable) model + (observable) style
 - [skywidgets.dart](https://github.com/domokit/create/blob/master/lib/skywidgets.dart):
   code to render views using [Sky](https://github.com/domokit/sky_engine)
-- [main.dart](https://github.com/domokit/create/blob/master/lib/main.dart):
+- [counter.dart](https://github.com/domokit/create/blob/master/lib/counter.dart):
   sample application written using the framework
 
 Feedback? [I'd love to hear it](mailto:dynin@google.com).
