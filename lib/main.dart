@@ -2,45 +2,13 @@
 
 import 'elements.dart';
 import 'styles.dart';
+import 'views.dart';
 
 import 'package:sky/widgets.dart';
 import 'package:sky/theme/colors.dart' as colors;
 
 enum Dimensions { Modules, Schema, Paramaters, Library, Services, Views, Styles, Data, Launch }
 enum Modules { Core, Meta, Demo }
-
-// A view of M, which is a model type (and must be Observable)
-abstract class View<M extends Observable> {
-  final M model;
-  final ReadRef<Style> style;
-
-  // Fields for internal use by the toolkit implementation
-  Context cachedSubContext;
-  Object cachedWidget;
-
-  View(this.model, this.style);
-
-  TextStyle get textStyle => (style != null && style.value != null) ?
-      style.value.toTextStyle : null;
-}
-
-// A text view of String model
-class LabelView extends View<ReadRef<String>> {
-  LabelView(ReadRef<String> labelText, ReadRef<Style> style): super(labelText, style);
-}
-
-// A button view
-class ButtonView extends View<ReadRef<String>> {
-  final ReadRef<Operation> _action;
-
-  ButtonView(ReadRef<String> buttonText, ReadRef<Style> style, this._action):
-    super(buttonText, style);
-}
-
-// A column view
-class ColumnView extends View<ReadList<View>> {
-  ColumnView(ReadList<View> rows, ReadRef<Style> style): super(rows, style);
-}
 
 class SkyToolkit {
   Widget build(View view, Context context) {
@@ -99,18 +67,18 @@ class SkyToolkit {
   }
 
   Widget renderLabel(LabelView label, Context context) {
-    return new Text(label.model.value, style: label.textStyle);
+    return new Text(label.model.value, style: textStyleOf(label));
   }
 
   Widget renderButton(ButtonView button, Context conext) {
     void buttonPressed() {
-      if (button._action != null && button._action.value != null) {
-        button._action.value.scheduleAction();
+      if (button.action != null && button.action.value != null) {
+        button.action.value.scheduleAction();
       }
     }
 
     return new RaisedButton(
-      child: new Text(button.model.value, style: button.textStyle),
+      child: new Text(button.model.value, style: textStyleOf(button)),
       onPressed: buttonPressed
     );
   }
@@ -122,15 +90,17 @@ class SkyToolkit {
     );
   }
 
+  TextStyle textStyleOf(View view) {
+    if (view.style != null && view.style.value != null) {
+      return view.style.value.toTextStyle;
+    } else {
+      return null;
+    }
+  }
+
   List<Widget> _buildWidgetList(ReadList<View> views, Context context) {
     return new MappedList<View, Widget>(views, (view) => build(view, context)).elements;
   }
-}
-
-// Application state
-abstract class AppState implements Zone {
-  ReadRef<String> get appTitle;
-  ReadRef<View> get mainView;
 }
 
 class CounterStore extends BaseZone {
