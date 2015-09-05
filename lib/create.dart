@@ -34,6 +34,8 @@ List<AppMode> ALL_MODES = [
   LAUNCH_MODE
 ];
 
+const STARTUP_MODE = SCHEMA_MODE;
+
 //enum Modules { Core, Meta, Demo }
 
 class CreateStore extends BaseZone {
@@ -53,9 +55,9 @@ class CreateStore extends BaseZone {
 
 class CreateApp extends BaseZone implements AppState {
   final CreateStore datastore;
-  final Ref<AppMode> appMode = new State<AppMode>(LAUNCH_MODE);
+  final Ref<AppMode> appMode = new State<AppMode>(STARTUP_MODE);
   ReadRef<String> get appTitle => new ReactiveFunction<AppMode, String>(
-      appMode, this, (AppMode mode) => 'Demo App \u{00BB} ${mode.name}');
+      appMode, this, (AppMode mode) => 'Demo App \u{2022} ${mode.name}');
   ReadRef<View> get mainView => new ReactiveFunction<AppMode, View>(
       appMode, this, makeMainView);
 
@@ -75,20 +77,22 @@ class CreateApp extends BaseZone implements AppState {
   }
 
   View schemaView() {
-    return new RowView(new ImmutableList<View>([
-      new LabelView(
-        new Constant<String>('Name'),
-        new Constant<Style>(BODY1_STYLE)
-      ),
-      new LabelView(
-        new Constant<String>('Type'),
-        new Constant<Style>(BODY2_STYLE)
-      ),
-      new ButtonView(
-        new Constant<String>('Save!'),
-        new Constant<Style>(BUTTON_STYLE),
-        new Constant<Operation>(null)
-      )
+    return new ColumnView(new ImmutableList<View>([
+      new RowView(new ImmutableList<View>([
+        new TextInput(
+          new State<String>('Name'),
+          new Constant<Style>(BODY2_STYLE)
+        ),
+        new LabelView(
+          new Constant<String>('Type'),
+          new Constant<Style>(BODY2_STYLE)
+        ),
+        new ButtonView(
+          new Constant<String>('Button!'),
+          new Constant<Style>(BUTTON_STYLE),
+          new Constant<Operation>(null)
+        )
+      ]))
     ]));
   }
 
@@ -126,6 +130,6 @@ class CreateApp extends BaseZone implements AppState {
           new Constant<Operation>(datastore.increaseValue)
         )
       ]
-    ), null);
+    ));
   }
 }

@@ -39,7 +39,7 @@ class CounterApp extends BaseZone implements AppState {
           new Constant<Operation>(datastore.increaseValue)
         )
       ]
-    ), null);
+    ));
   }
 
   @override DrawerView makeDrawer() {

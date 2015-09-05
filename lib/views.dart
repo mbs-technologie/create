@@ -22,6 +22,11 @@ class LabelView extends View<ReadRef<String>> {
   LabelView(ReadRef<String> labelText, ReadRef<Style> style): super(labelText, style);
 }
 
+/// An editable text view
+class TextInput extends View<Ref<String>> {
+  TextInput(Ref<String> text, ReadRef<Style> style): super(text, style);
+}
+
 /// A button view
 class ButtonView extends View<ReadRef<String>> {
   final ReadRef<Operation> action;
@@ -42,7 +47,7 @@ class RowView extends ContainerView {
 
 /// A column view
 class ColumnView extends ContainerView {
-  ColumnView(ReadList<View> rows, ReadRef<Style> style): super(rows, style);
+  ColumnView(ReadList<View> rows, [ReadRef<Style> style]): super(rows, style);
 }
 
 /// A header item (which can be rendered as a DrawerHeader)

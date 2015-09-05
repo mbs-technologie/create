@@ -7,6 +7,8 @@ import 'styles.dart';
 import 'views.dart';
 
 import 'package:sky/widgets.dart';
+import 'package:sky/editing/editable_string.dart';
+import 'package:sky/editing/editable_text.dart';
 import 'package:sky/theme/colors.dart' as colors;
 
 ThemeData _APP_THEME = new ThemeData(
@@ -116,6 +118,8 @@ class SkyApp extends App {
     // TODO: use the visitor pattern here?
     if (view is LabelView) {
       return _renderLabel(view);
+    } else if (view is TextInput) {
+      return _renderTextInput(view, context);
     } else if (view is ButtonView) {
       return _renderButton(view);
     } else if (view is HeaderView) {
@@ -137,6 +141,18 @@ class SkyApp extends App {
 
   Text _renderLabel(LabelView label) {
     return new Text(label.model.value, style: _textStyleOf(label));
+  }
+
+  EditableText _renderTextInput(TextInput input, Context context) {
+    TextStyle textStyle = _textStyleOf(input);
+    assert (textStyle != null); // EditableText must have a style
+    // TODO: two-way binding
+    return new EditableText(
+      value: new EditableString(text: input.model.value),
+      focused: true,
+      style: textStyle,
+      cursorColor: textStyle.color
+    );
   }
 
   MaterialButton _renderButton(ButtonView button) {
@@ -171,10 +187,7 @@ class SkyApp extends App {
   }
 
   Row _renderRow(RowView row, Context context) {
-    return new Row(
-      _buildWidgetList(row.model, context),
-      alignItems: FlexAlignItems.start
-    );
+    return new Row(_buildWidgetList(row.model, context));
   }
 
   Column _renderColumn(ColumnView column, Context context) {
