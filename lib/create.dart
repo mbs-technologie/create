@@ -54,23 +54,22 @@ class CreateStore extends BaseZone {
 class CreateAppState extends BaseZone implements AppState {
   final CreateStore datastore;
   final Ref<AppMode> appMode = new State<AppMode>(LAUNCH_MODE);
-  final ReadRef<String> appTitle = new Constant<String>('Create!');
-  final Ref<View> mainView = new State<View>();
+  ReadRef<String> get appTitle => new ReactiveFunction<AppMode, String>(
+      appMode, this, (AppMode mode) => 'Demo App \u{00BB} ${mode.name}');
+  ReadRef<View> get mainView => new ReactiveFunction<AppMode, View>(
+      appMode, this, makeMainView);
 
-  CreateAppState(this.datastore) {
-    mainView.value = new ColumnView(
-      new ImmutableList<View>([
-        new LabelView(
-          datastore.describeState,
-          new Constant<Style>(BODY1_STYLE)
-        ),
-        new ButtonView(
-          new Constant<String>('Increase the counter value'),
-          new Constant<Style>(BUTTON_STYLE),
-          new Constant<Operation>(datastore.increaseValue)
-        )
-      ]
-    ), null);
+  CreateAppState(this.datastore);
+
+  View makeMainView(AppMode mode) {
+    if (mode == LAUNCH_MODE) {
+      return counterView();
+    } else {
+      return new LabelView(
+        new Constant<String>('TODO: ${mode.name}'),
+        new Constant<Style>(TITLE_STYLE)
+      );
+    }
   }
 
   @override DrawerView makeDrawer() {
@@ -92,5 +91,21 @@ class CreateAppState extends BaseZone implements AppState {
       new Constant<IconId>(mode.icon),
       new Constant<Operation>(makeOperation(() { appMode.value = mode; }))
     );
+  }
+
+  View counterView() {
+    return new ColumnView(
+      new ImmutableList<View>([
+        new LabelView(
+          datastore.describeState,
+          new Constant<Style>(BODY1_STYLE)
+        ),
+        new ButtonView(
+          new Constant<String>('Increase the counter value'),
+          new Constant<Style>(BUTTON_STYLE),
+          new Constant<Operation>(datastore.increaseValue)
+        )
+      ]
+    ), null);
   }
 }
