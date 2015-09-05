@@ -35,6 +35,11 @@ abstract class ContainerView extends View<ReadList<View>> {
   ContainerView(ReadList<View> subviews, [ReadRef<Style> style]): super(subviews, style);
 }
 
+/// A row view
+class RowView extends ContainerView {
+  RowView(ReadList<View> columns, [ReadRef<Style> style]): super(columns, style);
+}
+
 /// A column view
 class ColumnView extends ContainerView {
   ColumnView(ReadList<View> rows, ReadRef<Style> style): super(rows, style);

@@ -51,7 +51,7 @@ class CreateStore extends BaseZone {
       counter, this, (int counterValue) => 'The counter value is $counterValue');
 }
 
-class CreateAppState extends BaseZone implements AppState {
+class CreateApp extends BaseZone implements AppState {
   final CreateStore datastore;
   final Ref<AppMode> appMode = new State<AppMode>(LAUNCH_MODE);
   ReadRef<String> get appTitle => new ReactiveFunction<AppMode, String>(
@@ -59,17 +59,37 @@ class CreateAppState extends BaseZone implements AppState {
   ReadRef<View> get mainView => new ReactiveFunction<AppMode, View>(
       appMode, this, makeMainView);
 
-  CreateAppState(this.datastore);
+  CreateApp(this.datastore);
 
   View makeMainView(AppMode mode) {
     if (mode == LAUNCH_MODE) {
       return counterView();
+    } else if (mode == SCHEMA_MODE) {
+      return schemaView();
     } else {
       return new LabelView(
         new Constant<String>('TODO: ${mode.name}'),
         new Constant<Style>(TITLE_STYLE)
       );
     }
+  }
+
+  View schemaView() {
+    return new RowView(new ImmutableList<View>([
+      new LabelView(
+        new Constant<String>('Name'),
+        new Constant<Style>(BODY1_STYLE)
+      ),
+      new LabelView(
+        new Constant<String>('Type'),
+        new Constant<Style>(BODY2_STYLE)
+      ),
+      new ButtonView(
+        new Constant<String>('Save!'),
+        new Constant<Style>(BUTTON_STYLE),
+        new Constant<Operation>(null)
+      )
+    ]));
   }
 
   @override DrawerView makeDrawer() {

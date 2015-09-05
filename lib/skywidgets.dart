@@ -124,6 +124,8 @@ class SkyApp extends App {
       return _renderItem(view);
     } else if (view is DividerView) {
       return _renderDivider(view);
+    } else if (view is RowView) {
+      return _renderRow(view, context);
     } else if (view is ColumnView) {
       return _renderColumn(view, context);
     } else if (view is DrawerView) {
@@ -166,6 +168,13 @@ class SkyApp extends App {
 
   DrawerDivider _renderDivider(DividerView divider) {
     return new DrawerDivider();
+  }
+
+  Row _renderRow(RowView row, Context context) {
+    return new Row(
+      _buildWidgetList(row.model, context),
+      alignItems: FlexAlignItems.start
+    );
   }
 
   Column _renderColumn(ColumnView column, Context context) {

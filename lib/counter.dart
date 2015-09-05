@@ -21,12 +21,12 @@ class CounterStore extends BaseZone {
       counter, this, (int counterValue) => 'The counter value is $counterValue');
 }
 
-class CounterAppState extends BaseZone implements AppState {
+class CounterApp extends BaseZone implements AppState {
   final CounterStore datastore;
   final ReadRef<String> appTitle = new Constant<String>('Create!');
   final Ref<View> mainView = new State<View>();
 
-  CounterAppState(this.datastore) {
+  CounterApp(this.datastore) {
     mainView.value = new ColumnView(
       new ImmutableList<View>([
         new LabelView(

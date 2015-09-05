@@ -13,10 +13,10 @@ void main() {
 
   switch (app) {
     case Run.COUNTER:
-      appState = new CounterAppState(new CounterStore());
+      appState = new CounterApp(new CounterStore());
       break;
     case Run.CREATE:
-      appState = new CreateAppState(new CreateStore());
+      appState = new CreateApp(new CreateStore());
       break;
   }
 
