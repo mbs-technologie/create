@@ -28,10 +28,18 @@ class IconId {
   const IconId(this.id);
 }
 
-const ICON_MENU = const IconId("navigation/menu");
-const ICON_SEARCH = const IconId("action/search");
-const ICON_MORE_VERT = const IconId("navigation/more_vert");
-const ICON_SETTINGS = const IconId('action/settings');
-const ICON_HELP = const IconId('action/help');
-const ICON_EXPOSURE_PLUS_1 = const IconId('image/exposure_plus_1');
-const ICON_EXPOSURE_PLUS_2 = const IconId('image/exposure_plus_2');
+const MENU_ICON = const IconId("navigation/menu");
+const SEARCH_ICON = const IconId("action/search");
+const MORE_VERT_ICON = const IconId("navigation/more_vert");
+const SETTINGS_ICON = const IconId('action/settings');
+const HELP_ICON = const IconId('action/help');
+const LAUNCH_ICON = const IconId('action/launch');
+const CODE_ICON = const IconId('action/code');
+const EXTENSION_ICON = const IconId('action/extension');
+const VIEW_QUILT_ICON = const IconId('action/view_quilt');
+const SETTINGS_SYSTEM_DAYDREAM_ICON = const IconId('device/settings_system_daydream');
+const WIDGETS_ICON = const IconId('device/widgets');
+const STYLE_ICON = const IconId('image/style');
+const EXPOSURE_PLUS_1_ICON = const IconId('image/exposure_plus_1');
+const EXPOSURE_PLUS_2_ICON = const IconId('image/exposure_plus_2');
+const CLOUD_ICON = const IconId('file/cloud');

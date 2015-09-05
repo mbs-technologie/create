@@ -1,11 +1,24 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 
+import 'views.dart';
 import 'counter.dart';
+import 'create.dart';
 import 'skywidgets.dart';
 
-void main() {
-  new SkyApp(new CounterAppState(new CounterStore())).run();
-}
+enum Run { COUNTER, CREATE }
 
-//enum Dimensions { Modules, Schema, Paramaters, Library, Services, Views, Styles, Data, Launch }
-//enum Modules { Core, Meta, Demo }
+void main() {
+  Run app = Run.CREATE;  // Change to run Counter app
+  AppState appState;
+
+  switch (app) {
+    case Run.COUNTER:
+      appState = new CounterAppState(new CounterStore());
+      break;
+    case Run.CREATE:
+      appState = new CreateAppState(new CreateStore());
+      break;
+  }
+
+  new SkyApp(appState).run();
+}

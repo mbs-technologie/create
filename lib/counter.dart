@@ -1,5 +1,7 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 
+library counter;
+
 import 'elements.dart';
 import 'styles.dart';
 import 'views.dart';
@@ -42,24 +44,24 @@ class CounterAppState extends BaseZone implements AppState {
 
   @override DrawerView makeDrawer() {
     return new DrawerView(
-      new ImmutableList<ItemView>([
+      new ImmutableList<View>([
         new HeaderView(
           new Constant<String>('Counter Demo')
         ),
         new ItemView(
           new Constant<String>('Increase by one'),
-          new Constant<IconId>(ICON_EXPOSURE_PLUS_1),
+          new Constant<IconId>(EXPOSURE_PLUS_1_ICON),
           new Constant<Operation>(increaseByOne)
         ),
         new ItemView(
           new Constant<String>('Increase by two'),
-          new Constant<IconId>(ICON_EXPOSURE_PLUS_2),
+          new Constant<IconId>(EXPOSURE_PLUS_2_ICON),
           new Constant<Operation>(increaseByTwo)
         ),
         new DividerView(),
         new ItemView(
           new Constant<String>('Help & Feedback'),
-          new Constant<IconId>(ICON_HELP),
+          new Constant<IconId>(HELP_ICON),
           null
         ),
       ])

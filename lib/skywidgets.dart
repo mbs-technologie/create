@@ -204,15 +204,15 @@ class SkyApp extends App {
   Widget _buildToolBar() {
     return new ToolBar(
         left: new IconButton(
-          icon: ICON_MENU.id,
+          icon: MENU_ICON.id,
           onPressed: _openDrawer),
         center: new Text(appState.appTitle.value),
         right: [
           new IconButton(
-            icon: ICON_SEARCH.id,
+            icon: SEARCH_ICON.id,
             onPressed: _handleBeginSearch),
           new IconButton(
-            icon: ICON_MORE_VERT.id,
+            icon: MORE_VERT_ICON.id,
             onPressed: _handleShowMenu)
         ]
       );
