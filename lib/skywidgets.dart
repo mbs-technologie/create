@@ -7,8 +7,7 @@ import 'styles.dart';
 import 'views.dart';
 
 import 'package:sky/widgets.dart';
-import 'package:sky/editing/editable_string.dart';
-import 'package:sky/editing/editable_text.dart';
+import 'package:sky/editing/input.dart';
 import 'package:sky/theme/colors.dart' as colors;
 
 ThemeData _APP_THEME = new ThemeData(
@@ -143,15 +142,15 @@ class SkyApp extends App {
     return new Text(label.model.value, style: _textStyleOf(label));
   }
 
-  EditableText _renderTextInput(TextInput input, Context context) {
-    TextStyle textStyle = _textStyleOf(input);
-    assert (textStyle != null); // EditableText must have a style
+  Widget _renderTextInput(TextInput input, Context context) {
     // TODO: two-way binding
-    return new EditableText(
-      value: new EditableString(text: input.model.value),
-      focused: true,
-      style: textStyle,
-      cursorColor: textStyle.color
+    return new Container(
+      width: 300.0,
+      child: new Input(
+        key: new GlobalKey()
+        //initialValue: input.model.value
+        //placeholder: "foo"
+      )
     );
   }
 

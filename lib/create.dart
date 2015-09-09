@@ -80,7 +80,7 @@ class CreateApp extends BaseZone implements AppState {
     return new ColumnView(new ImmutableList<View>([
       new RowView(new ImmutableList<View>([
         new TextInput(
-          new State<String>('Name'),
+          new State<String>('name'),
           new Constant<Style>(BODY2_STYLE)
         ),
         new LabelView(
