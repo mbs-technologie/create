@@ -12,21 +12,21 @@ class AppMode {
   const AppMode(this.name, this.icon);
 }
 
-const MODULES_MODE = const AppMode("Modules", WIDGETS_ICON);
-const SCHEMA_MODE = const AppMode("Schema", SETTINGS_SYSTEM_DAYDREAM_ICON);
-const PARAMETERS_MODE = const AppMode("Parameters", SETTINGS_ICON);
-const LIBRARY_MODE = const AppMode("Library", CODE_ICON);
-const SERVICES_MODE = const AppMode("Services", EXTENSION_ICON);
-const VIEWS_MODE = const AppMode("Views", VIEW_QUILT_ICON);
-const STYLES_MODE = const AppMode("Styles", STYLE_ICON);
-const DATA_MODE = const AppMode("Data", CLOUD_ICON);
-const LAUNCH_MODE = const AppMode("Launch", LAUNCH_ICON);
+const AppMode MODULES_MODE = const AppMode("Modules", WIDGETS_ICON);
+const AppMode SCHEMA_MODE = const AppMode("Schema", SETTINGS_SYSTEM_DAYDREAM_ICON);
+const AppMode PARAMETERS_MODE = const AppMode("Parameters", SETTINGS_ICON);
+const AppMode OPERATIONS_MODE = const AppMode("Operations", CODE_ICON);
+const AppMode SERVICES_MODE = const AppMode("Services", EXTENSION_ICON);
+const AppMode VIEWS_MODE = const AppMode("Views", VIEW_QUILT_ICON);
+const AppMode STYLES_MODE = const AppMode("Styles", STYLE_ICON);
+const AppMode DATA_MODE = const AppMode("Data", CLOUD_ICON);
+const AppMode LAUNCH_MODE = const AppMode("Launch", LAUNCH_ICON);
 
 List<AppMode> ALL_MODES = [
   MODULES_MODE,
   SCHEMA_MODE,
   PARAMETERS_MODE,
-  LIBRARY_MODE,
+  OPERATIONS_MODE,
   SERVICES_MODE,
   VIEWS_MODE,
   STYLES_MODE,

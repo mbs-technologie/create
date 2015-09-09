@@ -28,18 +28,18 @@ class IconId {
   const IconId(this.id);
 }
 
-const MENU_ICON = const IconId("navigation/menu");
-const SEARCH_ICON = const IconId("action/search");
-const MORE_VERT_ICON = const IconId("navigation/more_vert");
-const SETTINGS_ICON = const IconId('action/settings');
-const HELP_ICON = const IconId('action/help');
-const LAUNCH_ICON = const IconId('action/launch');
-const CODE_ICON = const IconId('action/code');
-const EXTENSION_ICON = const IconId('action/extension');
-const VIEW_QUILT_ICON = const IconId('action/view_quilt');
-const SETTINGS_SYSTEM_DAYDREAM_ICON = const IconId('device/settings_system_daydream');
-const WIDGETS_ICON = const IconId('device/widgets');
-const STYLE_ICON = const IconId('image/style');
-const EXPOSURE_PLUS_1_ICON = const IconId('image/exposure_plus_1');
-const EXPOSURE_PLUS_2_ICON = const IconId('image/exposure_plus_2');
-const CLOUD_ICON = const IconId('file/cloud');
+const IconId MENU_ICON = const IconId("navigation/menu");
+const IconId SEARCH_ICON = const IconId("action/search");
+const IconId MORE_VERT_ICON = const IconId("navigation/more_vert");
+const IconId SETTINGS_ICON = const IconId('action/settings');
+const IconId HELP_ICON = const IconId('action/help');
+const IconId LAUNCH_ICON = const IconId('action/launch');
+const IconId CODE_ICON = const IconId('action/code');
+const IconId EXTENSION_ICON = const IconId('action/extension');
+const IconId VIEW_QUILT_ICON = const IconId('action/view_quilt');
+const IconId SETTINGS_SYSTEM_DAYDREAM_ICON = const IconId('device/settings_system_daydream');
+const IconId WIDGETS_ICON = const IconId('device/widgets');
+const IconId STYLE_ICON = const IconId('image/style');
+const IconId EXPOSURE_PLUS_1_ICON = const IconId('image/exposure_plus_1');
+const IconId EXPOSURE_PLUS_2_ICON = const IconId('image/exposure_plus_2');
+const IconId CLOUD_ICON = const IconId('file/cloud');
