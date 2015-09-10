@@ -35,6 +35,15 @@ class ButtonView extends View<ReadRef<String>> {
     super(buttonText, style);
 }
 
+/// A selection view (a.k.a. dropdown buttons)
+class SelectionInput<T> extends View<Ref<T>> {
+  final ReadList<T> options;
+  final Function display;
+
+  SelectionInput(Ref<T> current, this.options, String _display(T value),
+    [ReadRef<Style> style]): super(current, style), display = _display;
+}
+
 /// A container view has subviews
 abstract class ContainerView extends View<ReadList<View>> {
   ContainerView(ReadList<View> subviews, [ReadRef<Style> style]): super(subviews, style);

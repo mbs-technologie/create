@@ -28,9 +28,10 @@ class IconId {
   const IconId(this.id);
 }
 
-const IconId MENU_ICON = const IconId("navigation/menu");
-const IconId SEARCH_ICON = const IconId("action/search");
-const IconId MORE_VERT_ICON = const IconId("navigation/more_vert");
+const IconId MENU_ICON = const IconId('navigation/menu');
+const IconId SEARCH_ICON = const IconId('action/search');
+const IconId ARROW_DROP_DOWN_ICON = const IconId('navigation/arrow_drop_down');
+const IconId MORE_VERT_ICON = const IconId('navigation/more_vert');
 const IconId SETTINGS_ICON = const IconId('action/settings');
 const IconId HELP_ICON = const IconId('action/help');
 const IconId LAUNCH_ICON = const IconId('action/launch');

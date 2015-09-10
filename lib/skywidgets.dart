@@ -121,6 +121,8 @@ class SkyApp extends App {
       return _renderTextInput(view, context);
     } else if (view is ButtonView) {
       return _renderButton(view);
+    } else if (view is SelectionInput) {
+      return _renderSelection(view);
     } else if (view is HeaderView) {
       return _renderHeader(view);
     } else if (view is ItemView) {
@@ -151,6 +153,16 @@ class SkyApp extends App {
         //initialValue: input.model.value
         //placeholder: "foo"
       )
+    );
+  }
+
+  Widget _renderSelection(SelectionInput selection) {
+    return new FlatButton(
+      child: new Row([
+        new Text(selection.display(selection.model.value), style: _textStyleOf(selection)),
+        new Icon(type: ARROW_DROP_DOWN_ICON.id, size: 24)
+      ])
+      //onPressed: _scheduleAction(button.action)
     );
   }
 

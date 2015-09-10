@@ -53,6 +53,8 @@ class CreateStore extends BaseZone {
       counter, this, (int counterValue) => 'The counter value is $counterValue');
 }
 
+enum Type { STRING, INTEGER }
+
 class CreateApp extends BaseZone implements AppState {
   final CreateStore datastore;
   final Ref<AppMode> appMode = new State<AppMode>(STARTUP_MODE);
@@ -77,15 +79,18 @@ class CreateApp extends BaseZone implements AppState {
   }
 
   View schemaView() {
+    String displayType(Type type) => type == Type.STRING ? "String" : "Integer";
+
     return new ColumnView(new ImmutableList<View>([
       new RowView(new ImmutableList<View>([
         new TextInput(
           new State<String>('name'),
           new Constant<Style>(BODY2_STYLE)
         ),
-        new LabelView(
-          new Constant<String>('Type'),
-          new Constant<Style>(BODY2_STYLE)
+        new SelectionInput<Type>(
+          new State<Type>(Type.STRING),
+          new ImmutableList<Type>([ Type.STRING, Type.INTEGER ]),
+          displayType
         ),
         new ButtonView(
           new Constant<String>('Button!'),
