@@ -22,14 +22,14 @@ typedef Widget MenuBuilder();
 class SkyApp extends App {
   final AppState appState;
   final Zone viewZone = new BaseZone();
+  final Ref<MenuBuilder> menuBuilder = new State<MenuBuilder>(null);
   final Ref<DrawerView> drawer = new State<DrawerView>(null);
-
-  MenuBuilder _menuBuilder;
 
   SkyApp(this.appState) {
     Operation rebuildOperation = viewZone.makeOperation(rebuildApp);
     appState.appTitle.observe(rebuildOperation, viewZone);
     appState.mainView.observe(rebuildOperation, viewZone);
+    menuBuilder.observe(rebuildOperation, viewZone);
     drawer.observe(rebuildOperation, viewZone);
   }
 
@@ -54,23 +54,13 @@ class SkyApp extends App {
 
   Widget buildOverlays() {
     List<Widget> overlays = [ _buildScaffold() ];
-    if (_menuBuilder != null) {
+    if (menuBuilder.value != null) {
       overlays.add(new ModalOverlay(
-        children: [ _menuBuilder() ],
-        onDismiss: dismissMenu
+        children: [ menuBuilder.value() ],
+        onDismiss: () => menuBuilder.value = null
       ));
     }
     return new Stack(overlays);
-  }
-
-  void showMenu(MenuBuilder menuBuilder) {
-    _menuBuilder = menuBuilder;
-    rebuildApp();
-  }
-
-  void dismissMenu() {
-    _menuBuilder = null;
-    rebuildApp();
   }
 
   Widget _buildScaffold() {
@@ -94,16 +84,11 @@ class SkyApp extends App {
   }
 
   Widget _viewToWidget(View view, Context context) {
-    if (view.cachedWidget != null && _canCacheWidget(view)) {
-      return  view.cachedWidget as Widget;
-    }
-
     _cleanupView(view);
     view.cachedSubContext = context.makeSubContext();
     Operation forceRefreshOp = context.zone.makeOperation(() => forceRefresh(view));
 
     Widget result = _renderView(view, context);
-    view.cachedWidget = result;
 
     if (view.model != null) {
       view.model.observe(forceRefreshOp, view.cachedSubContext);
@@ -116,19 +101,12 @@ class SkyApp extends App {
     return result;
   }
 
-  bool _canCacheWidget(View view) {
-    // For simplicity, don't cache container widgets at all.
-    // TODO: detect when the child widgets are updated.
-    return !(view is ContainerView);
-  }
-
   // Dispose of cached widget and associated resources
   void _cleanupView(View view) {
     if (view.cachedSubContext != null) {
       view.cachedSubContext.dispose();
       view.cachedSubContext = null;
     }
-    view.cachedWidget = null;
   }
 
   void forceRefresh(View view) {
@@ -304,7 +282,7 @@ class SelectionComponent extends Component {
 
   void _showSelectionMenu() {
     dropdownTopLeft = localToGlobal(new Point(0.0, 0.0));
-    app.showMenu(_buildMenu);
+    app.menuBuilder.value = _buildMenu;
   }
 
   void _selected(option) {
@@ -313,7 +291,7 @@ class SelectionComponent extends Component {
   }
 
   void _dismissMenu() {
-    app.dismissMenu();
+    app.menuBuilder.value = null;
   }
 
   Widget _buildMenu() {

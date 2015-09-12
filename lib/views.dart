@@ -12,7 +12,6 @@ abstract class View<M extends Observable> {
 
   // Fields for internal use by the toolkit implementation
   Context cachedSubContext;
-  Object cachedWidget;
 
   View(this.model, this.style);
 }
