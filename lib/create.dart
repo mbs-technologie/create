@@ -117,6 +117,7 @@ class CreateApp extends BaseZone implements AppState {
   }
 
   ItemView _modeItem(AppMode mode) {
+    // TODO: show currently active mode
     return new ItemView(
       new Constant<String>(mode.name),
       new Constant<IconId>(mode.icon),

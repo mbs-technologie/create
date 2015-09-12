@@ -8,7 +8,7 @@ import 'skyapp.dart';
 enum Run { COUNTER, CREATE }
 
 void main() {
-  Run app = Run.CREATE;  // Change to run Counter app
+  Run app = Run.CREATE;  // Change to run the Counter app
   AppState appState;
 
   switch (app) {

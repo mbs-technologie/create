@@ -16,8 +16,6 @@ ThemeData _APP_THEME = new ThemeData(
 );
 const EdgeDims _MAIN_VIEW_PADDING = const EdgeDims.all(10.0);
 
-typedef Widget MenuBuilder();
-
 // This is to make Dart happy: even optional arguments in mixin superclass generate an error.
 abstract class SkyAppShim extends App {
   SkyAppShim(): super(key: new GlobalKey());
