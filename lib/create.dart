@@ -44,6 +44,8 @@ class CreateStore extends BaseZone {
 
   final Ref<int> increaseBy = new State<int>(1);
 
+  final Ref<Type> typeSelection = new State<Type>(Type.STRING);
+
   // Business logic
   Operation get increaseValue => makeOperation(() {
     counter.value = counter.value + increaseBy.value;
@@ -88,7 +90,7 @@ class CreateApp extends BaseZone implements AppState {
           new Constant<Style>(BODY2_STYLE)
         ),
         new SelectionInput<Type>(
-          new State<Type>(Type.STRING),
+          datastore.typeSelection,
           new ImmutableList<Type>([ Type.STRING, Type.INTEGER ]),
           displayType
         ),

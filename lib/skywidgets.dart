@@ -7,7 +7,8 @@ import 'styles.dart';
 import 'views.dart';
 
 import 'package:sky/widgets.dart';
-import 'package:sky/editing/input.dart';
+import 'package:sky/src/widgets/input.dart';
+import 'package:sky/src/widgets/popup_menu.dart';
 import 'package:sky/theme/colors.dart' as colors;
 
 ThemeData _APP_THEME = new ThemeData(
@@ -16,13 +17,17 @@ ThemeData _APP_THEME = new ThemeData(
 );
 const EdgeDims _MAIN_VIEW_PADDING = const EdgeDims.all(10.0);
 
+typedef Widget MenuBuilder();
+
 class SkyApp extends App {
   final AppState appState;
   final Zone viewZone = new BaseZone();
   final Ref<DrawerView> drawer = new State<DrawerView>(null);
 
+  MenuBuilder _menuBuilder;
+
   SkyApp(this.appState) {
-    Operation rebuildOperation = viewZone.makeOperation(_rebuild);
+    Operation rebuildOperation = viewZone.makeOperation(rebuildApp);
     appState.appTitle.observe(rebuildOperation, viewZone);
     appState.mainView.observe(rebuildOperation, viewZone);
     drawer.observe(rebuildOperation, viewZone);
@@ -37,17 +42,37 @@ class SkyApp extends App {
       data: _APP_THEME,
       child: new Title(
         title: appState.appTitle.value,
-        child: _buildScaffold()
+        child: buildOverlays()
       )
     );
   }
 
-  void _rebuild() {
+  void rebuildApp() {
     // This is Sky's way of forcing widgets to refresh.
     setState(() { });
   }
 
-  // TODO: implement navigator.
+  Widget buildOverlays() {
+    List<Widget> overlays = [ _buildScaffold() ];
+    if (_menuBuilder != null) {
+      overlays.add(new ModalOverlay(
+        children: [ _menuBuilder() ],
+        onDismiss: dismissMenu
+      ));
+    }
+    return new Stack(overlays);
+  }
+
+  void showMenu(MenuBuilder menuBuilder) {
+    _menuBuilder = menuBuilder;
+    rebuildApp();
+  }
+
+  void dismissMenu() {
+    _menuBuilder = null;
+    rebuildApp();
+  }
+
   Widget _buildScaffold() {
     return new Scaffold(
       toolbar: _buildToolBar(),
@@ -75,16 +100,16 @@ class SkyApp extends App {
 
     _cleanupView(view);
     view.cachedSubContext = context.makeSubContext();
-    Operation forceRefresh = context.zone.makeOperation(() => _forceRefresh(view));
+    Operation forceRefreshOp = context.zone.makeOperation(() => forceRefresh(view));
 
     Widget result = _renderView(view, context);
     view.cachedWidget = result;
 
     if (view.model != null) {
-      view.model.observe(forceRefresh, view.cachedSubContext);
+      view.model.observe(forceRefreshOp, view.cachedSubContext);
     }
     if (view.style != null) {
-      view.style.observe(forceRefresh, view.cachedSubContext);
+      view.style.observe(forceRefreshOp, view.cachedSubContext);
     }
     // TODO: observe icon for ItemView, etc.
 
@@ -106,11 +131,11 @@ class SkyApp extends App {
     view.cachedWidget = null;
   }
 
-  void _forceRefresh(View view) {
+  void forceRefresh(View view) {
     _cleanupView(view);
 
     // TODO: implement finer-grained refreshing.
-    _rebuild();
+    rebuildApp();
   }
 
   Widget _renderView(View view, Context context) {
@@ -141,7 +166,7 @@ class SkyApp extends App {
   }
 
   Text _renderLabel(LabelView label) {
-    return new Text(label.model.value, style: _textStyleOf(label));
+    return new Text(label.model.value, style: textStyleOf(label));
   }
 
   Widget _renderTextInput(TextInput input, Context context) {
@@ -149,39 +174,33 @@ class SkyApp extends App {
     return new Container(
       width: 300.0,
       child: new Input(
-        key: new GlobalKey()
-        //initialValue: input.model.value
+        key: new GlobalKey(),
+        initialValue: input.model.value
         //placeholder: "foo"
       )
     );
   }
 
   Widget _renderSelection(SelectionInput selection) {
-    return new FlatButton(
-      child: new Row([
-        new Text(selection.display(selection.model.value), style: _textStyleOf(selection)),
-        new Icon(type: ARROW_DROP_DOWN_ICON.id, size: 24)
-      ])
-      //onPressed: _scheduleAction(button.action)
-    );
+    return new SelectionComponent(selection, this);
   }
 
   MaterialButton _renderButton(ButtonView button) {
     return new RaisedButton(
-      child: new Text(button.model.value, style: _textStyleOf(button)),
+      child: new Text(button.model.value, style: textStyleOf(button)),
       onPressed: _scheduleAction(button.action)
     );
   }
 
   DrawerHeader _renderHeader(HeaderView header) {
     return new DrawerHeader(
-      child: new Text(header.model.value, style: _textStyleOf(header))
+      child: new Text(header.model.value, style: textStyleOf(header))
     );
   }
 
   DrawerItem _renderItem(ItemView item) {
     return new DrawerItem(
-      child: new Text(item.model.value, style: _textStyleOf(item)),
+      child: new Text(item.model.value, style: textStyleOf(item)),
       icon: item.icon.value != null ? item.icon.value.id : null,
       onPressed: () {
         if (isNotNull(item.action)) {
@@ -216,7 +235,7 @@ class SkyApp extends App {
     );
   }
 
-  TextStyle _textStyleOf(View view) {
+  TextStyle textStyleOf(View view) {
     if (isNotNull(view.style)) {
       return view.style.value.toTextStyle;
     } else {
@@ -261,4 +280,59 @@ class SkyApp extends App {
 
   void _handleBeginSearch() => null; // TODO
   void _handleShowMenu() => null; // TODO
+}
+
+// TODO: Use Sky widget once it's implemented
+class SelectionComponent extends Component {
+  SelectionInput selection;
+  SkyApp app;
+  Point dropdownTopLeft;
+
+  SelectionComponent(this.selection, this.app);
+
+  TextStyle get textStyle => app.textStyleOf(selection);
+
+  Widget build() {
+    return new FlatButton(
+      child: new Row([
+        new Text(selection.display(selection.model.value), style: textStyle),
+        new Icon(type: ARROW_DROP_DOWN_ICON.id, size: 24)
+      ]),
+      onPressed: _showSelectionMenu
+    );
+  }
+
+  void _showSelectionMenu() {
+    dropdownTopLeft = localToGlobal(new Point(0.0, 0.0));
+    app.showMenu(_buildMenu);
+  }
+
+  void _selected(option) {
+    selection.model.value = option;
+    _dismissMenu();
+  }
+
+  void _dismissMenu() {
+    app.dismissMenu();
+  }
+
+  Widget _buildMenu() {
+    final List<PopupMenuItem> menuItems = new List.from(selection.options.elements.map(
+      (option) => new PopupMenuItem(
+          child: new Text(selection.display(option), style: textStyle),
+          onPressed: () => _selected(option)
+      )
+    ));
+
+    return new Positioned(
+      child: new PopupMenu2(
+        items: menuItems,
+        level: 4,
+        showing: true,
+        onDismissed: _dismissMenu
+      ),
+      left: dropdownTopLeft.x,
+      top: dropdownTopLeft.y
+    );
+  }
 }

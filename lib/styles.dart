@@ -2,7 +2,7 @@
 
 library styles;
 
-import 'package:sky/painting/text_style.dart';
+import 'package:sky/src/painting/text_style.dart';
 import 'package:sky/theme/typography.dart' as typography;
 
 class Style {
