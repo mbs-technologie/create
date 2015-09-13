@@ -38,12 +38,30 @@ const AppMode STARTUP_MODE = LAUNCH_MODE; //SCHEMA_MODE;
 
 //enum Modules { Core, Meta, Demo }
 
+class TypeId {
+  final String name;
+  const TypeId(this.name);
+}
+
+const TypeId STRING_TYPE = const TypeId("String");
+const TypeId INTEGER_TYPE = const TypeId("Integer");
+
+List<TypeId> PRIMITIVE_TYPES = [
+  STRING_TYPE,
+  INTEGER_TYPE
+];
+
+String displayTypeId(TypeId typeId) => typeId.name;
+
 class CreateRecord {
   final Ref<String> name;
+  final Ref<TypeId> typeId;
   final Ref<int> state;
 
-  CreateRecord(String name, int state):
-      name = new State<String>(name), state = new State<int>(state);
+  CreateRecord(String name, TypeId typeId, int state):
+      name = new State<String>(name),
+      typeId = new State<TypeId>(typeId),
+      state = new State<int>(state);
 }
 
 String COUNTER_NAME = "counter";
@@ -53,8 +71,8 @@ class CreateData extends BaseZone {
   List<CreateRecord> records = new List<CreateRecord>();
 
   CreateData() {
-    records.add(new CreateRecord(COUNTER_NAME, 42));
-    records.add(new CreateRecord(INCREASEBY_NAME, 1));
+    records.add(new CreateRecord(COUNTER_NAME, INTEGER_TYPE, 42));
+    records.add(new CreateRecord(INCREASEBY_NAME, INTEGER_TYPE, 1));
   }
 
   CreateRecord lookup(String name) {
@@ -69,8 +87,6 @@ class CreateData extends BaseZone {
   }
 }
 
-enum Type { STRING, INTEGER }
-
 class CreateApp extends BaseZone implements AppState {
   final CreateData datastore;
   final Ref<AppMode> appMode = new State<AppMode>(STARTUP_MODE);
@@ -78,8 +94,6 @@ class CreateApp extends BaseZone implements AppState {
       appMode, this, (AppMode mode) => 'Demo App \u{2022} ${mode.name}');
   ReadRef<View> get mainView => new ReactiveFunction<AppMode, View>(
       appMode, this, makeMainView);
-
-  final Ref<Type> typeSelection = new State<Type>(Type.STRING);
 
   CreateApp(this.datastore);
 
@@ -96,26 +110,24 @@ class CreateApp extends BaseZone implements AppState {
     }
   }
 
-  View schemaView() {
-    String displayType(Type type) => type == Type.STRING ? "String" : "Integer";
+  View schemaRowView(CreateRecord record) {
+    return new RowView(new ImmutableList<View>([
+      new TextInput(
+        record.name,
+        new Constant<Style>(BODY2_STYLE)
+      ),
+      new SelectionInput<TypeId>(
+        record.typeId,
+        new ImmutableList<TypeId>(PRIMITIVE_TYPES),
+        displayTypeId
+      )
+    ]));
+  }
 
+  View schemaView() {
     return new ColumnView(new ImmutableList<View>([
-      new RowView(new ImmutableList<View>([
-        new TextInput(
-          new State<String>('name'),
-          new Constant<Style>(BODY2_STYLE)
-        ),
-        new SelectionInput<Type>(
-          typeSelection,
-          new ImmutableList<Type>([ Type.STRING, Type.INTEGER ]),
-          displayType
-        ),
-        new ButtonView(
-          new Constant<String>('Button!'),
-          new Constant<Style>(BUTTON_STYLE),
-          new Constant<Operation>(null)
-        )
-      ]))
+      schemaRowView(datastore.lookup(COUNTER_NAME)),
+      schemaRowView(datastore.lookup(INCREASEBY_NAME))
     ]));
   }
 
