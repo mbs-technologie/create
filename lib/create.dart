@@ -34,25 +34,39 @@ List<AppMode> ALL_MODES = [
   LAUNCH_MODE
 ];
 
-const STARTUP_MODE = SCHEMA_MODE;
+const AppMode STARTUP_MODE = LAUNCH_MODE; //SCHEMA_MODE;
 
 //enum Modules { Core, Meta, Demo }
 
+class CreateRecord {
+  final Ref<String> name;
+  final Ref<int> state;
+
+  CreateRecord(String name, int state):
+      name = new State<String>(name), state = new State<int>(state);
+}
+
+String COUNTER_NAME = "counter";
+String INCREASEBY_NAME = "increaseby";
+
 class CreateData extends BaseZone {
-  // State
-  final Ref<int> counter = new State<int>(68);
+  List<CreateRecord> records = new List<CreateRecord>();
 
-  final Ref<int> increaseBy = new State<int>(1);
+  CreateData() {
+    records.add(new CreateRecord(COUNTER_NAME, 42));
+    records.add(new CreateRecord(INCREASEBY_NAME, 1));
+  }
 
-  final Ref<Type> typeSelection = new State<Type>(Type.STRING);
+  CreateRecord lookup(String name) {
+    // TODO: we should use an index or map here if we care about performance...
+    for (int i = 0; i < records.length; ++i) {
+      if (records[i].name.value == name) {
+        return records[i];
+      }
+    }
 
-  // Business logic
-  Operation get increaseValue => makeOperation(() {
-    counter.value = counter.value + increaseBy.value;
-  });
-
-  ReadRef<String> get describeState => new ReactiveFunction<int, String>(
-      counter, this, (int counterValue) => 'The counter value is $counterValue');
+    return null;
+  }
 }
 
 enum Type { STRING, INTEGER }
@@ -64,6 +78,8 @@ class CreateApp extends BaseZone implements AppState {
       appMode, this, (AppMode mode) => 'Demo App \u{2022} ${mode.name}');
   ReadRef<View> get mainView => new ReactiveFunction<AppMode, View>(
       appMode, this, makeMainView);
+
+  final Ref<Type> typeSelection = new State<Type>(Type.STRING);
 
   CreateApp(this.datastore);
 
@@ -90,7 +106,7 @@ class CreateApp extends BaseZone implements AppState {
           new Constant<Style>(BODY2_STYLE)
         ),
         new SelectionInput<Type>(
-          datastore.typeSelection,
+          typeSelection,
           new ImmutableList<Type>([ Type.STRING, Type.INTEGER ]),
           displayType
         ),
@@ -118,7 +134,6 @@ class CreateApp extends BaseZone implements AppState {
   }
 
   ItemView _modeItem(AppMode mode) {
-    // TODO: show currently active mode
     return new ItemView(
       new Constant<String>(mode.name),
       new Constant<IconId>(mode.icon),
@@ -131,15 +146,26 @@ class CreateApp extends BaseZone implements AppState {
     return new ColumnView(
       new ImmutableList<View>([
         new LabelView(
-          datastore.describeState,
+          describeState,
           new Constant<Style>(BODY1_STYLE)
         ),
         new ButtonView(
           new Constant<String>('Increase the counter value'),
           new Constant<Style>(BUTTON_STYLE),
-          new Constant<Operation>(datastore.increaseValue)
+          new Constant<Operation>(increaseValue)
         )
       ]
     ));
   }
+
+  Operation get increaseValue => makeOperation(() {
+    CreateRecord counter = datastore.lookup(COUNTER_NAME);
+    CreateRecord increaseby = datastore.lookup(INCREASEBY_NAME);
+    assert (counter != null && increaseby != null);
+    counter.state.value = counter.state.value + increaseby.state.value;
+  });
+
+  ReadRef<String> get describeState => new ReactiveFunction<int, String>(
+      datastore.lookup(COUNTER_NAME).state, this,
+      (int counterValue) => 'The counter value is $counterValue');
 }
