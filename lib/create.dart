@@ -56,34 +56,39 @@ String displayTypeId(TypeId typeId) => typeId.name;
 class CreateRecord {
   final Ref<String> name;
   final Ref<TypeId> typeId;
-  final Ref<int> state;
+  final Ref<String> state;
 
-  CreateRecord(String name, TypeId typeId, int state):
+  CreateRecord(String name, TypeId typeId, String state):
       name = new State<String>(name),
       typeId = new State<TypeId>(typeId),
-      state = new State<int>(state);
+      state = new State<String>(state);
 }
 
 String COUNTER_NAME = "counter";
 String INCREASEBY_NAME = "increaseby";
 
 class CreateData extends BaseZone {
-  List<CreateRecord> records = new List<CreateRecord>();
+  List<CreateRecord> _records = new List<CreateRecord>();
 
   CreateData() {
-    records.add(new CreateRecord(COUNTER_NAME, INTEGER_TYPE, 42));
-    records.add(new CreateRecord(INCREASEBY_NAME, INTEGER_TYPE, 1));
+    addAll([
+      new CreateRecord(COUNTER_NAME, INTEGER_TYPE, "68"),
+      new CreateRecord(INCREASEBY_NAME, INTEGER_TYPE, "1")
+    ]);
+  }
+
+  void addAll(List<CreateRecord> records) {
+    _records.addAll(records);
   }
 
   CreateRecord lookup(String name) {
-    // TODO: we should use an index or map here if we care about performance...
-    for (int i = 0; i < records.length; ++i) {
-      if (records[i].name.value == name) {
-        return records[i];
-      }
-    }
+    // TODO: we should use an index here if we care about scaling,
+    // but that would be somewhat complicated because names can be updated.
+    return _records.firstWhere((element) => (element.name.value == name), orElse: () => null);
+  }
 
-    return null;
+  ReadList<CreateRecord> runQuery(bool query(CreateRecord), Context context) {
+    return new ImmutableList<CreateRecord>(new List<CreateRecord>.from(_records.where(query)));
   }
 }
 
@@ -98,10 +103,13 @@ class CreateApp extends BaseZone implements AppState {
   CreateApp(this.datastore);
 
   View makeMainView(AppMode mode) {
+    Context context = this; // TODO: create subcontext
     if (mode == LAUNCH_MODE) {
       return counterView();
     } else if (mode == SCHEMA_MODE) {
-      return schemaView();
+      return schemaView(context);
+    } else if (mode == DATA_MODE) {
+      return dataView(context);
     } else {
       return new LabelView(
         new Constant<String>('TODO: ${mode.name}'),
@@ -124,11 +132,40 @@ class CreateApp extends BaseZone implements AppState {
     ]));
   }
 
-  View schemaView() {
-    return new ColumnView(new ImmutableList<View>([
-      schemaRowView(datastore.lookup(COUNTER_NAME)),
-      schemaRowView(datastore.lookup(INCREASEBY_NAME))
+  View schemaView(Context context) {
+    return new ColumnView(
+      new MappedList<CreateRecord, View>(
+        datastore.runQuery((record) => true, context),
+        schemaRowView
+      )
+    );
+  }
+
+  View dataRowView(CreateRecord record) {
+    return new RowView(new ImmutableList<View>([
+      new LabelView(
+        record.name,
+        new Constant<Style>(BODY1_STYLE)
+      ),
+      new LabelView(
+        new Constant<String>(record.typeId.value.name),
+        new Constant<Style>(BODY1_STYLE)
+      ),
+      new TextInput(
+        record.state,
+        new Constant<Style>(BODY2_STYLE)
+        // TODO: switch to the number keyboard
+      ),
     ]));
+  }
+
+  View dataView(Context context) {
+    return new ColumnView(
+      new MappedList<CreateRecord, View>(
+        datastore.runQuery((record) => true, context),
+        dataRowView
+      )
+    );
   }
 
   @override DrawerView makeDrawer() {
@@ -170,14 +207,21 @@ class CreateApp extends BaseZone implements AppState {
     ));
   }
 
+  static int getIntValue(ReadRef<String> stringRef) =>
+    isNotNull(stringRef) ? int.parse(stringRef.value, onError: (s) => 0) : 0;
+
+  static void setIntValue(WriteRef<String> writeRef, int newValue) {
+    writeRef.value = newValue.toString();
+  }
+
   Operation get increaseValue => makeOperation(() {
     CreateRecord counter = datastore.lookup(COUNTER_NAME);
     CreateRecord increaseby = datastore.lookup(INCREASEBY_NAME);
     assert (counter != null && increaseby != null);
-    counter.state.value = counter.state.value + increaseby.state.value;
+    setIntValue(counter.state, getIntValue(counter.state) + getIntValue(increaseby.state));
   });
 
-  ReadRef<String> get describeState => new ReactiveFunction<int, String>(
+  ReadRef<String> get describeState => new ReactiveFunction<String, String>(
       datastore.lookup(COUNTER_NAME).state, this,
-      (int counterValue) => 'The counter value is $counterValue');
+      (String counterValue) => 'The counter value is $counterValue');
 }

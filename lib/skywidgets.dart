@@ -86,6 +86,7 @@ abstract class SkyWidgets {
     // TODO: two-way binding
     return new Container(
       width: 300.0,
+      // TODO: update model.
       child: new Input(
         key: new GlobalKey(),
         initialValue: input.model.value
