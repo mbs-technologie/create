@@ -1,14 +1,14 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 
-library skywidgets;
+library skyapp;
+
+import 'package:sky/widgets.dart';
+import 'package:sky/theme/colors.dart' as colors;
 
 import 'elements.dart';
 import 'styles.dart';
 import 'views.dart';
 import 'skywidgets.dart';
-
-import 'package:sky/widgets.dart';
-import 'package:sky/theme/colors.dart' as colors;
 
 ThemeData _APP_THEME = new ThemeData(
   brightness: ThemeBrightness.light,

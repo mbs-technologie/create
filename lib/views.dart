@@ -66,10 +66,11 @@ class HeaderView extends View<ReadRef<String>> {
 /// An item (which can be rendered as a DrawerItem)
 class ItemView extends View<ReadRef<String>> {
   final ReadRef<IconId> icon;
+  final ReadRef<bool> selected;
   final ReadRef<Operation> action;
 
   // Do not specify the style here.
-  ItemView(ReadRef<String> itemText, this.icon, this.action): super(itemText, null);
+  ItemView(ReadRef<String> itemText, this.icon, this.selected, this.action): super(itemText, null);
 }
 
 /// A divider

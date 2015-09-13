@@ -2,13 +2,13 @@
 
 library skywidgets;
 
-import 'elements.dart';
-import 'styles.dart';
-import 'views.dart';
-
 import 'package:sky/widgets.dart';
 import 'package:sky/src/widgets/input.dart';
 import 'package:sky/src/widgets/popup_menu.dart';
+
+import 'elements.dart';
+import 'styles.dart';
+import 'views.dart';
 
 typedef Widget MenuBuilder();
 
@@ -115,6 +115,7 @@ abstract class SkyWidgets {
     return new DrawerItem(
       child: new Text(item.model.value, style: textStyleOf(item)),
       icon: item.icon.value != null ? item.icon.value.id : null,
+      selected: item.selected.value,
       onPressed: () {
         if (isNotNull(item.action)) {
           // We dismiss the drawer as a side effect of an item selection.

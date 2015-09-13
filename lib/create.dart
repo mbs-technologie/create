@@ -38,7 +38,7 @@ const STARTUP_MODE = SCHEMA_MODE;
 
 //enum Modules { Core, Meta, Demo }
 
-class CreateStore extends BaseZone {
+class CreateData extends BaseZone {
   // State
   final Ref<int> counter = new State<int>(68);
 
@@ -58,7 +58,7 @@ class CreateStore extends BaseZone {
 enum Type { STRING, INTEGER }
 
 class CreateApp extends BaseZone implements AppState {
-  final CreateStore datastore;
+  final CreateData datastore;
   final Ref<AppMode> appMode = new State<AppMode>(STARTUP_MODE);
   ReadRef<String> get appTitle => new ReactiveFunction<AppMode, String>(
       appMode, this, (AppMode mode) => 'Demo App \u{2022} ${mode.name}');
@@ -110,6 +110,7 @@ class CreateApp extends BaseZone implements AppState {
     items.add(new ItemView(
       new Constant<String>('Help & Feedback'),
       new Constant<IconId>(HELP_ICON),
+      new Constant<bool>(false),
       null
     ));
 
@@ -121,6 +122,7 @@ class CreateApp extends BaseZone implements AppState {
     return new ItemView(
       new Constant<String>(mode.name),
       new Constant<IconId>(mode.icon),
+      new Constant<bool>(appMode.value == mode),
       new Constant<Operation>(makeOperation(() { appMode.value = mode; }))
     );
   }

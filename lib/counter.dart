@@ -6,7 +6,7 @@ import 'elements.dart';
 import 'styles.dart';
 import 'views.dart';
 
-class CounterStore extends BaseZone {
+class CounterData extends BaseZone {
   // State
   final Ref<int> counter = new State<int>(68);
 
@@ -22,7 +22,7 @@ class CounterStore extends BaseZone {
 }
 
 class CounterApp extends BaseZone implements AppState {
-  final CounterStore datastore;
+  final CounterData datastore;
   final ReadRef<String> appTitle = new Constant<String>('Create!');
   final Ref<View> mainView = new State<View>();
 
@@ -51,17 +51,20 @@ class CounterApp extends BaseZone implements AppState {
         new ItemView(
           new Constant<String>('Increase by one'),
           new Constant<IconId>(EXPOSURE_PLUS_1_ICON),
+          new Constant<bool>(datastore.increaseBy.value == 1),
           new Constant<Operation>(increaseByOne)
         ),
         new ItemView(
           new Constant<String>('Increase by two'),
           new Constant<IconId>(EXPOSURE_PLUS_2_ICON),
+          new Constant<bool>(datastore.increaseBy.value == 2),
           new Constant<Operation>(increaseByTwo)
         ),
         new DividerView(),
         new ItemView(
           new Constant<String>('Help & Feedback'),
           new Constant<IconId>(HELP_ICON),
+          new Constant<bool>(false),
           null
         ),
       ])
