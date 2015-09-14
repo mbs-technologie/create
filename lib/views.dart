@@ -26,6 +26,11 @@ class TextInput extends View<Ref<String>> {
   TextInput(Ref<String> text, ReadRef<Style> style): super(text, style);
 }
 
+/// A boolean input, aka checkbox
+class CheckboxInput extends View<Ref<bool>> {
+  CheckboxInput(Ref<bool> state, [ReadRef<Style> style]): super(state, style);
+}
+
 /// A button view
 class ButtonView extends View<ReadRef<String>> {
   final ReadRef<Operation> action;

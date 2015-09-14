@@ -18,8 +18,8 @@ const AppMode SCHEMA_MODE = const AppMode("Schema", SETTINGS_SYSTEM_DAYDREAM_ICO
 const AppMode PARAMETERS_MODE = const AppMode("Parameters", SETTINGS_ICON);
 const AppMode OPERATIONS_MODE = const AppMode("Operations", CODE_ICON);
 const AppMode SERVICES_MODE = const AppMode("Services", EXTENSION_ICON);
-const AppMode VIEWS_MODE = const AppMode("Views", VIEW_QUILT_ICON);
 const AppMode STYLES_MODE = const AppMode("Styles", STYLE_ICON);
+const AppMode VIEWS_MODE = const AppMode("Views", VIEW_QUILT_ICON);
 const AppMode DATA_MODE = const AppMode("Data", CLOUD_ICON);
 const AppMode LAUNCH_MODE = const AppMode("Launch", LAUNCH_ICON);
 
@@ -29,8 +29,8 @@ List<AppMode> ALL_MODES = [
   PARAMETERS_MODE,
   OPERATIONS_MODE,
   SERVICES_MODE,
-  VIEWS_MODE,
   STYLES_MODE,
+  VIEWS_MODE,
   DATA_MODE,
   LAUNCH_MODE
 ];
@@ -60,6 +60,7 @@ class CreateApp extends BaseZone implements AppState {
   ReadRef<String> appTitle;
   ReadRef<View> mainView;
   ReadRef<Operation> addOperation;
+  Context viewContext;
 
   CreateApp(this.datastore) {
     appTitle = new ReactiveFunction<AppMode, String>(appMode, this,
@@ -69,13 +70,19 @@ class CreateApp extends BaseZone implements AppState {
   }
 
   View makeMainView(AppMode mode) {
-    Context context = this; // TODO: create subcontext
-    if (mode == LAUNCH_MODE) {
-      return counterView();
+    if (viewContext != null) {
+      viewContext.dispose();
+    }
+    viewContext = makeSubContext();
+
+    if (mode == MODULES_MODE) {
+      return modulesView(viewContext);
     } else if (mode == SCHEMA_MODE) {
-      return schemaView(context);
+      return schemaView(viewContext);
     } else if (mode == DATA_MODE) {
-      return dataView(context);
+      return dataView(viewContext);
+    } else if (mode == LAUNCH_MODE) {
+      return counterView();
     } else {
       return new LabelView(
         new Constant<String>('TODO: ${mode.name}'),
@@ -102,6 +109,35 @@ class CreateApp extends BaseZone implements AppState {
     return prefix + index.toString();
   }
 
+  View modulesView(Context context) {
+    return new ColumnView(new ImmutableList<View>([
+      modulesRowView("Dart Core"),
+      modulesRowView("Modular"),
+      modulesRowView("Flutter")
+    ]));
+  }
+
+  View modulesRowView(String name) {
+    return new RowView(new ImmutableList<View>([
+      new CheckboxInput(
+        new State<bool>(true)
+      ),
+      new LabelView(
+        new Constant<String>(name),
+        new Constant<Style>(TITLE_STYLE)
+      )
+    ]));
+  }
+
+  View schemaView(Context context) {
+    return new ColumnView(
+      new MappedList<CreateRecord, View>(
+        datastore.runQuery((record) => true, context),
+        schemaRowView
+      )
+    );
+  }
+
   View schemaRowView(CreateRecord record) {
     return new RowView(new ImmutableList<View>([
       new TextInput(
@@ -114,15 +150,6 @@ class CreateApp extends BaseZone implements AppState {
         displayTypeId
       )
     ]));
-  }
-
-  View schemaView(Context context) {
-    return new ColumnView(
-      new MappedList<CreateRecord, View>(
-        datastore.runQuery((record) => true, context),
-        schemaRowView
-      )
-    );
   }
 
   View dataRowView(CreateRecord record) {

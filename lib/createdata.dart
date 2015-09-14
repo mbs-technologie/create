@@ -40,7 +40,9 @@ class CreateData extends BaseZone {
 
   ReadList<CreateRecord> runQuery(QueryType query, Context context) {
     final LiveQuery liveQuery = new LiveQuery(query, this);
+    context.addResource(liveQuery);
     _liveQueries.add(liveQuery);
+    print("Added; ${_liveQueries.length} active queries.");
     return liveQuery.result;
   }
 
@@ -51,6 +53,7 @@ class CreateData extends BaseZone {
 
   void unregister(LiveQuery liveQuery) {
     _liveQueries.remove(liveQuery);
+    print("Removed; ${_liveQueries.length} active queries.");
   }
 }
 

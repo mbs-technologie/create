@@ -55,6 +55,8 @@ abstract class SkyWidgets {
     // TODO: use the visitor pattern here?
     if (view is LabelView) {
       return renderLabel(view);
+    } else if (view is CheckboxInput) {
+      return renderCheckboxInput(view, context);
     } else if (view is TextInput) {
       return renderTextInput(view, context);
     } else if (view is ButtonView) {
@@ -80,6 +82,14 @@ abstract class SkyWidgets {
 
   Text renderLabel(LabelView label) {
     return new Text(label.model.value, style: textStyleOf(label));
+  }
+
+  Widget renderCheckboxInput(CheckboxInput input, Context context) {
+    // TODO: two-way binding
+    return new Container(
+      child: new Checkbox(value: input.model.value),
+      padding: const EdgeDims.all(5.0)
+    );
   }
 
   Widget renderTextInput(TextInput input, Context context) {
