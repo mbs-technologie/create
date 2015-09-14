@@ -164,10 +164,28 @@ class Constant<T> extends ReadRef<T> with _BaseImmutable {
   Constant(this.value);
 }
 
-/// Stores the value of type T, triggering observers when it changes.
-abstract class _BaseState<T> implements ReadRef<T> {
-  T _value;
+/// Maintains the set of observers.
+abstract class _ObserverManager implements Observable {
   Set<Operation> _observers = new Set<Operation>();
+
+  @override void observe(Operation observer, Context context) {
+    _observers.add(observer);
+    // TODO: make this work correctly if the same observer is registered multiple times
+    context.addResource(new DisposeProcedure(() => _observers.remove(observer)));
+  }
+
+  /// Trigger observers--to be used by the subclasses of ObserverManager.
+  void _triggerObservers() {
+    // We create a copy to avoid concurrent modification exceptions
+    // from the observer code.
+    // TODO: once event loops are introduced, we can stop doing it.
+    _observers.toSet().forEach((observer) => observer.scheduleObserver());
+  }
+}
+
+/// Stores the value of type T, triggering observers when it changes.
+abstract class _BaseState<T> extends ReadRef<T> with _ObserverManager {
+  T _value;
 
   _BaseState([this._value]);
 
@@ -177,17 +195,8 @@ abstract class _BaseState<T> implements ReadRef<T> {
   void _setState(T newValue) {
     if (newValue != _value) {
       _value = newValue;
-      // We create a copy to avoid concurrent modification exceptions
-      // from the observer code.
-      // TODO: once event loops are introduced, we can stop doing it.
-      _observers.toSet().forEach((observer) => observer.scheduleObserver());
+      _triggerObservers();
     }
-  }
-
-  @override void observe(Operation observer, Context context) {
-    _observers.add(observer);
-    // TODO: make this work correctly if the same observer is registered multiple times
-    context.addResource(new DisposeProcedure(() => _observers.remove(observer)));
   }
 }
 
@@ -258,6 +267,22 @@ class MappedList<S, T> implements ReadList<T> {
 
   /// TODO: implement this efficiently.
   List<T> get elements => new List<T>.from(_source.elements.map(_function));
+}
+
+/// An list that can change state.
+class MutableList<E> extends ReadList<E> with _ObserverManager {
+  final List<E> elements;
+  State<int> size;
+
+  MutableList(this.elements) {
+    size = new State<int>(elements.length);
+  }
+
+  void add(E element) {
+    elements.add(element);
+    size.value = elements.length;
+    _triggerObservers();
+  }
 }
 
 /// Check whether a reference is not null and holds a non-null value.

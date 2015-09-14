@@ -67,19 +67,13 @@ class CreateRecord {
 String COUNTER_NAME = "counter";
 String INCREASEBY_NAME = "increaseby";
 
+typedef bool QueryType(CreateRecord);
+
 class CreateData extends BaseZone {
-  List<CreateRecord> _records = new List<CreateRecord>();
+  final List<CreateRecord> _records;
+  final Set<LiveQuery> _liveQueries = new Set<LiveQuery>();
 
-  CreateData() {
-    addAll([
-      new CreateRecord(COUNTER_NAME, INTEGER_TYPE, "68"),
-      new CreateRecord(INCREASEBY_NAME, INTEGER_TYPE, "1")
-    ]);
-  }
-
-  void addAll(List<CreateRecord> records) {
-    _records.addAll(records);
-  }
+  CreateData(this._records);
 
   CreateRecord lookup(String name) {
     // TODO: we should use an index here if we care about scaling,
@@ -87,8 +81,45 @@ class CreateData extends BaseZone {
     return _records.firstWhere((element) => (element.name.value == name), orElse: () => null);
   }
 
-  ReadList<CreateRecord> runQuery(bool query(CreateRecord), Context context) {
-    return new ImmutableList<CreateRecord>(new List<CreateRecord>.from(_records.where(query)));
+  ReadList<CreateRecord> runQuery(QueryType query, Context context) {
+    final LiveQuery liveQuery = new LiveQuery(query, this);
+    _liveQueries.add(liveQuery);
+    return liveQuery.result;
+  }
+
+  void add(CreateRecord record) {
+    _records.add(record);
+    _liveQueries.forEach((q) => q.newRecord(record));
+  }
+
+  void unregister(LiveQuery liveQuery) {
+    _liveQueries.remove(liveQuery);
+  }
+}
+
+List<CreateRecord> INITIAL_CREATE_DATA = [
+  new CreateRecord(COUNTER_NAME, INTEGER_TYPE, "68"),
+  new CreateRecord(INCREASEBY_NAME, INTEGER_TYPE, "1")
+];
+
+class LiveQuery implements Disposable {
+  MutableList<CreateRecord> result;
+  final QueryType query;
+  final CreateData datastore;
+
+  LiveQuery(this.query, this.datastore) {
+    result = new MutableList<CreateRecord>(
+        new List<CreateRecord>.from(datastore._records.where(query)));
+  }
+
+  void newRecord(CreateRecord record) {
+    if (query(record)) {
+      result.add(record); // This will trigger observers
+    }
+  }
+
+  void dispose() {
+    datastore.unregister(this);
   }
 }
 
@@ -123,8 +154,10 @@ class CreateApp extends BaseZone implements AppState {
   }
 
   Operation makeAddOperation(AppMode mode) {
-    if (mode == OPERATIONS_MODE) {
-      return makeOperation(() { appMode.value = LAUNCH_MODE; });
+    if (mode == SCHEMA_MODE) {
+      return makeOperation(() {
+        datastore.add(new CreateRecord("data", STRING_TYPE, ""));
+      });
     } else {
       return null;
     }
