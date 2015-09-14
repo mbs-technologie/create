@@ -1,8 +1,9 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 
-library create;
+library createapp;
 
 import 'elements.dart';
+import 'createdata.dart';
 import 'styles.dart';
 import 'views.dart';
 
@@ -38,14 +39,6 @@ const AppMode STARTUP_MODE = LAUNCH_MODE; //SCHEMA_MODE;
 
 //enum Modules { Core, Meta, Demo }
 
-class TypeId {
-  final String name;
-  const TypeId(this.name);
-}
-
-const TypeId STRING_TYPE = const TypeId("String");
-const TypeId INTEGER_TYPE = const TypeId("Integer");
-
 List<TypeId> PRIMITIVE_TYPES = [
   STRING_TYPE,
   INTEGER_TYPE
@@ -53,75 +46,13 @@ List<TypeId> PRIMITIVE_TYPES = [
 
 String displayTypeId(TypeId typeId) => typeId.name;
 
-class CreateRecord {
-  final Ref<String> name;
-  final Ref<TypeId> typeId;
-  final Ref<String> state;
-
-  CreateRecord(String name, TypeId typeId, String state):
-      name = new State<String>(name),
-      typeId = new State<TypeId>(typeId),
-      state = new State<String>(state);
-}
-
 String COUNTER_NAME = "counter";
 String INCREASEBY_NAME = "increaseby";
-
-typedef bool QueryType(CreateRecord);
-
-class CreateData extends BaseZone {
-  final List<CreateRecord> _records;
-  final Set<LiveQuery> _liveQueries = new Set<LiveQuery>();
-
-  CreateData(this._records);
-
-  CreateRecord lookup(String name) {
-    // TODO: we should use an index here if we care about scaling,
-    // but that would be somewhat complicated because names can be updated.
-    return _records.firstWhere((element) => (element.name.value == name), orElse: () => null);
-  }
-
-  ReadList<CreateRecord> runQuery(QueryType query, Context context) {
-    final LiveQuery liveQuery = new LiveQuery(query, this);
-    _liveQueries.add(liveQuery);
-    return liveQuery.result;
-  }
-
-  void add(CreateRecord record) {
-    _records.add(record);
-    _liveQueries.forEach((q) => q.newRecord(record));
-  }
-
-  void unregister(LiveQuery liveQuery) {
-    _liveQueries.remove(liveQuery);
-  }
-}
 
 List<CreateRecord> INITIAL_CREATE_DATA = [
   new CreateRecord(COUNTER_NAME, INTEGER_TYPE, "68"),
   new CreateRecord(INCREASEBY_NAME, INTEGER_TYPE, "1")
 ];
-
-class LiveQuery implements Disposable {
-  MutableList<CreateRecord> result;
-  final QueryType query;
-  final CreateData datastore;
-
-  LiveQuery(this.query, this.datastore) {
-    result = new MutableList<CreateRecord>(
-        new List<CreateRecord>.from(datastore._records.where(query)));
-  }
-
-  void newRecord(CreateRecord record) {
-    if (query(record)) {
-      result.add(record); // This will trigger observers
-    }
-  }
-
-  void dispose() {
-    datastore.unregister(this);
-  }
-}
 
 class CreateApp extends BaseZone implements AppState {
   final CreateData datastore;
@@ -156,11 +87,19 @@ class CreateApp extends BaseZone implements AppState {
   Operation makeAddOperation(AppMode mode) {
     if (mode == SCHEMA_MODE) {
       return makeOperation(() {
-        datastore.add(new CreateRecord("data", STRING_TYPE, ""));
+        datastore.add(new CreateRecord(newRecordName("data"), STRING_TYPE, ""));
       });
     } else {
       return null;
     }
+  }
+
+  String newRecordName(String prefix) {
+    int index = 0;
+    while (datastore.lookup(prefix + index.toString()) != null) {
+      ++index;
+    }
+    return prefix + index.toString();
   }
 
   View schemaRowView(CreateRecord record) {

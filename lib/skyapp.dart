@@ -102,10 +102,13 @@ class SkyApp extends SkyAppShim with SkyWidgets {
       );
   }
 
+  // Floating action button currently generates exceptions
+  bool USE_FLOATING_BUTTON = false;
+
   Widget _buildFloatingActionButton() {
     if (isNotNull(appState.addOperation)) {
       Operation addOperation = appState.addOperation.value;
-      if (false) {  // Floating action button currently generates exceptions
+      if (USE_FLOATING_BUTTON) {
         return new FloatingActionButton(
           child: new Icon(type: ADD_ICON.id, size: 24),
           backgroundColor: colors.RedAccent[200],
