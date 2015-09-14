@@ -50,8 +50,8 @@ String COUNTER_NAME = "counter";
 String INCREASEBY_NAME = "increaseby";
 
 List<CreateRecord> INITIAL_CREATE_DATA = [
-  new CreateRecord(COUNTER_NAME, INTEGER_TYPE, "68"),
-  new CreateRecord(INCREASEBY_NAME, INTEGER_TYPE, "1")
+  new CreateRecord(RecordType.DATA, COUNTER_NAME, INTEGER_TYPE, "68"),
+  new CreateRecord(RecordType.PARAMETER, INCREASEBY_NAME, INTEGER_TYPE, "1")
 ];
 
 class CreateApp extends BaseZone implements AppState {
@@ -94,7 +94,7 @@ class CreateApp extends BaseZone implements AppState {
   Operation makeAddOperation(AppMode mode) {
     if (mode == SCHEMA_MODE) {
       return makeOperation(() {
-        datastore.add(new CreateRecord(newRecordName("data"), STRING_TYPE, ""));
+        datastore.add(new CreateRecord(RecordType.DATA, newRecordName("data"), STRING_TYPE, ""));
       });
     } else {
       return null;
@@ -132,7 +132,7 @@ class CreateApp extends BaseZone implements AppState {
   View schemaView(Context context) {
     return new ColumnView(
       new MappedList<CreateRecord, View>(
-        datastore.runQuery((record) => true, context),
+        datastore.runQuery((record) => record.type == RecordType.DATA, context),
         schemaRowView
       )
     );
@@ -173,7 +173,7 @@ class CreateApp extends BaseZone implements AppState {
   View dataView(Context context) {
     return new ColumnView(
       new MappedList<CreateRecord, View>(
-        datastore.runQuery((record) => true, context),
+        datastore.runQuery((record) => record.type == RecordType.PARAMETER, context),
         dataRowView
       )
     );
