@@ -70,7 +70,7 @@ class SkyApp extends SkyAppShim with SkyWidgets {
       toolbar: _buildToolBar(),
       body: _buildMainCanvas(),
       snackBar: null,
-      floatingActionButton: null,
+      floatingActionButton: _buildFloatingActionButton(),
       drawer: drawer.value != null ? renderDrawer(drawer.value, viewZone) : null
     );
   }
@@ -100,6 +100,26 @@ class SkyApp extends SkyAppShim with SkyWidgets {
             onPressed: _handleShowMenu)
         ]
       );
+  }
+
+  Widget _buildFloatingActionButton() {
+    if (isNotNull(appState.addOperation)) {
+      Operation addOperation = appState.addOperation.value;
+      if (false) {  // Floating action button currently generates exceptions
+        return new FloatingActionButton(
+          child: new Icon(type: ADD_ICON.id, size: 24),
+          backgroundColor: colors.RedAccent[200],
+          onPressed: () => addOperation.scheduleAction()
+        );
+      } else {
+        return new RaisedButton(
+          child: new Icon(type: ADD_ICON.id, size: 24),
+          onPressed: () => addOperation.scheduleAction()
+        );
+      }
+    } else {
+      return null;
+    }
   }
 
   void _openDrawer() {

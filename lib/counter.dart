@@ -25,6 +25,7 @@ class CounterApp extends BaseZone implements AppState {
   final CounterData datastore;
   final ReadRef<String> appTitle = new Constant<String>('Create!');
   final Ref<View> mainView = new State<View>();
+  final ReadRef<Operation> addOperation = new Constant<Operation>(null);
 
   CounterApp(this.datastore) {
     mainView.value = new ColumnView(

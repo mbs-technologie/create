@@ -95,12 +95,16 @@ class CreateData extends BaseZone {
 class CreateApp extends BaseZone implements AppState {
   final CreateData datastore;
   final Ref<AppMode> appMode = new State<AppMode>(STARTUP_MODE);
-  ReadRef<String> get appTitle => new ReactiveFunction<AppMode, String>(
-      appMode, this, (AppMode mode) => 'Demo App \u{2022} ${mode.name}');
-  ReadRef<View> get mainView => new ReactiveFunction<AppMode, View>(
-      appMode, this, makeMainView);
+  ReadRef<String> appTitle;
+  ReadRef<View> mainView;
+  ReadRef<Operation> addOperation;
 
-  CreateApp(this.datastore);
+  CreateApp(this.datastore) {
+    appTitle = new ReactiveFunction<AppMode, String>(appMode, this,
+        (AppMode mode) => 'Demo App \u{2022} ${mode.name}');
+    mainView = new ReactiveFunction<AppMode, View>(appMode, this, makeMainView);
+    addOperation = new ReactiveFunction<AppMode, Operation>(appMode, this, makeAddOperation);
+  }
 
   View makeMainView(AppMode mode) {
     Context context = this; // TODO: create subcontext
@@ -115,6 +119,14 @@ class CreateApp extends BaseZone implements AppState {
         new Constant<String>('TODO: ${mode.name}'),
         new Constant<Style>(TITLE_STYLE)
       );
+    }
+  }
+
+  Operation makeAddOperation(AppMode mode) {
+    if (mode == OPERATIONS_MODE) {
+      return makeOperation(() { appMode.value = LAUNCH_MODE; });
+    } else {
+      return null;
     }
   }
 

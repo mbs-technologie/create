@@ -88,5 +88,6 @@ class DrawerView extends ContainerView {
 abstract class AppState implements Zone {
   ReadRef<String> get appTitle;
   ReadRef<View> get mainView;
+  ReadRef<Operation> get addOperation;
   DrawerView makeDrawer();
 }
