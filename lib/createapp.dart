@@ -50,6 +50,7 @@ String COUNTER_NAME = "counter";
 String INCREASEBY_NAME = "increaseby";
 
 List<CreateRecord> INITIAL_CREATE_DATA = [
+//  new CreateRecord(RecordType.PARAMETER, APPTITLE_NAME, STRING_TYPE, "Demo App"),
   new CreateRecord(RecordType.DATA, COUNTER_NAME, INTEGER_TYPE, "68"),
   new CreateRecord(RecordType.PARAMETER, INCREASEBY_NAME, INTEGER_TYPE, "1")
 ];
@@ -63,8 +64,10 @@ class CreateApp extends BaseZone implements AppState {
   Context viewContext;
 
   CreateApp(this.datastore) {
-    appTitle = new ReactiveFunction<AppMode, String>(appMode, this,
-        (AppMode mode) => 'Demo App \u{2022} ${mode.name}');
+    ReadRef<String> titleString = new Constant<String>("Demo App");
+    appTitle = new ReactiveFunction2<String, AppMode, String>(
+        titleString, appMode, this,
+        (String title, AppMode mode) => '$title \u{2022} ${mode.name}');
     mainView = new ReactiveFunction<AppMode, View>(appMode, this, makeMainView);
     addOperation = new ReactiveFunction<AppMode, Operation>(appMode, this, makeAddOperation);
   }
@@ -79,6 +82,8 @@ class CreateApp extends BaseZone implements AppState {
       return modulesView(viewContext);
     } else if (mode == SCHEMA_MODE) {
       return schemaView(viewContext);
+    } else if (mode == PARAMETERS_MODE) {
+      return parametersView(viewContext);
     } else if (mode == DATA_MODE) {
       return dataView(viewContext);
     } else if (mode == LAUNCH_MODE) {
@@ -94,7 +99,12 @@ class CreateApp extends BaseZone implements AppState {
   Operation makeAddOperation(AppMode mode) {
     if (mode == SCHEMA_MODE) {
       return makeOperation(() {
-        datastore.add(new CreateRecord(RecordType.DATA, newRecordName("data"), STRING_TYPE, ""));
+        datastore.add(new CreateRecord(RecordType.DATA, newRecordName("data"), STRING_TYPE, "?"));
+      });
+    } else if (mode == PARAMETERS_MODE) {
+      return makeOperation(() {
+        datastore.add(new CreateRecord(RecordType.PARAMETER, newRecordName("param"),
+            STRING_TYPE, "?"));
       });
     } else {
       return null;
@@ -148,6 +158,33 @@ class CreateApp extends BaseZone implements AppState {
         record.typeId,
         new ImmutableList<TypeId>(PRIMITIVE_TYPES),
         displayTypeId
+      )
+    ]));
+  }
+
+  View parametersView(Context context) {
+    return new ColumnView(
+      new MappedList<CreateRecord, View>(
+        datastore.runQuery((record) => record.type == RecordType.PARAMETER, context),
+        parametersRowView
+      )
+    );
+  }
+
+  View parametersRowView(CreateRecord record) {
+    return new RowView(new ImmutableList<View>([
+      new TextInput(
+        record.name,
+        new Constant<Style>(BODY2_STYLE)
+      ),
+      new SelectionInput<TypeId>(
+        record.typeId,
+        new ImmutableList<TypeId>(PRIMITIVE_TYPES),
+        displayTypeId
+      ),
+      new TextInput(
+        record.state,
+        new Constant<Style>(BODY2_STYLE)
       )
     ]));
   }

@@ -242,6 +242,27 @@ class ReactiveFunction<S, T> extends _BaseState<T> {
   }
 }
 
+/// A two-argument reactive function that combines values of S1 and S2 into a value of type T.
+class ReactiveFunction2<S1, S2, T> extends _BaseState<T> {
+  final ReadRef<S1> _source1;
+  final ReadRef<S2> _source2;
+  final Context _context;
+  final Function _function;
+
+  ReactiveFunction2(this._source1, this._source2, this._context, T function(S1 s1, S2 s2)):
+    _function = function {
+      Operation recomputeOp = _context.zone.makeOperation(_recompute);
+      _source1.observe(recomputeOp, _context);
+      _source2.observe(recomputeOp, _context);
+      // TODO: we should lazily compute the value when the priority increases.
+      _recompute();
+    }
+
+  void _recompute() {
+    _setState(_function(_source1.value, _source2.value));
+  }
+}
+
 /// An immutable list that implements ReadList interface.
 class ImmutableList<E> extends ReadList<E> with _BaseImmutable {
   final List<E> elements;
