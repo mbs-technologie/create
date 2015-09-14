@@ -25,13 +25,16 @@ abstract class SkyWidgets {
 
     Widget result = renderView(view, context);
 
-    if (view.model != null) {
-      view.model.observe(forceRefreshOp, view.cachedSubContext);
+    // TextComponent knows what it's doing, and handles updates itself.
+    if (!(result is TextComponent)) {
+      if (view.model != null) {
+        view.model.observe(forceRefreshOp, view.cachedSubContext);
+      }
+      if (view.style != null) {
+        view.style.observe(forceRefreshOp, view.cachedSubContext);
+      }
+      // TODO: observe icon for ItemView, etc.
     }
-    if (view.style != null) {
-      view.style.observe(forceRefreshOp, view.cachedSubContext);
-    }
-    // TODO: observe icon for ItemView, etc.
 
     return result;
   }
@@ -93,16 +96,7 @@ abstract class SkyWidgets {
   }
 
   Widget renderTextInput(TextInput input, Context context) {
-    // TODO: two-way binding
-    return new Container(
-      width: 300.0,
-      // TODO: update model.
-      child: new Input(
-        key: new GlobalKey(),
-        initialValue: input.model.value
-        //placeholder: "foo"
-      )
-    );
+    return new TextComponent(input, context);
   }
 
   Widget renderSelection(SelectionInput selection) {
@@ -180,6 +174,65 @@ TextStyle textStyleOf(View view) {
     return view.style.value.toTextStyle;
   } else {
     return null;
+  }
+}
+
+// TODO: Make better use of Sky widgets
+class TextComponent extends StatefulComponent {
+  TextInput input;
+  Context context;
+  bool editing;
+  GlobalKey inputKey;
+  String widgetText;
+  bool observing = false;
+
+  TextComponent(this.input, this.context): editing = false, inputKey = new GlobalKey();
+
+  void syncConstructorArguments(TextComponent source) {
+    this.input = source.input;
+    this.context = source.context;
+    this.editing = source.editing;
+    this.inputKey = source.inputKey;
+    this.widgetText = source.widgetText;
+  }
+
+  TextStyle get textStyle => textStyleOf(input);
+
+  Widget build() {
+    registerOberverIfNeeded();
+    return new Container(
+      width: 300.0,
+      child: new Row([
+        new IconButton(icon: MODE_EDIT_ICON.id, onPressed: _editPressed),
+        editing
+          ? new Input(key: inputKey, initialValue: input.model.value, onChanged : widgetChanged)
+          : new Text(input.model.value, style: textStyle)
+      ])
+    );
+  }
+
+  void registerOberverIfNeeded() {
+    if (!observing) {
+      input.model.observe(context.zone.makeOperation(modelChanged), context);
+      observing = true;
+    }
+  }
+
+  void modelChanged() {
+    if (input.model.value != widgetText) {
+      setState(() { });
+    }
+  }
+
+  void widgetChanged(String newValue) {
+    widgetText = newValue;
+    input.model.value = newValue;
+  }
+
+  void _editPressed() {
+    setState(() {
+      editing = !editing;
+    });
   }
 }
 

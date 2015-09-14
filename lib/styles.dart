@@ -40,6 +40,7 @@ const IconId EXTENSION_ICON = const IconId('action/extension');
 const IconId VIEW_QUILT_ICON = const IconId('action/view_quilt');
 const IconId SETTINGS_SYSTEM_DAYDREAM_ICON = const IconId('device/settings_system_daydream');
 const IconId WIDGETS_ICON = const IconId('device/widgets');
+const IconId MODE_EDIT_ICON = const IconId('editor/mode_edit');
 const IconId STYLE_ICON = const IconId('image/style');
 const IconId EXPOSURE_PLUS_1_ICON = const IconId('image/exposure_plus_1');
 const IconId EXPOSURE_PLUS_2_ICON = const IconId('image/exposure_plus_2');
