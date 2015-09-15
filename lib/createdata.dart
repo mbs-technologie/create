@@ -15,7 +15,7 @@ const TypeId INTEGER_TYPE = const TypeId("Integer");
 const TypeId TEMPLATE_TYPE = const TypeId("Template");
 const TypeId CODE_TYPE = const TypeId("Code");
 
-enum RecordType { DATA, PARAMETER, OPERATION }
+enum RecordType { DATA, PARAMETER, OPERATION, SERVICE }
 
 class CreateRecord extends Record {
   final RecordType type;
@@ -33,14 +33,20 @@ class CreateRecord extends Record {
 class CreateData extends Datastore {
   CreateData(List<CreateRecord> initialState): super(initialState);
 
+  ReadList<CreateRecord> getDataRecords(RecordType type, Context context) =>
+    runQuery((record) => record.type == type, context);
+
   ReadList<CreateRecord> getData(Context context) =>
-    runQuery((record) => record.type == RecordType.DATA, context);
+    getDataRecords(RecordType.DATA, context);
 
   ReadList<CreateRecord> getParameters(Context context) =>
-    runQuery((record) => record.type == RecordType.PARAMETER, context);
+    getDataRecords(RecordType.PARAMETER, context);
 
   ReadList<CreateRecord> getOperations(Context context) =>
-    runQuery((record) => record.type == RecordType.OPERATION, context);
+    getDataRecords(RecordType.OPERATION, context);
+
+  ReadList<CreateRecord> getServices(Context context) =>
+    getDataRecords(RecordType.SERVICE, context);
 
   String newRecordName(String prefix) {
     int index = 0;

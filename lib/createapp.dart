@@ -61,6 +61,7 @@ List<CreateRecord> INITIAL_CREATE_DATA = [
   new CreateRecord(RecordType.PARAMETER, COUNTERBUTTON_NAME, STRING_TYPE,
       'Increase the counter value'),
   new CreateRecord(RecordType.PARAMETER, INCREASEBY_NAME, INTEGER_TYPE, '1'),
+  new CreateRecord(RecordType.SERVICE, "today", STRING_TYPE, today()), // Hack for the demo
   new CreateRecord(RecordType.OPERATION, "describe", TEMPLATE_TYPE,
       'The counter value is \$counter'),
   new CreateRecord(RecordType.OPERATION, "increase", CODE_TYPE,
@@ -98,6 +99,8 @@ class CreateApp extends BaseZone implements AppState {
       return parametersView(viewContext);
     } else if (mode == OPERATIONS_MODE) {
       return operationsView(viewContext);
+    } else if (mode == SERVICES_MODE) {
+      return servicesView(viewContext);
     } else if (mode == DATA_MODE) {
       return dataView(viewContext);
     } else if (mode == LAUNCH_MODE) {
@@ -219,21 +222,27 @@ class CreateApp extends BaseZone implements AppState {
     ]));
   }
 
-  View dataRowView(CreateRecord record) {
+  View servicesView(Context context) {
+    return new ColumnView(
+      new MappedList<CreateRecord, View>(datastore.getServices(context), servicesRowView)
+    );
+  }
+
+  View typeView(ReadRef<TypeId> typeId) {
+    return new LabelView(
+      // TODO: reactive function
+      new Constant<String>('\u{2192} ' + typeId.value.name),
+      new Constant<Style>(SUBHEAD_STYLE)
+    );
+  }
+
+  View servicesRowView(CreateRecord record) {
     return new RowView(new ImmutableList<View>([
       new LabelView(
         record.name,
-        new Constant<Style>(BODY1_STYLE)
+        new Constant<Style>(SUBHEAD_STYLE)
       ),
-      new LabelView(
-        new Constant<String>(record.typeId.value.name),
-        new Constant<Style>(BODY1_STYLE)
-      ),
-      new TextInput(
-        record.state,
-        new Constant<Style>(BODY2_STYLE)
-        // TODO: switch to the number keyboard
-      ),
+      typeView(record.typeId)
     ]));
   }
 
@@ -241,6 +250,21 @@ class CreateApp extends BaseZone implements AppState {
     return new ColumnView(
       new MappedList<CreateRecord, View>(datastore.getData(context), dataRowView)
     );
+  }
+
+  View dataRowView(CreateRecord record) {
+    return new RowView(new ImmutableList<View>([
+      new LabelView(
+        record.name,
+        new Constant<Style>(BODY1_STYLE)
+      ),
+      typeView(record.typeId),
+      new TextInput(
+        record.state,
+        new Constant<Style>(BODY2_STYLE)
+        // TODO: switch to the number keyboard
+      ),
+    ]));
   }
 
   @override DrawerView makeDrawer() {
@@ -299,4 +323,9 @@ class CreateApp extends BaseZone implements AppState {
   ReadRef<String> get describeState => new ReactiveFunction<String, String>(
       datastore.lookup(COUNTER_NAME).state, this,
       (String counterValue) => 'The counter value is $counterValue');
+}
+
+String today() {
+  DateTime date = new DateTime.now().toLocal();
+  return date.month.toString() + '/' + date.day.toString() + '/' + date.year.toString();
 }

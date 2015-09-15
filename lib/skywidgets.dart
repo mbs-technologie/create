@@ -83,8 +83,11 @@ abstract class SkyWidgets {
     throw new UnimplementedError("Unknown view: " + view.runtimeType.toString());
   }
 
-  Text renderLabel(LabelView label) {
-    return new Text(label.model.value, style: textStyleOf(label));
+  Widget renderLabel(LabelView label) {
+    return new Container(
+      child: new Text(label.model.value, style: textStyleOf(label)),
+      padding: const EdgeDims.symmetric(horizontal: 5.0)
+    );
   }
 
   Widget renderCheckboxInput(CheckboxInput input, Context context) {
