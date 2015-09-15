@@ -26,7 +26,7 @@ class Datastore<R extends Record> extends BaseZone {
     final _LiveQuery<R> liveQuery = new _LiveQuery<R>(query, this);
     context.addResource(liveQuery);
     _liveQueries.add(liveQuery);
-    print("Datastore: query added; ${_liveQueries.length} active queries.");
+    print('Datastore: query added; ${_liveQueries.length} active queries.');
     return liveQuery._result;
   }
 
@@ -37,7 +37,7 @@ class Datastore<R extends Record> extends BaseZone {
 
   void unregister(_LiveQuery liveQuery) {
     _liveQueries.remove(liveQuery);
-    print("Datastore: query removed; ${_liveQueries.length} active queries.");
+    print('Datastore: query removed; ${_liveQueries.length} active queries.');
   }
 }
 

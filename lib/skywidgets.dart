@@ -80,7 +80,7 @@ abstract class SkyWidgets {
       return renderDrawer(view, context);
     }
 
-    throw new UnimplementedError("Unknown view: " + view.runtimeType.toString());
+    throw new UnimplementedError('Unknown view: ${view.runtimeType}');
   }
 
   Widget renderLabel(LabelView label) {

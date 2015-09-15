@@ -37,8 +37,6 @@ List<AppMode> ALL_MODES = [
 
 const AppMode STARTUP_MODE = LAUNCH_MODE; //SCHEMA_MODE;
 
-//enum Modules { Core, Meta, Demo }
-
 List<TypeId> PRIMITIVE_TYPES = [
   STRING_TYPE,
   INTEGER_TYPE
@@ -63,7 +61,14 @@ List<double> FONT_SIZES = [
   112.0,
 ];
 
+List<ViewId> VIEW_TYPES = [
+  LABEL_VIEW,
+  BUTTON_VIEW,
+  COLUMN_VIEW
+];
+
 String displayTypeId(TypeId typeId) => typeId.name;
+String displayViewId(ViewId viewId) => viewId.name;
 String displayToString(object) => object != null ? object.toString() : '<default>';
 
 String COUNTER_NAME = 'counter';
@@ -81,7 +86,8 @@ List<CreateRecord> INITIAL_CREATE_DATA = [
       'The counter value is \$counter'),
   new DataRecord(RecordType.OPERATION, 'increase', CODE_TYPE, 'counter += increaseby'),
   new StyleRecord('largefont', 32.0),
-  new StyleRecord('bigred', 24.0)
+  new StyleRecord('bigred', 24.0),
+  new ViewRecord('labelview')
 ];
 
 class CreateApp extends BaseZone implements AppState {
@@ -119,6 +125,8 @@ class CreateApp extends BaseZone implements AppState {
       return servicesView(viewContext);
     } else if (mode == STYLES_MODE) {
       return stylesView(viewContext);
+    } else if (mode == VIEWS_MODE) {
+      return viewsView(viewContext);
     } else if (mode == DATA_MODE) {
       return dataView(viewContext);
     } else if (mode == LAUNCH_MODE) {
@@ -150,6 +158,10 @@ class CreateApp extends BaseZone implements AppState {
     } else if (mode == STYLES_MODE) {
       return makeOperation(() {
         datastore.add(new StyleRecord(datastore.newRecordName('style'), null));
+      });
+    } else if (mode == VIEWS_MODE) {
+      return makeOperation(() {
+        datastore.add(new ViewRecord(datastore.newRecordName('view')));
       });
     } else {
       return null;
@@ -281,12 +293,43 @@ class CreateApp extends BaseZone implements AppState {
         new Constant<Style>(BODY2_STYLE)
       ),
       new LabelView(
-        new Constant<String>("Font:"),
+        new Constant<String>('Font:'),
         new Constant<Style>(BODY2_STYLE)
       ),
       new SelectionInput<double>(
         record.fontSize,
         new ImmutableList<double>(FONT_SIZES),
+        displayToString
+      )
+    ]));
+  }
+
+  View viewsView(Context context) {
+    return new ColumnView(
+      new MappedList<ViewRecord, View>(datastore.getViews(context),
+          (view) => viewsRowView(view, context))
+    );
+  }
+
+  View viewsRowView(ViewRecord record, Context context) {
+    return new RowView(new ImmutableList<View>([
+      new TextInput(
+        record.name,
+        new Constant<Style>(BODY2_STYLE)
+      ),
+      new SelectionInput<ViewId>(
+        record.viewId,
+        new ImmutableList<ViewId>(VIEW_TYPES),
+        displayViewId
+      ),
+      new SelectionInput<StyleRecord>(
+        record.style,
+        datastore.getStyles(context),
+        displayToString
+      ),
+      new SelectionInput<DataRecord>(
+        record.content,
+        datastore.getContentOptions(context),
         displayToString
       )
     ]));

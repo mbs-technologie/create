@@ -5,21 +5,22 @@ library createdata;
 import 'elements.dart';
 import 'datastore.dart';
 
+abstract class CreateRecord implements Record {
+  Ref<String> get name;
+  String toString() => name.value;
+}
+
+enum RecordType { DATA, PARAMETER, OPERATION, SERVICE }
+
 class TypeId {
   final String name;
   const TypeId(this.name);
 }
 
-const TypeId STRING_TYPE = const TypeId("String");
-const TypeId INTEGER_TYPE = const TypeId("Integer");
-const TypeId TEMPLATE_TYPE = const TypeId("Template");
-const TypeId CODE_TYPE = const TypeId("Code");
-
-enum RecordType { DATA, PARAMETER, OPERATION, SERVICE }
-
-abstract class CreateRecord implements Record {
-  Ref<String> get name;
-}
+const TypeId STRING_TYPE = const TypeId('String');
+const TypeId INTEGER_TYPE = const TypeId('Integer');
+const TypeId TEMPLATE_TYPE = const TypeId('Template');
+const TypeId CODE_TYPE = const TypeId('Code');
 
 class DataRecord extends CreateRecord {
   final RecordType type;
@@ -40,6 +41,28 @@ class StyleRecord extends CreateRecord {
   StyleRecord(String name, double fontSize):
       name = new State<String>(name),
       fontSize = new State<double>(fontSize);
+}
+
+class ViewId {
+  final String name;
+  const ViewId(this.name);
+}
+
+const ViewId LABEL_VIEW = const ViewId('Label');
+const ViewId BUTTON_VIEW = const ViewId('Button');
+const ViewId COLUMN_VIEW = const ViewId('Column');
+
+class ViewRecord extends CreateRecord {
+  final Ref<String> name;
+  final Ref<ViewId> viewId;
+  final Ref<StyleRecord> style;
+  final Ref<DataRecord> content;
+
+  ViewRecord(String name):
+      name = new State<String>(name),
+      viewId = new State<ViewId>(LABEL_VIEW),
+      style = new State<StyleRecord>(null),
+      content = new State<DataRecord>(null);
 }
 
 // TODO: make the datastore a generic type.
@@ -63,6 +86,13 @@ class CreateData extends Datastore {
 
   ReadList<StyleRecord> getStyles(Context context) =>
     runQuery((record) => record is StyleRecord, context);
+
+  ReadList<ViewRecord> getViews(Context context) =>
+    runQuery((record) => record is ViewRecord, context);
+
+  ReadList<DataRecord> getContentOptions(Context context) =>
+    runQuery((record) => record is DataRecord &&
+        (record.typeId.value == STRING_TYPE || record.typeId.value == TEMPLATE_TYPE), context);
 
   String newRecordName(String prefix) {
     int index = 0;
