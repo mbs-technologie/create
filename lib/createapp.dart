@@ -46,13 +46,16 @@ List<TypeId> PRIMITIVE_TYPES = [
 
 String displayTypeId(TypeId typeId) => typeId.name;
 
-String COUNTER_NAME = "counter";
-String INCREASEBY_NAME = "increaseby";
+String COUNTER_NAME = 'counter';
+String COUNTERBUTTON_NAME = 'counterbutton';
+String INCREASEBY_NAME = 'increaseby';
 
 List<CreateRecord> INITIAL_CREATE_DATA = [
-//  new CreateRecord(RecordType.PARAMETER, APPTITLE_NAME, STRING_TYPE, "Demo App"),
-  new CreateRecord(RecordType.DATA, COUNTER_NAME, INTEGER_TYPE, "68"),
-  new CreateRecord(RecordType.PARAMETER, INCREASEBY_NAME, INTEGER_TYPE, "1")
+//  new CreateRecord(RecordType.PARAMETER, APPTITLE_NAME, STRING_TYPE, 'Demo App'),
+  new CreateRecord(RecordType.DATA, COUNTER_NAME, INTEGER_TYPE, '68'),
+  new CreateRecord(RecordType.PARAMETER, COUNTERBUTTON_NAME, STRING_TYPE,
+      'Increase the counter value'),
+  new CreateRecord(RecordType.PARAMETER, INCREASEBY_NAME, INTEGER_TYPE, '1')
 ];
 
 class CreateApp extends BaseZone implements AppState {
@@ -64,7 +67,7 @@ class CreateApp extends BaseZone implements AppState {
   Context viewContext;
 
   CreateApp(this.datastore) {
-    ReadRef<String> titleString = new Constant<String>("Demo App");
+    ReadRef<String> titleString = new Constant<String>('Demo App');
     appTitle = new ReactiveFunction2<String, AppMode, String>(
         titleString, appMode, this,
         (String title, AppMode mode) => '$title \u{2022} ${mode.name}');
@@ -99,12 +102,12 @@ class CreateApp extends BaseZone implements AppState {
   Operation makeAddOperation(AppMode mode) {
     if (mode == SCHEMA_MODE) {
       return makeOperation(() {
-        datastore.add(new CreateRecord(RecordType.DATA, newRecordName("data"), STRING_TYPE, "?"));
+        datastore.add(new CreateRecord(RecordType.DATA, newRecordName('data'), STRING_TYPE, '?'));
       });
     } else if (mode == PARAMETERS_MODE) {
       return makeOperation(() {
-        datastore.add(new CreateRecord(RecordType.PARAMETER, newRecordName("param"),
-            STRING_TYPE, "?"));
+        datastore.add(new CreateRecord(RecordType.PARAMETER, newRecordName('param'),
+            STRING_TYPE, '?'));
       });
     } else {
       return null;
@@ -121,9 +124,9 @@ class CreateApp extends BaseZone implements AppState {
 
   View modulesView(Context context) {
     return new ColumnView(new ImmutableList<View>([
-      modulesRowView("Dart Core"),
-      modulesRowView("Modular"),
-      modulesRowView("Flutter")
+      modulesRowView('Dart Core'),
+      modulesRowView('Modular'),
+      modulesRowView('Flutter')
     ]));
   }
 
@@ -247,7 +250,7 @@ class CreateApp extends BaseZone implements AppState {
           new Constant<Style>(BODY1_STYLE)
         ),
         new ButtonView(
-          new Constant<String>('Increase the counter value'),
+          datastore.lookup(COUNTERBUTTON_NAME).state,
           new Constant<Style>(BUTTON_STYLE),
           new Constant<Operation>(increaseValue)
         )
