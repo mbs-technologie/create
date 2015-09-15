@@ -44,6 +44,11 @@ List<TypeId> PRIMITIVE_TYPES = [
   INTEGER_TYPE
 ];
 
+List<TypeId> OPERATION_TYPES = [
+  TEMPLATE_TYPE,
+  CODE_TYPE
+];
+
 String displayTypeId(TypeId typeId) => typeId.name;
 
 String COUNTER_NAME = 'counter';
@@ -55,7 +60,11 @@ List<CreateRecord> INITIAL_CREATE_DATA = [
   new CreateRecord(RecordType.DATA, COUNTER_NAME, INTEGER_TYPE, '68'),
   new CreateRecord(RecordType.PARAMETER, COUNTERBUTTON_NAME, STRING_TYPE,
       'Increase the counter value'),
-  new CreateRecord(RecordType.PARAMETER, INCREASEBY_NAME, INTEGER_TYPE, '1')
+  new CreateRecord(RecordType.PARAMETER, INCREASEBY_NAME, INTEGER_TYPE, '1'),
+  new CreateRecord(RecordType.OPERATION, "describe", TEMPLATE_TYPE,
+      'The counter value is \$counter'),
+  new CreateRecord(RecordType.OPERATION, "increase", CODE_TYPE,
+      'counter += increaseby'),
 ];
 
 class CreateApp extends BaseZone implements AppState {
@@ -87,6 +96,8 @@ class CreateApp extends BaseZone implements AppState {
       return schemaView(viewContext);
     } else if (mode == PARAMETERS_MODE) {
       return parametersView(viewContext);
+    } else if (mode == OPERATIONS_MODE) {
+      return operationsView(viewContext);
     } else if (mode == DATA_MODE) {
       return dataView(viewContext);
     } else if (mode == LAUNCH_MODE) {
@@ -102,24 +113,22 @@ class CreateApp extends BaseZone implements AppState {
   Operation makeAddOperation(AppMode mode) {
     if (mode == SCHEMA_MODE) {
       return makeOperation(() {
-        datastore.add(new CreateRecord(RecordType.DATA, newRecordName('data'), STRING_TYPE, '?'));
+        datastore.add(new CreateRecord(RecordType.DATA, datastore.newRecordName('data'),
+            STRING_TYPE, '?'));
       });
     } else if (mode == PARAMETERS_MODE) {
       return makeOperation(() {
-        datastore.add(new CreateRecord(RecordType.PARAMETER, newRecordName('param'),
+        datastore.add(new CreateRecord(RecordType.PARAMETER, datastore.newRecordName('param'),
             STRING_TYPE, '?'));
+      });
+    } else if (mode == OPERATIONS_MODE) {
+      return makeOperation(() {
+        datastore.add(new CreateRecord(RecordType.OPERATION, datastore.newRecordName('op'),
+            TEMPLATE_TYPE, 'foo'));
       });
     } else {
       return null;
     }
-  }
-
-  String newRecordName(String prefix) {
-    int index = 0;
-    while (datastore.lookup(prefix + index.toString()) != null) {
-      ++index;
-    }
-    return prefix + index.toString();
   }
 
   View modulesView(Context context) {
@@ -144,10 +153,7 @@ class CreateApp extends BaseZone implements AppState {
 
   View schemaView(Context context) {
     return new ColumnView(
-      new MappedList<CreateRecord, View>(
-        datastore.runQuery((record) => record.type == RecordType.DATA, context),
-        schemaRowView
-      )
+      new MappedList<CreateRecord, View>(datastore.getData(context), schemaRowView)
     );
   }
 
@@ -167,10 +173,7 @@ class CreateApp extends BaseZone implements AppState {
 
   View parametersView(Context context) {
     return new ColumnView(
-      new MappedList<CreateRecord, View>(
-        datastore.runQuery((record) => record.type == RecordType.PARAMETER, context),
-        parametersRowView
-      )
+      new MappedList<CreateRecord, View>(datastore.getParameters(context), parametersRowView)
     );
   }
 
@@ -183,6 +186,30 @@ class CreateApp extends BaseZone implements AppState {
       new SelectionInput<TypeId>(
         record.typeId,
         new ImmutableList<TypeId>(PRIMITIVE_TYPES),
+        displayTypeId
+      ),
+      new TextInput(
+        record.state,
+        new Constant<Style>(BODY2_STYLE)
+      )
+    ]));
+  }
+
+  View operationsView(Context context) {
+    return new ColumnView(
+      new MappedList<CreateRecord, View>(datastore.getOperations(context), operationsRowView)
+    );
+  }
+
+  View operationsRowView(CreateRecord record) {
+    return new RowView(new ImmutableList<View>([
+      new TextInput(
+        record.name,
+        new Constant<Style>(BODY2_STYLE)
+      ),
+      new SelectionInput<TypeId>(
+        record.typeId,
+        new ImmutableList<TypeId>(OPERATION_TYPES),
         displayTypeId
       ),
       new TextInput(
@@ -212,10 +239,7 @@ class CreateApp extends BaseZone implements AppState {
 
   View dataView(Context context) {
     return new ColumnView(
-      new MappedList<CreateRecord, View>(
-        datastore.runQuery((record) => record.type == RecordType.PARAMETER, context),
-        dataRowView
-      )
+      new MappedList<CreateRecord, View>(datastore.getData(context), dataRowView)
     );
   }
 
