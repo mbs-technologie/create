@@ -13,15 +13,15 @@ class AppMode {
   const AppMode(this.name, this.icon);
 }
 
-const AppMode MODULES_MODE = const AppMode("Modules", WIDGETS_ICON);
-const AppMode SCHEMA_MODE = const AppMode("Schema", SETTINGS_SYSTEM_DAYDREAM_ICON);
-const AppMode PARAMETERS_MODE = const AppMode("Parameters", SETTINGS_ICON);
-const AppMode OPERATIONS_MODE = const AppMode("Operations", CODE_ICON);
-const AppMode SERVICES_MODE = const AppMode("Services", EXTENSION_ICON);
-const AppMode STYLES_MODE = const AppMode("Styles", STYLE_ICON);
-const AppMode VIEWS_MODE = const AppMode("Views", VIEW_QUILT_ICON);
-const AppMode DATA_MODE = const AppMode("Data", CLOUD_ICON);
-const AppMode LAUNCH_MODE = const AppMode("Launch", LAUNCH_ICON);
+const AppMode MODULES_MODE = const AppMode('Modules', WIDGETS_ICON);
+const AppMode SCHEMA_MODE = const AppMode('Schema', SETTINGS_SYSTEM_DAYDREAM_ICON);
+const AppMode PARAMETERS_MODE = const AppMode('Parameters', SETTINGS_ICON);
+const AppMode OPERATIONS_MODE = const AppMode('Operations', CODE_ICON);
+const AppMode SERVICES_MODE = const AppMode('Services', EXTENSION_ICON);
+const AppMode STYLES_MODE = const AppMode('Styles', STYLE_ICON);
+const AppMode VIEWS_MODE = const AppMode('Views', VIEW_QUILT_ICON);
+const AppMode DATA_MODE = const AppMode('Data', CLOUD_ICON);
+const AppMode LAUNCH_MODE = const AppMode('Launch', LAUNCH_ICON);
 
 List<AppMode> ALL_MODES = [
   MODULES_MODE,
@@ -49,23 +49,39 @@ List<TypeId> OPERATION_TYPES = [
   CODE_TYPE
 ];
 
+List<double> FONT_SIZES = [
+  null,
+  12.0,
+  14.0,
+  16.0,
+  20.0,
+  24.0,
+  32.0,
+  40.0,
+  48.0,
+  56.0,
+  112.0,
+];
+
 String displayTypeId(TypeId typeId) => typeId.name;
+String displayToString(object) => object != null ? object.toString() : '<default>';
 
 String COUNTER_NAME = 'counter';
 String COUNTERBUTTON_NAME = 'counterbutton';
 String INCREASEBY_NAME = 'increaseby';
 
 List<CreateRecord> INITIAL_CREATE_DATA = [
-//  new CreateRecord(RecordType.PARAMETER, APPTITLE_NAME, STRING_TYPE, 'Demo App'),
-  new CreateRecord(RecordType.DATA, COUNTER_NAME, INTEGER_TYPE, '68'),
-  new CreateRecord(RecordType.PARAMETER, COUNTERBUTTON_NAME, STRING_TYPE,
+//  new DataRecord(RecordType.PARAMETER, APPTITLE_NAME, STRING_TYPE, 'Demo App'),
+  new DataRecord(RecordType.DATA, COUNTER_NAME, INTEGER_TYPE, '68'),
+  new DataRecord(RecordType.PARAMETER, COUNTERBUTTON_NAME, STRING_TYPE,
       'Increase the counter value'),
-  new CreateRecord(RecordType.PARAMETER, INCREASEBY_NAME, INTEGER_TYPE, '1'),
-  new CreateRecord(RecordType.SERVICE, "today", STRING_TYPE, today()), // Hack for the demo
-  new CreateRecord(RecordType.OPERATION, "describe", TEMPLATE_TYPE,
+  new DataRecord(RecordType.PARAMETER, INCREASEBY_NAME, INTEGER_TYPE, '1'),
+  new DataRecord(RecordType.SERVICE, 'today', STRING_TYPE, today()), // Hack for the demo
+  new DataRecord(RecordType.OPERATION, 'describe', TEMPLATE_TYPE,
       'The counter value is \$counter'),
-  new CreateRecord(RecordType.OPERATION, "increase", CODE_TYPE,
-      'counter += increaseby'),
+  new DataRecord(RecordType.OPERATION, 'increase', CODE_TYPE, 'counter += increaseby'),
+  new StyleRecord('largefont', 32.0),
+  new StyleRecord('bigred', 24.0)
 ];
 
 class CreateApp extends BaseZone implements AppState {
@@ -101,6 +117,8 @@ class CreateApp extends BaseZone implements AppState {
       return operationsView(viewContext);
     } else if (mode == SERVICES_MODE) {
       return servicesView(viewContext);
+    } else if (mode == STYLES_MODE) {
+      return stylesView(viewContext);
     } else if (mode == DATA_MODE) {
       return dataView(viewContext);
     } else if (mode == LAUNCH_MODE) {
@@ -116,18 +134,22 @@ class CreateApp extends BaseZone implements AppState {
   Operation makeAddOperation(AppMode mode) {
     if (mode == SCHEMA_MODE) {
       return makeOperation(() {
-        datastore.add(new CreateRecord(RecordType.DATA, datastore.newRecordName('data'),
+        datastore.add(new DataRecord(RecordType.DATA, datastore.newRecordName('data'),
             STRING_TYPE, '?'));
       });
     } else if (mode == PARAMETERS_MODE) {
       return makeOperation(() {
-        datastore.add(new CreateRecord(RecordType.PARAMETER, datastore.newRecordName('param'),
+        datastore.add(new DataRecord(RecordType.PARAMETER, datastore.newRecordName('param'),
             STRING_TYPE, '?'));
       });
     } else if (mode == OPERATIONS_MODE) {
       return makeOperation(() {
-        datastore.add(new CreateRecord(RecordType.OPERATION, datastore.newRecordName('op'),
+        datastore.add(new DataRecord(RecordType.OPERATION, datastore.newRecordName('op'),
             TEMPLATE_TYPE, 'foo'));
+      });
+    } else if (mode == STYLES_MODE) {
+      return makeOperation(() {
+        datastore.add(new StyleRecord(datastore.newRecordName('style'), null));
       });
     } else {
       return null;
@@ -156,11 +178,11 @@ class CreateApp extends BaseZone implements AppState {
 
   View schemaView(Context context) {
     return new ColumnView(
-      new MappedList<CreateRecord, View>(datastore.getData(context), schemaRowView)
+      new MappedList<DataRecord, View>(datastore.getData(context), schemaRowView)
     );
   }
 
-  View schemaRowView(CreateRecord record) {
+  View schemaRowView(DataRecord record) {
     return new RowView(new ImmutableList<View>([
       new TextInput(
         record.name,
@@ -176,11 +198,11 @@ class CreateApp extends BaseZone implements AppState {
 
   View parametersView(Context context) {
     return new ColumnView(
-      new MappedList<CreateRecord, View>(datastore.getParameters(context), parametersRowView)
+      new MappedList<DataRecord, View>(datastore.getParameters(context), parametersRowView)
     );
   }
 
-  View parametersRowView(CreateRecord record) {
+  View parametersRowView(DataRecord record) {
     return new RowView(new ImmutableList<View>([
       new TextInput(
         record.name,
@@ -200,11 +222,11 @@ class CreateApp extends BaseZone implements AppState {
 
   View operationsView(Context context) {
     return new ColumnView(
-      new MappedList<CreateRecord, View>(datastore.getOperations(context), operationsRowView)
+      new MappedList<DataRecord, View>(datastore.getOperations(context), operationsRowView)
     );
   }
 
-  View operationsRowView(CreateRecord record) {
+  View operationsRowView(DataRecord record) {
     return new RowView(new ImmutableList<View>([
       new TextInput(
         record.name,
@@ -224,7 +246,7 @@ class CreateApp extends BaseZone implements AppState {
 
   View servicesView(Context context) {
     return new ColumnView(
-      new MappedList<CreateRecord, View>(datastore.getServices(context), servicesRowView)
+      new MappedList<DataRecord, View>(datastore.getServices(context), servicesRowView)
     );
   }
 
@@ -236,7 +258,7 @@ class CreateApp extends BaseZone implements AppState {
     );
   }
 
-  View servicesRowView(CreateRecord record) {
+  View servicesRowView(DataRecord record) {
     return new RowView(new ImmutableList<View>([
       new LabelView(
         record.name,
@@ -246,13 +268,37 @@ class CreateApp extends BaseZone implements AppState {
     ]));
   }
 
-  View dataView(Context context) {
+  View stylesView(Context context) {
     return new ColumnView(
-      new MappedList<CreateRecord, View>(datastore.getData(context), dataRowView)
+      new MappedList<StyleRecord, View>(datastore.getStyles(context), stylesRowView)
     );
   }
 
-  View dataRowView(CreateRecord record) {
+  View stylesRowView(StyleRecord record) {
+    return new RowView(new ImmutableList<View>([
+      new TextInput(
+        record.name,
+        new Constant<Style>(BODY2_STYLE)
+      ),
+      new LabelView(
+        new Constant<String>("Font:"),
+        new Constant<Style>(BODY2_STYLE)
+      ),
+      new SelectionInput<double>(
+        record.fontSize,
+        new ImmutableList<double>(FONT_SIZES),
+        displayToString
+      )
+    ]));
+  }
+
+  View dataView(Context context) {
+    return new ColumnView(
+      new MappedList<DataRecord, View>(datastore.getData(context), dataRowView)
+    );
+  }
+
+  View dataRowView(DataRecord record) {
     return new RowView(new ImmutableList<View>([
       new LabelView(
         record.name,
@@ -314,8 +360,8 @@ class CreateApp extends BaseZone implements AppState {
   }
 
   Operation get increaseValue => makeOperation(() {
-    CreateRecord counter = datastore.lookup(COUNTER_NAME);
-    CreateRecord increaseby = datastore.lookup(INCREASEBY_NAME);
+    DataRecord counter = datastore.lookup(COUNTER_NAME);
+    DataRecord increaseby = datastore.lookup(INCREASEBY_NAME);
     assert (counter != null && increaseby != null);
     setIntValue(counter.state, getIntValue(counter.state) + getIntValue(increaseby.state));
   });

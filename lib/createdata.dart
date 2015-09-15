@@ -17,36 +17,52 @@ const TypeId CODE_TYPE = const TypeId("Code");
 
 enum RecordType { DATA, PARAMETER, OPERATION, SERVICE }
 
-class CreateRecord extends Record {
+abstract class CreateRecord implements Record {
+  Ref<String> get name;
+}
+
+class DataRecord extends CreateRecord {
   final RecordType type;
   final Ref<String> name;
   final Ref<TypeId> typeId;
   final Ref<String> state;
 
-  CreateRecord(this.type, String name, TypeId typeId, String state):
+  DataRecord(this.type, String name, TypeId typeId, String state):
       name = new State<String>(name),
       typeId = new State<TypeId>(typeId),
       state = new State<String>(state);
+}
+
+class StyleRecord extends CreateRecord {
+  final Ref<String> name;
+  final Ref<double> fontSize;
+
+  StyleRecord(String name, double fontSize):
+      name = new State<String>(name),
+      fontSize = new State<double>(fontSize);
 }
 
 // TODO: make the datastore a generic type.
 class CreateData extends Datastore {
   CreateData(List<CreateRecord> initialState): super(initialState);
 
-  ReadList<CreateRecord> getDataRecords(RecordType type, Context context) =>
-    runQuery((record) => record.type == type, context);
+  ReadList<DataRecord> getDataRecords(RecordType type, Context context) =>
+    runQuery((record) => record is DataRecord && record.type == type, context);
 
-  ReadList<CreateRecord> getData(Context context) =>
+  ReadList<DataRecord> getData(Context context) =>
     getDataRecords(RecordType.DATA, context);
 
-  ReadList<CreateRecord> getParameters(Context context) =>
+  ReadList<DataRecord> getParameters(Context context) =>
     getDataRecords(RecordType.PARAMETER, context);
 
-  ReadList<CreateRecord> getOperations(Context context) =>
+  ReadList<DataRecord> getOperations(Context context) =>
     getDataRecords(RecordType.OPERATION, context);
 
-  ReadList<CreateRecord> getServices(Context context) =>
+  ReadList<DataRecord> getServices(Context context) =>
     getDataRecords(RecordType.SERVICE, context);
+
+  ReadList<StyleRecord> getStyles(Context context) =>
+    runQuery((record) => record is StyleRecord, context);
 
   String newRecordName(String prefix) {
     int index = 0;
