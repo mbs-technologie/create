@@ -16,18 +16,30 @@ class Datastore<R extends Record> extends BaseZone {
 
   Datastore(this._records);
 
+  /// Retrieve a record by name
   R lookup(String name) {
     // TODO: we should use an index here if we care about scaling,
     // but that would be somewhat complicated because names can be updated.
     return _records.firstWhere((element) => (element.name.value == name), orElse: () => null);
   }
 
+  /// Run a query and get a list of matching results back.
+  /// If context is not null, then the query is 'live' and result list gets updated
+  /// to reflect new records added to the datastore.  When the context is disposed,
+  /// updates stop.
+  /// If the context is null, a "snapshot" of the results is returned as an immutable list.
   ReadList<R> runQuery(bool query(R), Context context) {
-    final _LiveQuery<R> liveQuery = new _LiveQuery<R>(query, this);
-    context.addResource(liveQuery);
-    _liveQueries.add(liveQuery);
-    print('Datastore: query added; ${_liveQueries.length} active queries.');
-    return liveQuery._result;
+    List<R> results = new List<R>.from(_records.where(query));
+
+    if (context != null) {
+      final _LiveQuery<R> liveQuery = new _LiveQuery<R>(query, this, results);
+      context.addResource(liveQuery);
+      _liveQueries.add(liveQuery);
+      print('Datastore: query added; ${_liveQueries.length} active queries.');
+      return liveQuery._result;
+    } else {
+      return new ImmutableList<R>(results);
+    }
   }
 
   void add(R record) {
@@ -46,8 +58,8 @@ class _LiveQuery<R extends Record> implements Disposable {
   final QueryType _query;
   final Datastore<R> _datastore;
 
-  _LiveQuery(this._query, this._datastore) {
-    _result = new MutableList<R>(new List<R>.from(_datastore._records.where(_query)));
+  _LiveQuery(this._query, this._datastore, List<R> firstResults) {
+    _result = new MutableList<R>(firstResults);
   }
 
   void newRecordAdded(R record) {

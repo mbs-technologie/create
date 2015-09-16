@@ -293,23 +293,12 @@ class CreateApp extends BaseZone implements AppState {
   }
 
   View makeStyleInput(Ref<StyleRecord> style, Context context) {
-    // We don't have live updates of the style selection.
-    // TODO: optimize datastore to cache queries.
-    Context subcontext = context.makeSubContext();
-    View result = new SelectionInput<StyleRecord>(style, datastore.getStyles(subcontext),
-        displayToString);
-    subcontext.dispose();
-    return result;
+    return new SelectionInput<StyleRecord>(style, datastore.getStyles(null), displayToString);
   }
 
   View makeContentInput(Ref<DataRecord> content, Context context) {
-    // We don't have live updates of the content selection.
-    // TODO: optimize datastore to cache queries.
-    Context subcontext = context.makeSubContext();
-    View result = new SelectionInput<DataRecord>(content, datastore.getContentOptions(subcontext),
+    return new SelectionInput<DataRecord>(content, datastore.getContentOptions(null),
         displayToString);
-    subcontext.dispose();
-    return result;
   }
 
   View viewsRowView(ViewRecord record, Context context) {
