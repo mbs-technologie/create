@@ -11,6 +11,7 @@ class AppMode {
   final String name;
   final IconId icon;
   const AppMode(this.name, this.icon);
+  String toString() => name;
 }
 
 const AppMode MODULES_MODE = const AppMode('Modules', WIDGETS_ICON);
@@ -113,10 +114,7 @@ class CreateApp extends BaseZone implements AppState {
     } else if (mode == LAUNCH_MODE) {
       return launchView(viewContext);
     } else {
-      return new LabelView(
-        new Constant<String>('TODO: ${mode.name}'),
-        new Constant<Style>(TITLE_STYLE)
-      );
+      return _showError('Unknown mode: $mode.');
     }
   }
 
@@ -338,11 +336,27 @@ class CreateApp extends BaseZone implements AppState {
     ]));
   }
 
+  View _showError(String message) {
+    return new LabelView(new Constant<String>(message), new Constant<Style>(TITLE_STYLE));
+  }
+
   View launchView(Context context) {
-    ViewRecord mainView = datastore.lookup(MAIN_NAME);
-    assert (mainView != null && mainView.viewId.value == LABEL_VIEW &&
-        mainView.content.value != null);
-    return new LabelView(mainView.content.value.state, null);
+    CreateRecord mainRecord = datastore.lookup(MAIN_NAME);
+    if (mainRecord == null || !(mainRecord is ViewRecord)) {
+      return _showError('Main view not found.');
+    }
+    return showViewRecord(mainRecord as ViewRecord, context);
+  }
+
+  View showViewRecord(ViewRecord viewRecord, Context context) {
+    if (viewRecord.viewId.value != LABEL_VIEW) {
+      return _showError('Unknown viewId: ${viewRecord.viewId.value}.');
+    }
+    return showLabelViewRecord(viewRecord, context);
+  }
+
+  View showLabelViewRecord(ViewRecord viewRecord, Context context) {
+    return new LabelView(viewRecord.content.value.state, null);
   }
 
   @override DrawerView makeDrawer() {

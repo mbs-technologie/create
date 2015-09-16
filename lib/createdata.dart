@@ -15,6 +15,7 @@ enum RecordType { DATA, PARAMETER, OPERATION, SERVICE }
 class TypeId {
   final String name;
   const TypeId(this.name);
+  String toString() => name;
 }
 
 const TypeId STRING_TYPE = const TypeId('String');
@@ -46,6 +47,7 @@ class StyleRecord extends CreateRecord {
 class ViewId {
   final String name;
   const ViewId(this.name);
+  String toString() => name;
 }
 
 const ViewId LABEL_VIEW = const ViewId('Label');
