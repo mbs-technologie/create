@@ -102,24 +102,14 @@ class SkyApp extends SkyAppShim with SkyWidgets {
       );
   }
 
-  // Floating action button currently generates exceptions
-  bool USE_FLOATING_BUTTON = false;
-
   Widget _buildFloatingActionButton() {
     if (isNotNull(appState.addOperation)) {
       Operation addOperation = appState.addOperation.value;
-      if (USE_FLOATING_BUTTON) {
-        return new FloatingActionButton(
-          child: new Icon(type: ADD_ICON.id, size: 24),
-          backgroundColor: colors.RedAccent[200],
-          onPressed: () => addOperation.scheduleAction()
-        );
-      } else {
-        return new RaisedButton(
-          child: new Icon(type: ADD_ICON.id, size: 24),
-          onPressed: () => addOperation.scheduleAction()
-        );
-      }
+      return new FloatingActionButton(
+        child: new Icon(type: ADD_ICON.id, size: 24),
+        backgroundColor: colors.RedAccent[200],
+        onPressed: () => addOperation.scheduleAction()
+      );
     } else {
       return null;
     }

@@ -59,18 +59,28 @@ class ViewRecord extends CreateRecord {
   final Ref<ViewId> viewId;
   final Ref<StyleRecord> style;
   final Ref<DataRecord> content;
+  final Ref<DataRecord> action;
 
   ViewRecord(String name):
       name = new State<String>(name),
       viewId = new State<ViewId>(LABEL_VIEW),
       style = new State<StyleRecord>(null),
-      content = new State<DataRecord>(null);
+      content = new State<DataRecord>(null),
+      action = new State<DataRecord>(null);
 
   ViewRecord.Label(String name, StyleRecord style, DataRecord content):
       name = new State<String>(name),
       viewId = new State<ViewId>(LABEL_VIEW),
       style = new State<StyleRecord>(style),
-      content = new State<DataRecord>(content);
+      content = new State<DataRecord>(content),
+      action = new State<DataRecord>(null);
+
+  ViewRecord.Button(String name, StyleRecord style, DataRecord content, DataRecord action):
+      name = new State<String>(name),
+      viewId = new State<ViewId>(BUTTON_VIEW),
+      style = new State<StyleRecord>(style),
+      content = new State<DataRecord>(content),
+      action = new State<DataRecord>(action);
 }
 
 // TODO: make the datastore a generic type.
@@ -117,21 +127,25 @@ String INCREASEBY_NAME = 'increaseby';
 String MAIN_NAME = 'main';
 
 List<CreateRecord> buildInitialCreateData() {
+  DataRecord counterbutton = new DataRecord(RecordType.PARAMETER, COUNTERBUTTON_NAME, STRING_TYPE,
+      'Increase the counter value');
   DataRecord describe = new DataRecord(RecordType.OPERATION, 'describe', TEMPLATE_TYPE,
       'The counter value is \$counter');
+  DataRecord increase = new DataRecord(RecordType.OPERATION, 'increase', CODE_TYPE,
+      'counter += increaseby');
 
   return [
   //  new DataRecord(RecordType.PARAMETER, APPTITLE_NAME, STRING_TYPE, 'Demo App'),
     new DataRecord(RecordType.DATA, COUNTER_NAME, INTEGER_TYPE, '68'),
-    new DataRecord(RecordType.PARAMETER, COUNTERBUTTON_NAME, STRING_TYPE,
-        'Increase the counter value'),
+    counterbutton,
     new DataRecord(RecordType.PARAMETER, INCREASEBY_NAME, INTEGER_TYPE, '1'),
     new DataRecord(RecordType.SERVICE, 'today', STRING_TYPE, _today()), // Hack for the demo
     describe,
-    new DataRecord(RecordType.OPERATION, 'increase', CODE_TYPE, 'counter += increaseby'),
+    increase,
     new StyleRecord('largefont', 32.0),
     new StyleRecord('bigred', 24.0),
-    new ViewRecord.Label(MAIN_NAME, null, describe)
+    new ViewRecord.Label("counterlabel", null, describe),
+    new ViewRecord.Button(MAIN_NAME, null, counterbutton, increase)
   ];
 }
 

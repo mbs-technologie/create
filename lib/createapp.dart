@@ -349,14 +349,31 @@ class CreateApp extends BaseZone implements AppState {
   }
 
   View showViewRecord(ViewRecord viewRecord, Context context) {
-    if (viewRecord.viewId.value != LABEL_VIEW) {
-      return _showError('Unknown viewId: ${viewRecord.viewId.value}.');
+    if (viewRecord.viewId.value == LABEL_VIEW) {
+      return showLabelViewRecord(viewRecord, context);
+    } else if (viewRecord.viewId.value == BUTTON_VIEW) {
+      return showButtonViewRecord(viewRecord, context);
     }
-    return showLabelViewRecord(viewRecord, context);
+
+    return _showError('Unknown viewId: ${viewRecord.viewId.value}.');
   }
 
   View showLabelViewRecord(ViewRecord viewRecord, Context context) {
     return new LabelView(viewRecord.content.value.state, null);
+  }
+
+  View showButtonViewRecord(ViewRecord viewRecord, Context context) {
+    Operation action = makeOperation(() => _executeAction(viewRecord.action.value));
+
+    return new ButtonView(viewRecord.content.value.state, null,
+        new Constant<Operation>(action));
+  }
+
+  void _executeAction(DataRecord action) {
+    if (action != null) {
+      print('Executing ${action.name.value}');
+      _increaseValue();
+    }
   }
 
   @override DrawerView makeDrawer() {
@@ -406,12 +423,12 @@ class CreateApp extends BaseZone implements AppState {
     writeRef.value = newValue.toString();
   }
 
-  Operation get increaseValue => makeOperation(() {
+  void _increaseValue() {
     DataRecord counter = datastore.lookup(COUNTER_NAME);
     DataRecord increaseby = datastore.lookup(INCREASEBY_NAME);
     assert (counter != null && increaseby != null);
     setIntValue(counter.state, getIntValue(counter.state) + getIntValue(increaseby.state));
-  });
+  }
 
   ReadRef<String> get describeState => new ReactiveFunction<String, String>(
       datastore.lookup(COUNTER_NAME).state, this,
