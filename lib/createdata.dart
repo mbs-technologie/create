@@ -63,6 +63,12 @@ class ViewRecord extends CreateRecord {
       viewId = new State<ViewId>(LABEL_VIEW),
       style = new State<StyleRecord>(null),
       content = new State<DataRecord>(null);
+
+  ViewRecord.Label(String name, StyleRecord style, DataRecord content):
+      name = new State<String>(name),
+      viewId = new State<ViewId>(LABEL_VIEW),
+      style = new State<StyleRecord>(style),
+      content = new State<DataRecord>(content);
 }
 
 // TODO: make the datastore a generic type.
@@ -101,4 +107,33 @@ class CreateData extends Datastore {
     }
     return prefix + index.toString();
   }
+}
+
+String COUNTER_NAME = 'counter';
+String COUNTERBUTTON_NAME = 'counterbutton';
+String INCREASEBY_NAME = 'increaseby';
+String MAIN_NAME = 'main';
+
+List<CreateRecord> buildInitialCreateData() {
+  DataRecord describe = new DataRecord(RecordType.OPERATION, 'describe', TEMPLATE_TYPE,
+      'The counter value is \$counter');
+
+  return [
+  //  new DataRecord(RecordType.PARAMETER, APPTITLE_NAME, STRING_TYPE, 'Demo App'),
+    new DataRecord(RecordType.DATA, COUNTER_NAME, INTEGER_TYPE, '68'),
+    new DataRecord(RecordType.PARAMETER, COUNTERBUTTON_NAME, STRING_TYPE,
+        'Increase the counter value'),
+    new DataRecord(RecordType.PARAMETER, INCREASEBY_NAME, INTEGER_TYPE, '1'),
+    new DataRecord(RecordType.SERVICE, 'today', STRING_TYPE, _today()), // Hack for the demo
+    describe,
+    new DataRecord(RecordType.OPERATION, 'increase', CODE_TYPE, 'counter += increaseby'),
+    new StyleRecord('largefont', 32.0),
+    new StyleRecord('bigred', 24.0),
+    new ViewRecord.Label(MAIN_NAME, null, describe)
+  ];
+}
+
+String _today() {
+  DateTime date = new DateTime.now().toLocal();
+  return date.month.toString() + '/' + date.day.toString() + '/' + date.year.toString();
 }

@@ -17,7 +17,7 @@ void main() {
       appState = new CounterApp(new CounterData());
       break;
     case Run.CREATE:
-      appState = new CreateApp(new CreateData(INITIAL_CREATE_DATA));
+      appState = new CreateApp(new CreateData(buildInitialCreateData()));
       break;
   }
 

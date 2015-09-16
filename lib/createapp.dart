@@ -71,25 +71,6 @@ String displayTypeId(TypeId typeId) => typeId.name;
 String displayViewId(ViewId viewId) => viewId.name;
 String displayToString(object) => object != null ? object.toString() : '<default>';
 
-String COUNTER_NAME = 'counter';
-String COUNTERBUTTON_NAME = 'counterbutton';
-String INCREASEBY_NAME = 'increaseby';
-
-List<CreateRecord> INITIAL_CREATE_DATA = [
-//  new DataRecord(RecordType.PARAMETER, APPTITLE_NAME, STRING_TYPE, 'Demo App'),
-  new DataRecord(RecordType.DATA, COUNTER_NAME, INTEGER_TYPE, '68'),
-  new DataRecord(RecordType.PARAMETER, COUNTERBUTTON_NAME, STRING_TYPE,
-      'Increase the counter value'),
-  new DataRecord(RecordType.PARAMETER, INCREASEBY_NAME, INTEGER_TYPE, '1'),
-  new DataRecord(RecordType.SERVICE, 'today', STRING_TYPE, today()), // Hack for the demo
-  new DataRecord(RecordType.OPERATION, 'describe', TEMPLATE_TYPE,
-      'The counter value is \$counter'),
-  new DataRecord(RecordType.OPERATION, 'increase', CODE_TYPE, 'counter += increaseby'),
-  new StyleRecord('largefont', 32.0),
-  new StyleRecord('bigred', 24.0),
-  new ViewRecord('labelview')
-];
-
 class CreateApp extends BaseZone implements AppState {
   final CreateData datastore;
   final Ref<AppMode> appMode = new State<AppMode>(STARTUP_MODE);
@@ -130,7 +111,7 @@ class CreateApp extends BaseZone implements AppState {
     } else if (mode == DATA_MODE) {
       return dataView(viewContext);
     } else if (mode == LAUNCH_MODE) {
-      return counterView();
+      return launchView(viewContext);
     } else {
       return new LabelView(
         new Constant<String>('TODO: ${mode.name}'),
@@ -194,17 +175,21 @@ class CreateApp extends BaseZone implements AppState {
     );
   }
 
+  SelectionInput makePrimitiveTypeInput(Ref<TypeId> typeId) {
+    return new SelectionInput<TypeId>(
+      typeId,
+      new ImmutableList<TypeId>(PRIMITIVE_TYPES),
+      displayTypeId
+    );
+  }
+
   View schemaRowView(DataRecord record) {
     return new RowView(new ImmutableList<View>([
       new TextInput(
         record.name,
         new Constant<Style>(BODY2_STYLE)
       ),
-      new SelectionInput<TypeId>(
-        record.typeId,
-        new ImmutableList<TypeId>(PRIMITIVE_TYPES),
-        displayTypeId
-      )
+      makePrimitiveTypeInput(record.typeId)
     ]));
   }
 
@@ -220,11 +205,7 @@ class CreateApp extends BaseZone implements AppState {
         record.name,
         new Constant<Style>(BODY2_STYLE)
       ),
-      new SelectionInput<TypeId>(
-        record.typeId,
-        new ImmutableList<TypeId>(PRIMITIVE_TYPES),
-        displayTypeId
-      ),
+      makePrimitiveTypeInput(record.typeId),
       new TextInput(
         record.state,
         new Constant<Style>(BODY2_STYLE)
@@ -311,6 +292,26 @@ class CreateApp extends BaseZone implements AppState {
     );
   }
 
+  View makeStyleInput(Ref<StyleRecord> style, Context context) {
+    // We don't have live updates of the style selection.
+    // TODO: optimize datastore to cache queries.
+    Context subcontext = context.makeSubContext();
+    View result = new SelectionInput<StyleRecord>(style, datastore.getStyles(subcontext),
+        displayToString);
+    subcontext.dispose();
+    return result;
+  }
+
+  View makeContentInput(Ref<DataRecord> content, Context context) {
+    // We don't have live updates of the content selection.
+    // TODO: optimize datastore to cache queries.
+    Context subcontext = context.makeSubContext();
+    View result = new SelectionInput<DataRecord>(content, datastore.getContentOptions(subcontext),
+        displayToString);
+    subcontext.dispose();
+    return result;
+  }
+
   View viewsRowView(ViewRecord record, Context context) {
     return new RowView(new ImmutableList<View>([
       new TextInput(
@@ -322,16 +323,8 @@ class CreateApp extends BaseZone implements AppState {
         new ImmutableList<ViewId>(VIEW_TYPES),
         displayViewId
       ),
-      new SelectionInput<StyleRecord>(
-        record.style,
-        datastore.getStyles(context),
-        displayToString
-      ),
-      new SelectionInput<DataRecord>(
-        record.content,
-        datastore.getContentOptions(context),
-        displayToString
-      )
+      makeStyleInput(record.style, context),
+      makeContentInput(record.content, context)
     ]));
   }
 
@@ -345,7 +338,7 @@ class CreateApp extends BaseZone implements AppState {
     return new RowView(new ImmutableList<View>([
       new LabelView(
         record.name,
-        new Constant<Style>(BODY1_STYLE)
+        new Constant<Style>(SUBHEAD_STYLE)
       ),
       typeView(record.typeId),
       new TextInput(
@@ -354,6 +347,13 @@ class CreateApp extends BaseZone implements AppState {
         // TODO: switch to the number keyboard
       ),
     ]));
+  }
+
+  View launchView(Context context) {
+    ViewRecord mainView = datastore.lookup(MAIN_NAME);
+    assert (mainView != null && mainView.viewId.value == LABEL_VIEW &&
+        mainView.content.value != null);
+    return new LabelView(mainView.content.value.state, null);
   }
 
   @override DrawerView makeDrawer() {
@@ -379,6 +379,7 @@ class CreateApp extends BaseZone implements AppState {
     );
   }
 
+/*
   View counterView() {
     return new ColumnView(
       new ImmutableList<View>([
@@ -393,7 +394,7 @@ class CreateApp extends BaseZone implements AppState {
         )
       ]
     ));
-  }
+  }*/
 
   static int getIntValue(ReadRef<String> stringRef) =>
     isNotNull(stringRef) ? int.parse(stringRef.value, onError: (s) => 0) : 0;
@@ -412,9 +413,4 @@ class CreateApp extends BaseZone implements AppState {
   ReadRef<String> get describeState => new ReactiveFunction<String, String>(
       datastore.lookup(COUNTER_NAME).state, this,
       (String counterValue) => 'The counter value is $counterValue');
-}
-
-String today() {
-  DateTime date = new DateTime.now().toLocal();
-  return date.month.toString() + '/' + date.day.toString() + '/' + date.year.toString();
 }
