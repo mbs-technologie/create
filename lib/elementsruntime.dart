@@ -202,7 +202,7 @@ class MutableList<E> extends ReadList<E> with _ObserverManager {
   final List<E> elements;
   State<int> size;
 
-  MutableList(this.elements) {
+  MutableList([List<E> initialState]): elements = (initialState != null ? initialState : []) {
     size = new State<int>(elements.length);
   }
 

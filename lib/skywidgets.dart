@@ -94,7 +94,7 @@ abstract class SkyWidgets {
   Widget renderCheckboxInput(CheckboxInput input, Context context) {
     // TODO: two-way binding
     return new Container(
-      child: new Checkbox(value: input.model.value),
+      child: new Checkbox(value: input.model.value, onChanged: (ignored) => null),
       padding: const EdgeDims.all(5.0)
     );
   }

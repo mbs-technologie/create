@@ -141,7 +141,7 @@ class CreateApp extends BaseZone implements AppState {
       });
     } else if (mode == VIEWS_MODE) {
       return makeOperation(() {
-        datastore.add(new ViewRecord(datastore.newRecordName('view')));
+        datastore.add(new ViewRecord.Label(datastore.newRecordName('view'), null, null));
       });
     } else {
       return null;
@@ -354,20 +354,31 @@ class CreateApp extends BaseZone implements AppState {
       return showLabelViewRecord(viewRecord, context);
     } else if (viewRecord.viewId.value == BUTTON_VIEW) {
       return showButtonViewRecord(viewRecord, context);
+    } else if (viewRecord.viewId.value == COLUMN_VIEW) {
+      return showColumnViewRecord(viewRecord, context);
     }
 
     return _showError('Unknown viewId: ${viewRecord.viewId.value}.');
   }
 
   View showLabelViewRecord(ViewRecord viewRecord, Context context) {
+    // TODO: style.
     return new LabelView(viewRecord.content.value.state, null);
   }
 
   View showButtonViewRecord(ViewRecord viewRecord, Context context) {
     Operation action = makeOperation(() => _executeAction(viewRecord.action.value));
 
+    // TODO: style.
     return new ButtonView(viewRecord.content.value.state, null,
         new Constant<Operation>(action));
+  }
+
+  View showColumnViewRecord(ViewRecord viewRecord, Context context) {
+    ReadList<View> views = new MappedList<ViewRecord, View>(viewRecord.subviews,
+        (ViewRecord record) => showViewRecord(record, context));
+    // TODO: style.
+    return new ColumnView(views);
   }
 
   void _executeAction(DataRecord action) {
@@ -399,23 +410,6 @@ class CreateApp extends BaseZone implements AppState {
       new Constant<Operation>(makeOperation(() { appMode.value = mode; }))
     );
   }
-
-/*
-  View counterView() {
-    return new ColumnView(
-      new ImmutableList<View>([
-        new LabelView(
-          describeState,
-          new Constant<Style>(BODY1_STYLE)
-        ),
-        new ButtonView(
-          datastore.lookup(COUNTERBUTTON_NAME).state,
-          new Constant<Style>(BUTTON_STYLE),
-          new Constant<Operation>(increaseValue)
-        )
-      ]
-    ));
-  }*/
 
   static int getIntValue(ReadRef<String> stringRef) =>
     isNotNull(stringRef) ? int.parse(stringRef.value, onError: (s) => 0) : 0;
