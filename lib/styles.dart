@@ -2,7 +2,9 @@
 
 library styles;
 
+import 'dart:sky' show Color;
 import 'package:sky/src/painting/text_style.dart';
+import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/theme/typography.dart' as typography;
 
 abstract class Style {
@@ -17,12 +19,12 @@ class ThemedStyle extends Style {
   ThemedStyle(this.styleName, this.textStyle);
 }
 
-ThemedStyle TITLE_STYLE = new ThemedStyle("title", typography.black.title);
-ThemedStyle SUBHEAD_STYLE = new ThemedStyle("subhead", typography.black.subhead);
-ThemedStyle BODY2_STYLE = new ThemedStyle("body2", typography.black.body2);
-ThemedStyle BODY1_STYLE = new ThemedStyle("body1", typography.black.body1);
-ThemedStyle CAPTION_STYLE = new ThemedStyle("caption", typography.black.caption);
-ThemedStyle BUTTON_STYLE = new ThemedStyle("button", typography.black.button);
+ThemedStyle TITLE_STYLE = new ThemedStyle("Title", typography.black.title);
+ThemedStyle SUBHEAD_STYLE = new ThemedStyle("Subhead", typography.black.subhead);
+ThemedStyle BODY2_STYLE = new ThemedStyle("Body2", typography.black.body2);
+ThemedStyle BODY1_STYLE = new ThemedStyle("Body1", typography.black.body1);
+ThemedStyle CAPTION_STYLE = new ThemedStyle("Caption", typography.black.caption);
+ThemedStyle BUTTON_STYLE = new ThemedStyle("Button", typography.black.button);
 
 List<ThemedStyle> ALL_THEMED_STYLES = [
   TITLE_STYLE,
@@ -31,6 +33,25 @@ List<ThemedStyle> ALL_THEMED_STYLES = [
   BODY1_STYLE,
   CAPTION_STYLE,
   BUTTON_STYLE
+];
+
+class NamedColor {
+  final String name;
+  final Color color;
+
+  const NamedColor(this.name, this.color);
+}
+
+NamedColor BLACK_COLOR = new NamedColor("Black", colors.black);
+NamedColor RED_COLOR = new NamedColor("Red", colors.Blue[500]);
+NamedColor GREEN_COLOR = new NamedColor("Green", colors.Blue[500]);
+NamedColor BLUE_COLOR = new NamedColor("Blue", colors.Blue[500]);
+
+List<NamedColor> ALL_COLORS = [
+  BLACK_COLOR,
+  RED_COLOR,
+  GREEN_COLOR,
+  BLUE_COLOR
 ];
 
 // Icons from the Material Design library
