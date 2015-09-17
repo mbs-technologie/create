@@ -175,7 +175,7 @@ abstract class SkyWidgets {
 
 TextStyle textStyleOf(View view) {
   if (isNotNull(view.style)) {
-    return view.style.value.toTextStyle;
+    return view.style.value.textStyle;
   } else {
     return null;
   }

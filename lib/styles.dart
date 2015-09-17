@@ -5,21 +5,33 @@ library styles;
 import 'package:sky/src/painting/text_style.dart';
 import 'package:sky/theme/typography.dart' as typography;
 
-class Style {
-  final TextStyle style;
-  // TODO: add colors
-
-  Style(this.style);
-
-  TextStyle get toTextStyle => style;
+abstract class Style {
+  String get styleName;
+  TextStyle get textStyle;
 }
 
-Style TITLE_STYLE = new Style(typography.black.title);
-Style SUBHEAD_STYLE = new Style(typography.black.subhead);
-Style BODY2_STYLE = new Style(typography.black.body2);
-Style BODY1_STYLE = new Style(typography.black.body1);
-Style CAPTION_STYLE = new Style(typography.black.caption);
-Style BUTTON_STYLE = new Style(typography.black.button);
+class ThemedStyle extends Style {
+  final String styleName;
+  final TextStyle textStyle;
+
+  ThemedStyle(this.styleName, this.textStyle);
+}
+
+ThemedStyle TITLE_STYLE = new ThemedStyle("title", typography.black.title);
+ThemedStyle SUBHEAD_STYLE = new ThemedStyle("subhead", typography.black.subhead);
+ThemedStyle BODY2_STYLE = new ThemedStyle("body2", typography.black.body2);
+ThemedStyle BODY1_STYLE = new ThemedStyle("body1", typography.black.body1);
+ThemedStyle CAPTION_STYLE = new ThemedStyle("caption", typography.black.caption);
+ThemedStyle BUTTON_STYLE = new ThemedStyle("button", typography.black.button);
+
+List<ThemedStyle> ALL_THEMED_STYLES = [
+  TITLE_STYLE,
+  SUBHEAD_STYLE,
+  BODY2_STYLE,
+  BODY1_STYLE,
+  CAPTION_STYLE,
+  BUTTON_STYLE
+];
 
 // Icons from the Material Design library
 class IconId {

@@ -2,9 +2,12 @@
 
 library createdata;
 
+import 'package:sky/src/painting/text_style.dart';
+
 import 'elements.dart';
 import 'elementsruntime.dart';
 import 'datastore.dart';
+import 'styles.dart';
 
 abstract class CreateRecord implements Record {
   Ref<String> get name;
@@ -36,13 +39,17 @@ class DataRecord extends CreateRecord {
       state = new State<String>(state);
 }
 
-class StyleRecord extends CreateRecord {
+class StyleRecord extends CreateRecord implements Style {
   final Ref<String> name;
   final Ref<double> fontSize;
 
   StyleRecord(String name, double fontSize):
       name = new State<String>(name),
       fontSize = new State<double>(fontSize);
+
+  String get styleName => name.value;
+  TextStyle get textStyle => fontSize.value != null ?
+      new TextStyle(fontSize: fontSize.value) : null;
 }
 
 class ViewId {
@@ -58,31 +65,31 @@ const ViewId COLUMN_VIEW = const ViewId('Column');
 class ViewRecord extends CreateRecord {
   final Ref<String> name;
   final Ref<ViewId> viewId;
-  final Ref<StyleRecord> style;
+  final Ref<Style> style;
   final Ref<DataRecord> content;
   final Ref<DataRecord> action;
   final MutableList<ViewRecord> subviews;
 
-  ViewRecord.Label(String name, StyleRecord style, DataRecord content):
+  ViewRecord.Label(String name, Style style, DataRecord content):
       name = new State<String>(name),
       viewId = new State<ViewId>(LABEL_VIEW),
-      style = new State<StyleRecord>(style),
+      style = new State<Style>(style),
       content = new State<DataRecord>(content),
       action = new State<DataRecord>(null),
       subviews = new MutableList<ViewRecord>();
 
-  ViewRecord.Button(String name, StyleRecord style, DataRecord content, DataRecord action):
+  ViewRecord.Button(String name, Style style, DataRecord content, DataRecord action):
       name = new State<String>(name),
       viewId = new State<ViewId>(BUTTON_VIEW),
-      style = new State<StyleRecord>(style),
+      style = new State<Style>(style),
       content = new State<DataRecord>(content),
       action = new State<DataRecord>(action),
       subviews = new MutableList<ViewRecord>();
 
-  ViewRecord.Column(String name, StyleRecord style, MutableList<ViewRecord> columns):
+  ViewRecord.Column(String name, Style style, MutableList<ViewRecord> columns):
       name = new State<String>(name),
       viewId = new State<ViewId>(COLUMN_VIEW),
-      style = new State<StyleRecord>(style),
+      style = new State<Style>(style),
       content = new State<DataRecord>(null),
       action = new State<DataRecord>(null),
       subviews = columns;
@@ -137,8 +144,9 @@ List<CreateRecord> buildInitialCreateData() {
       'The counter value is \$counter');
   DataRecord increase = new DataRecord(RecordType.OPERATION, 'increase', CODE_TYPE,
       'counter += increaseby');
-  ViewRecord counterlabel = new ViewRecord.Label('counterlabel', null, describe);
-  ViewRecord counterbutton = new ViewRecord.Button('counterbutton', null, buttontext, increase);
+  ViewRecord counterlabel = new ViewRecord.Label('counterlabel', BODY1_STYLE, describe);
+  ViewRecord counterbutton = new ViewRecord.Button('counterbutton', BUTTON_STYLE, buttontext,
+      increase);
 
   return [
   //  new DataRecord(RecordType.PARAMETER, APPTITLE_NAME, STRING_TYPE, 'Demo App'),

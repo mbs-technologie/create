@@ -291,8 +291,12 @@ class CreateApp extends BaseZone implements AppState {
     );
   }
 
-  View makeStyleInput(Ref<StyleRecord> style, Context context) {
-    return new SelectionInput<StyleRecord>(style, datastore.getStyles(null), displayToString);
+  View makeStyleInput(Ref<Style> style, Context context) {
+    String displayStyle(Style s) => s != null ? s.styleName : '<no style>';
+    List<Style> styleOptions = [ null ];
+    styleOptions.addAll(datastore.getStyles(null).elements);
+    styleOptions.addAll(ALL_THEMED_STYLES);
+    return new SelectionInput<Style>(style, new ImmutableList<Style>(styleOptions), displayStyle);
   }
 
   View makeContentInput(Ref<DataRecord> content, Context context) {
@@ -362,23 +366,20 @@ class CreateApp extends BaseZone implements AppState {
   }
 
   View showLabelViewRecord(ViewRecord viewRecord, Context context) {
-    // TODO: style.
-    return new LabelView(viewRecord.content.value.state, null);
+    return new LabelView(viewRecord.content.value.state, viewRecord.style);
   }
 
   View showButtonViewRecord(ViewRecord viewRecord, Context context) {
     Operation action = makeOperation(() => _executeAction(viewRecord.action.value));
 
-    // TODO: style.
-    return new ButtonView(viewRecord.content.value.state, null,
+    return new ButtonView(viewRecord.content.value.state, viewRecord.style,
         new Constant<Operation>(action));
   }
 
   View showColumnViewRecord(ViewRecord viewRecord, Context context) {
     ReadList<View> views = new MappedList<ViewRecord, View>(viewRecord.subviews,
         (ViewRecord record) => showViewRecord(record, context));
-    // TODO: style.
-    return new ColumnView(views);
+    return new ColumnView(views, viewRecord.style);
   }
 
   void _executeAction(DataRecord action) {
