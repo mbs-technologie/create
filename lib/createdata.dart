@@ -42,14 +42,16 @@ class DataRecord extends CreateRecord {
 class StyleRecord extends CreateRecord implements Style {
   final Ref<String> name;
   final Ref<double> fontSize;
+  final Ref<NamedColor> color;
 
-  StyleRecord(String name, double fontSize):
+  StyleRecord(String name, double fontSize, NamedColor color):
       name = new State<String>(name),
-      fontSize = new State<double>(fontSize);
+      fontSize = new State<double>(fontSize),
+      color = new State<NamedColor>(color);
 
   String get styleName => name.value;
-  TextStyle get textStyle => fontSize.value != null ?
-      new TextStyle(fontSize: fontSize.value) : null;
+  TextStyle get textStyle =>
+      new TextStyle(fontSize: fontSize.value, color: color.value.colorValue);
 }
 
 class ViewId {
@@ -151,12 +153,13 @@ List<CreateRecord> buildInitialCreateData() {
   return [
   //  new DataRecord(RecordType.PARAMETER, APPTITLE_NAME, STRING_TYPE, 'Demo App'),
     new DataRecord(RecordType.DATA, COUNTER_NAME, INTEGER_TYPE, '68'),
+    buttontext,
     new DataRecord(RecordType.PARAMETER, INCREASEBY_NAME, INTEGER_TYPE, '1'),
     new DataRecord(RecordType.SERVICE, 'today', STRING_TYPE, _today()), // Hack for the demo
     describe,
     increase,
-    new StyleRecord('largefont', 32.0),
-    new StyleRecord('bigred', 24.0),
+    new StyleRecord('Largefont', 24.0, BLACK_COLOR),
+    new StyleRecord('Bigred', 32.0, RED_COLOR),
     counterlabel,
     counterbutton,
     new ViewRecord.Column(MAIN_NAME, null,

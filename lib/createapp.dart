@@ -137,7 +137,7 @@ class CreateApp extends BaseZone implements AppState {
       });
     } else if (mode == STYLES_MODE) {
       return makeOperation(() {
-        datastore.add(new StyleRecord(datastore.newRecordName('style'), null));
+        datastore.add(new StyleRecord(datastore.newRecordName('style'), null, BLACK_COLOR));
       });
     } else if (mode == VIEWS_MODE) {
       return makeOperation(() {
@@ -279,6 +279,11 @@ class CreateApp extends BaseZone implements AppState {
       new SelectionInput<double>(
         record.fontSize,
         new ImmutableList<double>(FONT_SIZES),
+        displayToString
+      ),
+      new SelectionInput<NamedColor>(
+        record.color,
+        new ImmutableList<NamedColor>(ALL_COLORS),
         displayToString
       )
     ]));

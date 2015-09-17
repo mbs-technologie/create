@@ -37,14 +37,16 @@ List<ThemedStyle> ALL_THEMED_STYLES = [
 
 class NamedColor {
   final String name;
-  final Color color;
+  final Color colorValue;
 
-  const NamedColor(this.name, this.color);
+  const NamedColor(this.name, this.colorValue);
+
+  String toString() => name;
 }
 
 NamedColor BLACK_COLOR = new NamedColor("Black", colors.black);
-NamedColor RED_COLOR = new NamedColor("Red", colors.Blue[500]);
-NamedColor GREEN_COLOR = new NamedColor("Green", colors.Blue[500]);
+NamedColor RED_COLOR = new NamedColor("Red", colors.Red[500]);
+NamedColor GREEN_COLOR = new NamedColor("Green", colors.Green[500]);
 NamedColor BLUE_COLOR = new NamedColor("Blue", colors.Blue[500]);
 
 List<NamedColor> ALL_COLORS = [
