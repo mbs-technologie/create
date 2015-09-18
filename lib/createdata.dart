@@ -130,6 +130,9 @@ class CreateData extends Datastore/*<CreateRecord>*/ {
     runQuery((record) => record is DataRecord &&
         (record.typeId.value == STRING_TYPE || record.typeId.value == TEMPLATE_TYPE), context);
 
+  ReadList<DataRecord> getActionOptions(Context context) =>
+    runQuery((record) => record is DataRecord && record.typeId.value == CODE_TYPE, context);
+
   String newRecordName(String prefix) {
     int index = 0;
     while (lookup(prefix + index.toString()) != null) {

@@ -39,6 +39,13 @@ class ButtonView extends View<ReadRef<String>> {
     super(buttonText, style);
 }
 
+/// An icon button view
+class IconButtonView extends View<ReadRef<IconId>> {
+  final ReadRef<Operation> action;
+
+  IconButtonView(ReadRef<IconId> icon, ReadRef<Style> style, this.action): super(icon, style);
+}
+
 /// A selection view (a.k.a. dropdown buttons)
 class SelectionInput<T> extends View<Ref<T>> {
   final ReadList<T> options;

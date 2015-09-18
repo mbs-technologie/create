@@ -309,6 +309,53 @@ class CreateApp extends BaseZone implements AppState {
         displayToString);
   }
 
+  View makeActionInput(Ref<DataRecord> action, Context context) {
+    return new SelectionInput<DataRecord>(action, datastore.getActionOptions(null),
+        displayToString);
+  }
+
+  View makeViewInput(Ref<ViewRecord> view, ViewRecord currentView, Context context) {
+    List<ViewRecord> viewOptions = [ null ];
+    // We filter out attempts to create recursive views
+    viewOptions.addAll(datastore.getViews(null).elements.where((v) => v != currentView));
+    String viewToString(view) => view != null ? view.name.value : '<none>';
+    return new SelectionInput<ViewRecord>(view, new ImmutableList<ViewRecord>(viewOptions),
+        viewToString);
+  }
+
+  void populateSubviewInput(MutableList<View> result, ViewRecord record, Context context) {
+    int size = record.subviews.size.value;
+    for (int i = 0; i < size; ++i) {
+      result.add(makeViewInput(record.subviews.at(i), record, context));
+    }
+    result.add(new IconButtonView(new Constant<IconId>(ADD_ICON), null,
+        new Constant<Operation>(makeOperation(() => record.subviews.add(null)))));
+  }
+
+  ReadList<View> makeSubviewInput(ViewRecord record, Context context) {
+    MutableList<View> result = new MutableList<View>();
+    populateSubviewInput(result, record, context);
+    void updateResult() {
+      result.clear();
+      populateSubviewInput(result, record, context);
+    }
+    record.subviews.observe(makeOperation(updateResult), context);
+    return result;
+  }
+
+  View viewsRowExtra(ViewRecord record, Context context) {
+    if (record.viewId.value == BUTTON_VIEW) {
+      return new RowView(new ImmutableList<View>([
+        makeContentInput(record.content, context),
+        makeActionInput(record.action, context)
+      ]));
+    } else if (record.viewId.value == COLUMN_VIEW) {
+      return new RowView(makeSubviewInput(record, context));
+    } else {
+      return makeContentInput(record.content, context);
+    }
+  }
+
   View viewsRowView(ViewRecord record, Context context) {
     return new RowView(new ImmutableList<View>([
       new TextInput(
@@ -321,7 +368,7 @@ class CreateApp extends BaseZone implements AppState {
         displayViewId
       ),
       makeStyleInput(record.style, context),
-      makeContentInput(record.content, context)
+      viewsRowExtra(record, context)
     ]));
   }
 
@@ -359,6 +406,10 @@ class CreateApp extends BaseZone implements AppState {
   }
 
   View showViewRecord(ViewRecord viewRecord, Context context) {
+    if (viewRecord == null) {
+      return new LabelView(new Constant<String>("[null view]"), null);
+    }
+
     if (viewRecord.viewId.value == LABEL_VIEW) {
       return showLabelViewRecord(viewRecord, context);
     } else if (viewRecord.viewId.value == BUTTON_VIEW) {

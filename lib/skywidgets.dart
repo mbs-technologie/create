@@ -65,6 +65,8 @@ abstract class SkyWidgets {
       return renderTextInput(view, context);
     } else if (view is ButtonView) {
       return renderButton(view);
+    } else if (view is IconButtonView) {
+      return renderIconButton(view);
     } else if (view is SelectionInput) {
       return renderSelection(view);
     } else if (view is HeaderView) {
@@ -112,6 +114,10 @@ abstract class SkyWidgets {
       child: new Text(button.model.value, style: textStyleOf(button)),
       onPressed: _scheduleAction(button.action)
     );
+  }
+
+  IconButton renderIconButton(IconButtonView button) {
+    return new IconButton(icon: button.model.value.id, onPressed: _scheduleAction(button.action));
   }
 
   DrawerHeader renderHeader(HeaderView header) {

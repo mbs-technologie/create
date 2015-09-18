@@ -5,7 +5,7 @@
 - [ ] Row views
 - [x] Parse templates and evaluate them
 - [ ] Parse code and evaluate it
-- [ ] IconButton view
+- [x] IconButton view
 - [ ] Improve TextInput widget; support for keyboard types
 - [ ] More primitives supported in the code
 - [ ] Use standard Sky widget for the PopupMenu
@@ -14,3 +14,4 @@
 - [ ] Datastore initialization from JSON
 - [ ] Datastore persistence
 - [ ] Bootstrapping Create
+- [ ] Live syntax check

@@ -206,11 +206,39 @@ class MutableList<E> extends ReadList<E> with _ObserverManager {
     size = new State<int>(elements.length);
   }
 
+  Ref<E> at(int index) {
+    assert (index >= 0 && index < elements.length);
+    return new _ListCell<E>(this, index);
+  }
+
+  void clear() {
+    if (elements.isNotEmpty) {
+      elements.clear();
+      size.value = 0;
+      _triggerObservers();
+    }
+  }
+
   void add(E element) {
     elements.add(element);
     size.value = elements.length;
     _triggerObservers();
   }
+}
+
+class _ListCell<E> implements Ref<E> {
+  final MutableList<E> list;
+  final int index;
+
+  _ListCell(this.list, this.index);
+
+  E get value => list.elements[index];
+  void set value(E newValue) {
+    list.elements[index] = newValue;
+  }
+
+  // TODO: precise observer.
+  void observe(Operation observer, Context context) => list.observe(observer, context);
 }
 
 /// Check whether a reference is not null and holds a non-null value.
