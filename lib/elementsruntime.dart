@@ -211,18 +211,27 @@ class MutableList<E> extends ReadList<E> with _ObserverManager {
     return new _ListCell<E>(this, index);
   }
 
+  void _updateSizeAndTriggerObservers() {
+    size.value = elements.length;
+    _triggerObservers();
+  }
+
   void clear() {
     if (elements.isNotEmpty) {
       elements.clear();
-      size.value = 0;
-      _triggerObservers();
+      _updateSizeAndTriggerObservers();
     }
   }
 
   void add(E element) {
     elements.add(element);
-    size.value = elements.length;
-    _triggerObservers();
+    _updateSizeAndTriggerObservers();
+  }
+
+  void removeAt(int index) {
+    assert (index >= 0 && index < elements.length);
+    elements.removeAt(index);
+    _updateSizeAndTriggerObservers();
   }
 }
 

@@ -66,11 +66,11 @@ List<double> FONT_SIZES = [
 List<ViewId> VIEW_TYPES = [
   LABEL_VIEW,
   BUTTON_VIEW,
-  COLUMN_VIEW
+  COLUMN_VIEW,
+  ROW_VIEW
 ];
 
 String displayTypeId(TypeId typeId) => typeId.name;
-String displayViewId(ViewId viewId) => viewId.name;
 String displayToString(object) => object != null ? object.toString() : '<default>';
 
 class CreateApp extends BaseZone implements AppState {
@@ -314,6 +314,11 @@ class CreateApp extends BaseZone implements AppState {
         displayToString);
   }
 
+  View makeViewIdInput(Ref<ViewId> viewId, Context context) {
+    return new SelectionInput<ViewId>(viewId, new ImmutableList<ViewId>(VIEW_TYPES),
+      (ViewId id) => id.name);
+  }
+
   View makeViewInput(Ref<ViewRecord> view, ViewRecord currentView, Context context) {
     List<ViewRecord> viewOptions = [ null ];
     // We filter out attempts to create recursive views
@@ -328,8 +333,13 @@ class CreateApp extends BaseZone implements AppState {
     for (int i = 0; i < size; ++i) {
       result.add(makeViewInput(record.subviews.at(i), record, context));
     }
-    result.add(new IconButtonView(new Constant<IconId>(ADD_ICON), null,
+    result.add(new IconButtonView(new Constant<IconId>(ADD_CIRCLE_ICON), null,
         new Constant<Operation>(makeOperation(() => record.subviews.add(null)))));
+    if (size > 0) {
+      result.add(new IconButtonView(new Constant<IconId>(REMOVE_CIRCLE_ICON), null,
+          new Constant<Operation>(makeOperation(() =>
+              record.subviews.removeAt(size - 1)))));
+    }
   }
 
   ReadList<View> makeSubviewInput(ViewRecord record, Context context) {
@@ -349,27 +359,37 @@ class CreateApp extends BaseZone implements AppState {
         makeContentInput(record.content, context),
         makeActionInput(record.action, context)
       ]));
-    } else if (record.viewId.value == COLUMN_VIEW) {
+    } else if (record.viewId.value == COLUMN_VIEW || record.viewId.value == ROW_VIEW) {
       return new RowView(makeSubviewInput(record, context));
     } else {
       return makeContentInput(record.content, context);
     }
   }
 
+  bool renderInRow(ViewId viewId) => viewId != COLUMN_VIEW && viewId != ROW_VIEW;
+
   View viewsRowView(ViewRecord record, Context context) {
-    return new RowView(new ImmutableList<View>([
-      new TextInput(
-        record.name,
-        new Constant<Style>(BODY2_STYLE)
-      ),
-      new SelectionInput<ViewId>(
-        record.viewId,
-        new ImmutableList<ViewId>(VIEW_TYPES),
-        displayViewId
-      ),
-      makeStyleInput(record.style, context),
-      viewsRowExtra(record, context)
-    ]));
+    View name = new TextInput(record.name, new Constant<Style>(BODY2_STYLE));
+
+    if (renderInRow(record.viewId.value)) {
+      return new RowView(new ImmutableList<View>([
+        name,
+        makeViewIdInput(record.viewId, context),
+        makeStyleInput(record.style, context),
+        viewsRowExtra(record, context)
+      ]));
+    } else {
+      return new RowView(new ImmutableList<View>([
+        name,
+        new ColumnView(new ImmutableList<View>([
+          new RowView(new ImmutableList<View>([
+            makeViewIdInput(record.viewId, context),
+            makeStyleInput(record.style, context)
+          ])),
+          viewsRowExtra(record, context)
+        ]))
+      ]));
+    }
   }
 
   View dataView(Context context) {
@@ -416,6 +436,8 @@ class CreateApp extends BaseZone implements AppState {
       return showButtonViewRecord(viewRecord, context);
     } else if (viewRecord.viewId.value == COLUMN_VIEW) {
       return showColumnViewRecord(viewRecord, context);
+    } else if (viewRecord.viewId.value == ROW_VIEW) {
+      return showRowViewRecord(viewRecord, context);
     }
 
     return _showError('Unknown viewId: ${viewRecord.viewId.value}.');
@@ -441,10 +463,17 @@ class CreateApp extends BaseZone implements AppState {
         new Constant<Operation>(action));
   }
 
-  View showColumnViewRecord(ViewRecord viewRecord, Context context) {
-    ReadList<View> views = new MappedList<ViewRecord, View>(viewRecord.subviews,
+  ReadList<View> showSubViews(ViewRecord viewRecord, Context context) {
+    return new MappedList<ViewRecord, View>(viewRecord.subviews,
         (ViewRecord record) => showViewRecord(record, context));
-    return new ColumnView(views, viewRecord.style);
+  }
+
+  View showColumnViewRecord(ViewRecord viewRecord, Context context) {
+    return new ColumnView(showSubViews(viewRecord, context), viewRecord.style);
+  }
+
+  View showRowViewRecord(ViewRecord viewRecord, Context context) {
+    return new RowView(showSubViews(viewRecord, context), viewRecord.style);
   }
 
   void _executeAction(DataRecord action) {

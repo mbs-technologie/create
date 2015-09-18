@@ -63,6 +63,7 @@ class ViewId {
 const ViewId LABEL_VIEW = const ViewId('Label');
 const ViewId BUTTON_VIEW = const ViewId('Button');
 const ViewId COLUMN_VIEW = const ViewId('Column');
+const ViewId ROW_VIEW = const ViewId('Row');
 
 class ViewRecord extends CreateRecord {
   final Ref<String> name;
@@ -95,6 +96,14 @@ class ViewRecord extends CreateRecord {
       content = new State<DataRecord>(null),
       action = new State<DataRecord>(null),
       subviews = columns;
+
+  ViewRecord.Row(String name, Style style, MutableList<ViewRecord> rows):
+      name = new State<String>(name),
+      viewId = new State<ViewId>(ROW_VIEW),
+      style = new State<Style>(style),
+      content = new State<DataRecord>(null),
+      action = new State<DataRecord>(null),
+      subviews = rows;
 }
 
 // Dart type system fails us here.
@@ -149,21 +158,22 @@ String MAIN_NAME = 'main';
 List<CreateRecord> buildInitialCreateData() {
   DataRecord buttontext = new DataRecord(RecordType.PARAMETER, 'buttontext', STRING_TYPE,
       'Increase the counter value');
-  DataRecord describe = new DataRecord(RecordType.OPERATION, 'describe', TEMPLATE_TYPE,
+  DataRecord describestate = new DataRecord(RecordType.OPERATION, 'describestate', TEMPLATE_TYPE,
       'The counter value is \$counter');
   DataRecord increase = new DataRecord(RecordType.OPERATION, 'increase', CODE_TYPE,
       'counter += increaseby');
-  ViewRecord counterlabel = new ViewRecord.Label('counterlabel', BODY1_STYLE, describe);
+  ViewRecord counterlabel = new ViewRecord.Label('counterlabel', BODY1_STYLE, describestate);
   ViewRecord counterbutton = new ViewRecord.Button('counterbutton', BUTTON_STYLE, buttontext,
       increase);
 
   return [
   //  new DataRecord(RecordType.PARAMETER, APPTITLE_NAME, STRING_TYPE, 'Demo App'),
     new DataRecord(RecordType.DATA, COUNTER_NAME, INTEGER_TYPE, '68'),
+    new DataRecord(RecordType.PARAMETER, 'hello', STRING_TYPE, 'Hello, world!'),
     buttontext,
     new DataRecord(RecordType.PARAMETER, INCREASEBY_NAME, INTEGER_TYPE, '1'),
     new DataRecord(RecordType.SERVICE, 'today', STRING_TYPE, _today()), // Hack for the demo
-    describe,
+    describestate,
     increase,
     new StyleRecord('Largefont', 24.0, BLACK_COLOR),
     new StyleRecord('Bigred', 32.0, RED_COLOR),
