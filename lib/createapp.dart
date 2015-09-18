@@ -5,6 +5,7 @@ library createapp;
 import 'elements.dart';
 import 'elementsruntime.dart';
 import 'createdata.dart';
+import 'createeval.dart';
 import 'styles.dart';
 import 'views.dart';
 
@@ -452,6 +453,14 @@ class CreateApp extends BaseZone implements AppState {
     return record.state;
   }
 
+  ReadRef<String> evaluateTemplate(String template, Context context) {
+    Construct code = parseTemplate(template);
+    State<String> result = new State<String>(code.evaluate(datastore));
+    Operation reevaluate = makeOperation(() => result.value = code.evaluate(datastore));
+    code.observe(datastore, reevaluate, context);
+    return result;
+  }
+
   View showLabelViewRecord(ViewRecord viewRecord, Context context) {
     return new LabelView(evaluateRecord(viewRecord.content.value, context), viewRecord.style);
   }
@@ -477,10 +486,13 @@ class CreateApp extends BaseZone implements AppState {
   }
 
   void _executeAction(DataRecord action) {
-    if (action != null) {
-      print('Executing ${action.name.value}');
-      _increaseValue();
+    if (action == null) {
+      return;
     }
+
+    print('Executing ${action.name.value}');
+    Construct code = parseCode(action.state.value);
+    code.evaluate(datastore);
   }
 
   @override DrawerView makeDrawer() {
@@ -504,108 +516,5 @@ class CreateApp extends BaseZone implements AppState {
       new Constant<bool>(appMode.value == mode),
       new Constant<Operation>(makeOperation(() { appMode.value = mode; }))
     );
-  }
-
-  static int getIntValue(ReadRef<String> stringRef) =>
-    isNotNull(stringRef) ? int.parse(stringRef.value, onError: (s) => 0) : 0;
-
-  static void setIntValue(WriteRef<String> writeRef, int newValue) {
-    writeRef.value = newValue.toString();
-  }
-
-  void _increaseValue() {
-    DataRecord counter = datastore.lookup(COUNTER_NAME);
-    DataRecord increaseby = datastore.lookup(INCREASEBY_NAME);
-    assert (counter != null && increaseby != null);
-    setIntValue(counter.state, getIntValue(counter.state) + getIntValue(increaseby.state));
-  }
-
-  ReadRef<String> evaluateTemplate(String template, Context context) {
-    Construct code = parseTemplate(template);
-    State<String> result = new State<String>(code.evaluate(datastore));
-    Operation reevaluate = makeOperation(() => result.value = code.evaluate(datastore));
-    code.observe(datastore, reevaluate, context);
-    return result;
-  }
-
-  Construct parseTemplate(String template) {
-    final List<Construct> result = [];
-    final int length = template.length;
-    int startIndex = 0;
-    int index = 0;
-    while (index + 1 < length) {
-      if (template[index] == '\$' && isLetter(template.codeUnitAt(index + 1))) {
-        if (startIndex < index) {
-          result.add(new ConstantConstruct(template.substring(startIndex, index)));
-        }
-        int startTemplate = index + 1;
-        index = startTemplate + 1;
-        while (index < length && isLetterOrDigit(template.codeUnitAt(index))) {
-          ++index;
-        }
-        result.add(new IdentifierConstruct(template.substring(startTemplate, index)));
-        startIndex = index;
-      } else {
-        ++index;
-      }
-    }
-    if (startIndex < length) {
-      result.add(new ConstantConstruct(template.substring(startIndex)));
-    }
-    return new ConcatenateConstruct(result);
-  }
-}
-
-abstract class Construct {
-  void observe(CreateData datastore, Operation operation, Context context);
-  String evaluate(CreateData datastore);
-}
-
-class ConstantConstruct implements Construct {
-  final String value;
-
-  ConstantConstruct(this.value);
-
-  void observe(CreateData datastore, Operation operation, Context context) => null;
-  String evaluate(CreateData datastore) => value;
-}
-
-class IdentifierConstruct implements Construct {
-  final String identifier;
-
-  IdentifierConstruct(this.identifier);
-
-  void observe(CreateData datastore, Operation operation, Context context) {
-    CreateRecord record = datastore.lookup(identifier);
-    // TODO: handle non-DataRecord records
-    if (record != null && record is DataRecord) {
-      record.state.observe(operation, context);
-    }
-  }
-
-  String evaluate(CreateData datastore) {
-    CreateRecord record = datastore.lookup(identifier);
-    // TODO: handle non-DataRecord records
-    if (record != null && record is DataRecord) {
-      return record.state.value;
-    } else {
-      return identifier + '???';
-    }
-  }
-}
-
-class ConcatenateConstruct implements Construct {
-  final List<Construct> parameters;
-
-  ConcatenateConstruct(this.parameters);
-
-  void observe(CreateData datastore, Operation operation, Context context) {
-    parameters.forEach((c) => c.observe(datastore, operation, context));
-  }
-
-  String evaluate(CreateData datastore) {
-    StringBuffer result = new StringBuffer();
-    parameters.forEach((c) => result.write(c.evaluate(datastore)));
-    return result.toString();
   }
 }

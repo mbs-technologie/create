@@ -19,14 +19,16 @@ General components:
 - [skyapp.dart](https://github.com/domokit/create/blob/master/lib/skyapp.dart):
   infrastructure for a Sky application
 
-Application-specific:
+Simple application:
 - [counter.dart](https://github.com/domokit/create/blob/master/lib/counter.dart):
-  simple counter application written using the framework
+  counter application written using the framework
+
+App builder:
 - [createdata.dart](https://github.com/domokit/create/blob/master/lib/createdata.dart):
-  datstore for the app builder
+  datastore for the app builder
+- [createeval.dart](https://github.com/domokit/create/blob/master/lib/createeval.dart):
+  expression parser/evaluator used by app builder
 - [createapp.dart](https://github.com/domokit/create/blob/master/lib/createapp.dart):
-  interface for the app builder
-- [main.dart](https://github.com/domokit/create/blob/master/lib/main.dart):
-  main() function
+  human interface for the app builder
 
 Feedback? [I'd love to hear it](mailto:dynin@google.com).

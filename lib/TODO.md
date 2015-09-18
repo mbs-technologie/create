@@ -5,7 +5,7 @@
   - [ ] Figure out refreshing
 - [x] Row views
 - [x] Parse templates and evaluate them
-- [ ] Parse code and evaluate it
+- [x] Parse code and evaluate it
 - [x] IconButton view
 - [ ] Improve TextInput widget; support for keyboard types
 - [ ] More primitives supported in the code

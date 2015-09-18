@@ -151,8 +151,6 @@ class CreateData extends Datastore/*<CreateRecord>*/ {
   }
 }
 
-String COUNTER_NAME = 'counter';
-String INCREASEBY_NAME = 'increaseby';
 String MAIN_NAME = 'main';
 
 List<CreateRecord> buildInitialCreateData() {
@@ -167,11 +165,10 @@ List<CreateRecord> buildInitialCreateData() {
       increase);
 
   return [
-  //  new DataRecord(RecordType.PARAMETER, APPTITLE_NAME, STRING_TYPE, 'Demo App'),
-    new DataRecord(RecordType.DATA, COUNTER_NAME, INTEGER_TYPE, '68'),
     new DataRecord(RecordType.PARAMETER, 'hello', STRING_TYPE, 'Hello, world!'),
+    new DataRecord(RecordType.DATA, 'counter', INTEGER_TYPE, '68'),
     buttontext,
-    new DataRecord(RecordType.PARAMETER, INCREASEBY_NAME, INTEGER_TYPE, '1'),
+    new DataRecord(RecordType.PARAMETER, 'increaseby', INTEGER_TYPE, '1'),
     new DataRecord(RecordType.SERVICE, 'today', STRING_TYPE, _today()), // Hack for the demo
     describestate,
     increase,
