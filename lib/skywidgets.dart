@@ -283,7 +283,7 @@ class SelectionComponent extends Component {
     ));
 
     return new Positioned(
-      child: new PopupMenu2(
+      child: new PopupMenu(
         items: menuItems,
         level: 4,
         showing: true,

@@ -3,7 +3,7 @@
 library skyapp;
 
 import 'package:sky/widgets.dart';
-import 'package:sky/theme/colors.dart' as colors;
+import 'package:sky/material.dart';
 
 import 'elements.dart';
 import 'elementsruntime.dart';
@@ -13,7 +13,7 @@ import 'skywidgets.dart';
 
 ThemeData _APP_THEME = new ThemeData(
   brightness: ThemeBrightness.light,
-  primarySwatch: colors.Teal
+  primarySwatch: Colors.teal
 );
 const EdgeDims _MAIN_VIEW_PADDING = const EdgeDims.all(10.0);
 
@@ -108,7 +108,7 @@ class SkyApp extends SkyAppShim with SkyWidgets {
       Operation addOperation = appState.addOperation.value;
       return new FloatingActionButton(
         child: new Icon(type: ADD_ICON.id, size: 24),
-        backgroundColor: colors.RedAccent[200],
+        backgroundColor: Colors.redAccent[200],
         onPressed: () => addOperation.scheduleAction()
       );
     } else {

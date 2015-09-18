@@ -20,7 +20,7 @@ packages:
   barback:
     description: barback
     source: hosted
-    version: "0.15.2+6"
+    version: "0.15.2+7"
   cassowary:
     description: cassowary
     source: hosted

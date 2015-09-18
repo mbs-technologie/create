@@ -4,8 +4,7 @@ library styles;
 
 import 'dart:sky' show Color;
 import 'package:sky/src/painting/text_style.dart';
-import 'package:sky/theme/colors.dart' as colors;
-import 'package:sky/theme/typography.dart' as typography;
+import 'package:sky/material.dart';
 
 abstract class Style {
   String get styleName;
@@ -19,12 +18,12 @@ class ThemedStyle extends Style {
   ThemedStyle(this.styleName, this.textStyle);
 }
 
-ThemedStyle TITLE_STYLE = new ThemedStyle("Title", typography.black.title);
-ThemedStyle SUBHEAD_STYLE = new ThemedStyle("Subhead", typography.black.subhead);
-ThemedStyle BODY2_STYLE = new ThemedStyle("Body2", typography.black.body2);
-ThemedStyle BODY1_STYLE = new ThemedStyle("Body1", typography.black.body1);
-ThemedStyle CAPTION_STYLE = new ThemedStyle("Caption", typography.black.caption);
-ThemedStyle BUTTON_STYLE = new ThemedStyle("Button", typography.black.button);
+ThemedStyle TITLE_STYLE = new ThemedStyle("Title", Typography.black.title);
+ThemedStyle SUBHEAD_STYLE = new ThemedStyle("Subhead", Typography.black.subhead);
+ThemedStyle BODY2_STYLE = new ThemedStyle("Body2", Typography.black.body2);
+ThemedStyle BODY1_STYLE = new ThemedStyle("Body1", Typography.black.body1);
+ThemedStyle CAPTION_STYLE = new ThemedStyle("Caption", Typography.black.caption);
+ThemedStyle BUTTON_STYLE = new ThemedStyle("Button", Typography.black.button);
 
 List<ThemedStyle> ALL_THEMED_STYLES = [
   TITLE_STYLE,
@@ -44,10 +43,10 @@ class NamedColor {
   String toString() => name;
 }
 
-NamedColor BLACK_COLOR = new NamedColor("Black", colors.black);
-NamedColor RED_COLOR = new NamedColor("Red", colors.Red[500]);
-NamedColor GREEN_COLOR = new NamedColor("Green", colors.Green[500]);
-NamedColor BLUE_COLOR = new NamedColor("Blue", colors.Blue[500]);
+NamedColor BLACK_COLOR = new NamedColor("Black", Colors.black);
+NamedColor RED_COLOR = new NamedColor("Red", Colors.red[500]);
+NamedColor GREEN_COLOR = new NamedColor("Green", Colors.green[500]);
+NamedColor BLUE_COLOR = new NamedColor("Blue", Colors.blue[500]);
 
 List<NamedColor> ALL_COLORS = [
   BLACK_COLOR,
