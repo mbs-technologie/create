@@ -215,3 +215,20 @@ class MutableList<E> extends ReadList<E> with _ObserverManager {
 
 /// Check whether a reference is not null and holds a non-null value.
 bool isNotNull(ReadRef ref) => (ref != null && ref.value != null);
+
+// Missing from the Dart library; see https://github.com/dart-lang/sdk/issues/24374
+
+/// Check whether this character is an ASCII digit.
+bool isDigit(int c) {
+  return c >= 0x30 && c <= 0x39;
+}
+
+/// Check whether this character is an ASCII letter.
+bool isLetter(int c) {
+  return (c >= 0x41 && c <= 0x5A) || (c >= 0x61 && c <= 0x7A);
+}
+
+/// Check whether this character is an ASCII letter or digit.
+bool isLetterOrDigit(int c) {
+  return isLetter(c) || isDigit(c);
+}

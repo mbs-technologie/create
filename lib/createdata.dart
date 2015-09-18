@@ -97,8 +97,12 @@ class ViewRecord extends CreateRecord {
       subviews = columns;
 }
 
-// TODO: make the datastore a generic type.
-class CreateData extends Datastore {
+// Dart type system fails us here.
+// We get an error:
+//   type 'MutableList<CreateRecord>' is not a subtype of type 'ReadList<ViewRecord>' of
+//   'function result'.
+// when trying to invoke getViews() if the type parameter is uncommented.
+class CreateData extends Datastore/*<CreateRecord>*/ {
   CreateData(List<CreateRecord> initialState): super(initialState);
 
   ReadList<DataRecord> getDataRecords(RecordType type, Context context) =>

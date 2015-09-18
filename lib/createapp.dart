@@ -370,14 +370,23 @@ class CreateApp extends BaseZone implements AppState {
     return _showError('Unknown viewId: ${viewRecord.viewId.value}.');
   }
 
+  ReadRef<String> evaluateRecord(DataRecord record, Context context) {
+    if (record.type == RecordType.OPERATION && record.typeId.value == TEMPLATE_TYPE) {
+      // TODO: make a reactive function which updates if template changes
+      return evaluateTemplate(record.state.value, context);
+    }
+
+    return record.state;
+  }
+
   View showLabelViewRecord(ViewRecord viewRecord, Context context) {
-    return new LabelView(viewRecord.content.value.state, viewRecord.style);
+    return new LabelView(evaluateRecord(viewRecord.content.value, context), viewRecord.style);
   }
 
   View showButtonViewRecord(ViewRecord viewRecord, Context context) {
     Operation action = makeOperation(() => _executeAction(viewRecord.action.value));
 
-    return new ButtonView(viewRecord.content.value.state, viewRecord.style,
+    return new ButtonView(evaluateRecord(viewRecord.content.value, context), viewRecord.style,
         new Constant<Operation>(action));
   }
 
@@ -431,7 +440,92 @@ class CreateApp extends BaseZone implements AppState {
     setIntValue(counter.state, getIntValue(counter.state) + getIntValue(increaseby.state));
   }
 
-  ReadRef<String> get describeState => new ReactiveFunction<String, String>(
-      datastore.lookup(COUNTER_NAME).state, this,
-      (String counterValue) => 'The counter value is $counterValue');
+  ReadRef<String> evaluateTemplate(String template, Context context) {
+    Construct code = parseTemplate(template);
+    State<String> result = new State<String>(code.evaluate(datastore));
+    Operation reevaluate = makeOperation(() => result.value = code.evaluate(datastore));
+    code.observe(datastore, reevaluate, context);
+    return result;
+  }
+
+  Construct parseTemplate(String template) {
+    final List<Construct> result = [];
+    final int length = template.length;
+    int startIndex = 0;
+    int index = 0;
+    while (index + 1 < length) {
+      if (template[index] == '\$' && isLetter(template.codeUnitAt(index + 1))) {
+        if (startIndex < index) {
+          result.add(new ConstantConstruct(template.substring(startIndex, index)));
+        }
+        int startTemplate = index + 1;
+        index = startTemplate + 1;
+        while (index < length && isLetterOrDigit(template.codeUnitAt(index))) {
+          ++index;
+        }
+        result.add(new IdentifierConstruct(template.substring(startTemplate, index)));
+        startIndex = index;
+      } else {
+        ++index;
+      }
+    }
+    if (startIndex < length) {
+      result.add(new ConstantConstruct(template.substring(startIndex)));
+    }
+    return new ConcatenateConstruct(result);
+  }
+}
+
+abstract class Construct {
+  void observe(CreateData datastore, Operation operation, Context context);
+  String evaluate(CreateData datastore);
+}
+
+class ConstantConstruct implements Construct {
+  final String value;
+
+  ConstantConstruct(this.value);
+
+  void observe(CreateData datastore, Operation operation, Context context) => null;
+  String evaluate(CreateData datastore) => value;
+}
+
+class IdentifierConstruct implements Construct {
+  final String identifier;
+
+  IdentifierConstruct(this.identifier);
+
+  void observe(CreateData datastore, Operation operation, Context context) {
+    CreateRecord record = datastore.lookup(identifier);
+    // TODO: handle non-DataRecord records
+    if (record != null && record is DataRecord) {
+      record.state.observe(operation, context);
+    }
+  }
+
+  String evaluate(CreateData datastore) {
+    CreateRecord record = datastore.lookup(identifier);
+    // TODO: handle non-DataRecord records
+    if (record != null && record is DataRecord) {
+      return record.state.value;
+    } else {
+      return identifier + '???';
+    }
+  }
+}
+
+class ConcatenateConstruct implements Construct {
+  final List<Construct> parameters;
+
+  ConcatenateConstruct(this.parameters);
+
+  void observe(CreateData datastore, Operation operation, Context context) {
+    parameters.forEach((c) => c.observe(datastore, operation, context));
+  }
+
+  String evaluate(CreateData datastore) {
+    StringBuffer result = new StringBuffer();
+    parameters.forEach((c) => result.write(c.evaluate(datastore)));
+    return result.toString();
+  }
 }
