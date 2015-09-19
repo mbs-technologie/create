@@ -171,7 +171,8 @@ abstract class SkyWidgets {
   };
 
   List<Widget> _buildWidgetList(ReadList<View> views, Context context) {
-    return new MappedList<View, Widget>(views, (view) => viewToWidget(view, context)).elements;
+    return new MappedList<View, Widget>(views,
+        (view) => viewToWidget(view, context), context).elements;
   }
 
   void _dismissDrawer() {

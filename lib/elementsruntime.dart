@@ -181,20 +181,28 @@ class ImmutableList<E> extends ReadList<E> with _BaseImmutable {
 }
 
 /// Since Dart doesn't have generic functions, we have to declare a special type here.
-class MappedList<S, T> implements ReadList<T> {
+class MappedList<S, T> extends ReadList<T> with _ObserverManager {
   final ReadList<S> _source;
   final Function _function;
+  List<T> _cachedElements;
 
-  MappedList(this._source, T function(S source)): _function = function;
+  MappedList(this._source, T function(S source), Context context): _function = function {
+    _source.observe(context.zone.makeOperation(_sourceChanged), context);
+  }
 
-  /// TODO: implement this efficiently.
-  @override void observe(Operation observer, Context context) =>
-      _source.observe(observer, context);
+  void _sourceChanged() {
+    _cachedElements = null;
+    _triggerObservers();
+  }
 
   ReadRef<int> get size => _source.size;
 
-  /// TODO: implement this efficiently.
-  List<T> get elements => new List<T>.from(_source.elements.map(_function));
+  List<T> get elements {
+    if (_cachedElements == null) {
+      _cachedElements = new List<T>.from(_source.elements.map(_function));
+    }
+    return _cachedElements;
+  }
 }
 
 /// An list that can change state.

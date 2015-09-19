@@ -171,7 +171,7 @@ class CreateApp extends BaseZone implements AppState {
 
   View schemaView(Context context) {
     return new ColumnView(
-      new MappedList<DataRecord, View>(datastore.getData(context), schemaRowView)
+      new MappedList<DataRecord, View>(datastore.getData(context), schemaRowView, context)
     );
   }
 
@@ -183,28 +183,27 @@ class CreateApp extends BaseZone implements AppState {
     );
   }
 
+  View nameInput(CreateRecord record) {
+    return new TextInput(record.name, new Constant<Style>(BODY2_STYLE));
+  }
+
   View schemaRowView(DataRecord record) {
     return new RowView(new ImmutableList<View>([
-      new TextInput(
-        record.name,
-        new Constant<Style>(BODY2_STYLE)
-      ),
+      nameInput(record),
       makePrimitiveTypeInput(record.typeId)
     ]));
   }
 
   View parametersView(Context context) {
     return new ColumnView(
-      new MappedList<DataRecord, View>(datastore.getParameters(context), parametersRowView)
+        new MappedList<DataRecord, View>(datastore.getParameters(context), parametersRowView,
+            context)
     );
   }
 
   View parametersRowView(DataRecord record) {
     return new RowView(new ImmutableList<View>([
-      new TextInput(
-        record.name,
-        new Constant<Style>(BODY2_STYLE)
-      ),
+      nameInput(record),
       makePrimitiveTypeInput(record.typeId),
       new TextInput(
         record.state,
@@ -215,16 +214,14 @@ class CreateApp extends BaseZone implements AppState {
 
   View operationsView(Context context) {
     return new ColumnView(
-      new MappedList<DataRecord, View>(datastore.getOperations(context), operationsRowView)
+        new MappedList<DataRecord, View>(datastore.getOperations(context), operationsRowView,
+            context)
     );
   }
 
   View operationsRowView(DataRecord record) {
     return new RowView(new ImmutableList<View>([
-      new TextInput(
-        record.name,
-        new Constant<Style>(BODY2_STYLE)
-      ),
+      nameInput(record),
       new SelectionInput<TypeId>(
         record.typeId,
         new ImmutableList<TypeId>(OPERATION_TYPES),
@@ -239,7 +236,7 @@ class CreateApp extends BaseZone implements AppState {
 
   View servicesView(Context context) {
     return new ColumnView(
-      new MappedList<DataRecord, View>(datastore.getServices(context), servicesRowView)
+      new MappedList<DataRecord, View>(datastore.getServices(context), servicesRowView, context)
     );
   }
 
@@ -263,16 +260,13 @@ class CreateApp extends BaseZone implements AppState {
 
   View stylesView(Context context) {
     return new ColumnView(
-      new MappedList<StyleRecord, View>(datastore.getStyles(context), stylesRowView)
+      new MappedList<StyleRecord, View>(datastore.getStyles(context), stylesRowView, context)
     );
   }
 
   View stylesRowView(StyleRecord record) {
     return new RowView(new ImmutableList<View>([
-      new TextInput(
-        record.name,
-        new Constant<Style>(BODY2_STYLE)
-      ),
+      nameInput(record),
       new LabelView(
         new Constant<String>('Font:'),
         new Constant<Style>(BODY2_STYLE)
@@ -293,7 +287,7 @@ class CreateApp extends BaseZone implements AppState {
   View viewsView(Context context) {
     return new ColumnView(
       new MappedList<ViewRecord, View>(datastore.getViews(context),
-          (view) => viewsRowView(view, context))
+          (view) => viewsRowView(view, context), context)
     );
   }
 
@@ -367,35 +361,39 @@ class CreateApp extends BaseZone implements AppState {
     }
   }
 
+  View viewsRowView(ViewRecord record, Context context) {
+    MutableList<View> rowElements = new MutableList<View>();
+    populateRowView(rowElements, record, context);
+    void updateRowView() {
+      rowElements.clear();
+      populateRowView(rowElements, record, context);
+    }
+    record.viewId.observe(makeOperation(updateRowView), context);
+    return new RowView(rowElements);
+  }
+
   bool renderInRow(ViewId viewId) => viewId != COLUMN_VIEW && viewId != ROW_VIEW;
 
-  View viewsRowView(ViewRecord record, Context context) {
-    View name = new TextInput(record.name, new Constant<Style>(BODY2_STYLE));
-
+  void populateRowView(MutableList<View> rowElements, ViewRecord record, Context context) {
+    rowElements.add(nameInput(record));
     if (renderInRow(record.viewId.value)) {
-      return new RowView(new ImmutableList<View>([
-        name,
-        makeViewIdInput(record.viewId, context),
-        makeStyleInput(record.style, context),
-        viewsRowExtra(record, context)
-      ]));
+      rowElements.add(makeViewIdInput(record.viewId, context));
+      rowElements.add(makeStyleInput(record.style, context));
+      rowElements.add(viewsRowExtra(record, context));
     } else {
-      return new RowView(new ImmutableList<View>([
-        name,
-        new ColumnView(new ImmutableList<View>([
-          new RowView(new ImmutableList<View>([
-            makeViewIdInput(record.viewId, context),
-            makeStyleInput(record.style, context)
-          ])),
-          viewsRowExtra(record, context)
-        ]))
-      ]));
+      rowElements.add(new ColumnView(new ImmutableList<View>([
+        new RowView(new ImmutableList<View>([
+          makeViewIdInput(record.viewId, context),
+          makeStyleInput(record.style, context)
+        ])),
+        viewsRowExtra(record, context)
+      ])));
     }
   }
 
   View dataView(Context context) {
     return new ColumnView(
-      new MappedList<DataRecord, View>(datastore.getData(context), dataRowView)
+      new MappedList<DataRecord, View>(datastore.getData(context), dataRowView, context)
     );
   }
 
@@ -474,7 +472,7 @@ class CreateApp extends BaseZone implements AppState {
 
   ReadList<View> showSubViews(ViewRecord viewRecord, Context context) {
     return new MappedList<ViewRecord, View>(viewRecord.subviews,
-        (ViewRecord record) => showViewRecord(record, context));
+        (ViewRecord record) => showViewRecord(record, context), context);
   }
 
   View showColumnViewRecord(ViewRecord viewRecord, Context context) {
