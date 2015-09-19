@@ -25,10 +25,14 @@ Simple application:
 
 App builder:
 - [createdata.dart](https://github.com/domokit/create/blob/master/lib/createdata.dart):
-  datastore for the app builder
+  data schema and datastore for the app builder
 - [createeval.dart](https://github.com/domokit/create/blob/master/lib/createeval.dart):
-  expression parser/evaluator used by app builder
+  expression parser/evaluator used by the app builder
 - [createapp.dart](https://github.com/domokit/create/blob/master/lib/createapp.dart):
   human interface for the app builder
+
+Main function:
+- [main.dart](https://github.com/domokit/create/blob/master/lib/main.dart):
+  just launch the app
 
 Feedback? [I'd love to hear it](mailto:dynin@google.com).

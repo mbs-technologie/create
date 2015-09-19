@@ -9,6 +9,7 @@
 - [ ] Improve TextInput widget; support for keyboard types
 - [ ] More primitives supported in the code
 - [ ] Use standard Sky widget for the PopupMenu
+- [ ] Do not require dev branch of Sky
 - [ ] Add Navigation support to Sky app
 - [ ] Efficient implementation of Datastore.lookup()
 - [ ] Ledger integration
@@ -17,3 +18,8 @@
 - [ ] Bootstrapping Create
 - [ ] Live syntax check
 - [ ] Standalone Android app
+- [ ] Prohibit recursive view declarations
+- [ ] Implement ReactiveBuild that autocreates subcontexts
+- [ ] Make styles computable
+- [ ] Factor out Named interface
+- [ ] Implement FilteredList and JoinedList

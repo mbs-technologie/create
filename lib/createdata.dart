@@ -111,7 +111,7 @@ class ViewRecord extends CreateRecord {
 //   type 'MutableList<CreateRecord>' is not a subtype of type 'ReadList<ViewRecord>' of
 //   'function result'.
 // when trying to invoke getViews() if the type parameter is uncommented.
-// Talked at length with gbracha about this,  there is no easy workaround;
+// Talked at length with gbracha@ about this, there is no easy workaround;
 // making the Datastore parameter dynamic is the least invasive solution.
 class CreateData extends Datastore/*<CreateRecord>*/ {
   CreateData(List<CreateRecord> initialState): super(initialState);

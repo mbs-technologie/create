@@ -205,7 +205,7 @@ class MappedList<S, T> extends ReadList<T> with _ObserverManager {
   }
 }
 
-/// An list that can change state.
+/// A list that can change state.
 class MutableList<E> extends ReadList<E> with _ObserverManager {
   final List<E> elements;
   State<int> size;
