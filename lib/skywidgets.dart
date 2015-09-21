@@ -11,13 +11,12 @@ import 'elementsruntime.dart';
 import 'styles.dart';
 import 'views.dart';
 
-typedef Widget MenuBuilder();
-
 abstract class SkyWidgets {
-  Ref<MenuBuilder> get menuBuilder;
   Ref<DrawerView> get drawer;
 
   void rebuildApp();
+
+  void showPopupMenu(List<PopupMenuItem> menuItems, MenuPosition position);
 
   Widget viewToWidget(View view, Context context) {
     _cleanupView(view);
@@ -106,7 +105,7 @@ abstract class SkyWidgets {
   }
 
   Widget renderSelection(SelectionInput selection) {
-    return new SelectionComponent(selection, menuBuilder);
+    return new SelectionComponent(selection, this);
   }
 
   MaterialButton renderButton(ButtonView button) {
@@ -250,10 +249,9 @@ class TextComponent extends StatefulComponent {
 // TODO: Use Sky widget once it's implemented
 class SelectionComponent extends Component {
   SelectionInput selection;
-  Ref<MenuBuilder> menuBuilder;
-  Point dropdownTopLeft;
+  SkyWidgets skyWidgets;
 
-  SelectionComponent(this.selection, this.menuBuilder);
+  SelectionComponent(this.selection, this.skyWidgets);
 
   TextStyle get textStyle => textStyleOf(selection);
 
@@ -268,20 +266,9 @@ class SelectionComponent extends Component {
   }
 
   void _showSelectionMenu() {
-    dropdownTopLeft = localToGlobal(new Point(0.0, 0.0));
-    menuBuilder.value = _buildMenu;
-  }
+    Point dropdownTopLeft = localToGlobal(new Point(0.0, 0.0));
+    MenuPosition position = new MenuPosition(left: dropdownTopLeft.x, top: dropdownTopLeft.y);
 
-  void _selected(option) {
-    selection.model.value = option;
-    _dismissMenu();
-  }
-
-  void _dismissMenu() {
-    menuBuilder.value = null;
-  }
-
-  Widget _buildMenu() {
     final List<PopupMenuItem> menuItems = new List.from(selection.options.elements.map(
       (option) => new PopupMenuItem(
           child: new Text(selection.display(option), style: textStyle),
@@ -289,15 +276,10 @@ class SelectionComponent extends Component {
       )
     ));
 
-    return new Positioned(
-      child: new PopupMenu(
-        items: menuItems,
-        level: 4,
-        showing: true,
-        onDismissed: _dismissMenu
-      ),
-      left: dropdownTopLeft.x,
-      top: dropdownTopLeft.y
-    );
+    skyWidgets.showPopupMenu(menuItems, position);
+  }
+
+  void _selected(option) {
+    selection.model.value = option;
   }
 }

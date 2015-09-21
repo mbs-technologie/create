@@ -25,14 +25,14 @@ abstract class SkyAppShim extends App {
 class SkyApp extends SkyAppShim with SkyWidgets {
   final AppState appState;
   final Zone viewZone = new BaseZone();
-  final Ref<MenuBuilder> menuBuilder = new State<MenuBuilder>(null);
   final Ref<DrawerView> drawer = new State<DrawerView>(null);
+  NavigationState _navigationState;
+  Navigator _navigator;
 
   SkyApp(this.appState) {
     Operation rebuildOperation = viewZone.makeOperation(rebuildApp);
     appState.appTitle.observe(rebuildOperation, viewZone);
     appState.mainView.observe(rebuildOperation, viewZone);
-    menuBuilder.observe(rebuildOperation, viewZone);
     drawer.observe(rebuildOperation, viewZone);
   }
 
@@ -45,9 +45,18 @@ class SkyApp extends SkyAppShim with SkyWidgets {
       data: _APP_THEME,
       child: new Title(
         title: appState.appTitle.value,
-        child: buildOverlays()
+        child: new Navigator(_navigationState)
       )
     );
+  }
+
+  @override void initState() {
+    _navigationState = new NavigationState([
+      new Route(
+        name: '/',
+        builder: (navigator, route) => _buildScaffold(navigator)
+      ),
+    ]);
   }
 
   void rebuildApp() {
@@ -55,18 +64,13 @@ class SkyApp extends SkyAppShim with SkyWidgets {
     setState(() { });
   }
 
-  Widget buildOverlays() {
-    List<Widget> overlays = [ _buildScaffold() ];
-    if (menuBuilder.value != null) {
-      overlays.add(new ModalOverlay(
-        children: [ menuBuilder.value() ],
-        onDismiss: () => menuBuilder.value = null
-      ));
-    }
-    return new Stack(overlays);
+  void showPopupMenu(List<PopupMenuItem> menuItems, MenuPosition position) {
+    showMenu(navigator: _navigator, position: position,
+        builder: (navigator) => menuItems);
   }
 
-  Widget _buildScaffold() {
+  Widget _buildScaffold(Navigator navigator) {
+    this._navigator = navigator;
     return new Scaffold(
       toolbar: _buildToolBar(),
       body: _buildMainCanvas(),

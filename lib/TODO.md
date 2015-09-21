@@ -23,3 +23,5 @@
 - [ ] Make styles computable
 - [ ] Factor out Named interface
 - [ ] Implement FilteredList and JoinedList
+- [ ] Scheduler for actions and observers
+- [ ] Parametrized operations
