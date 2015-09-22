@@ -8,8 +8,8 @@
 - [x] IconButton view
 - [ ] Improve TextInput widget; support for keyboard types
 - [ ] More primitives supported in the code
-- [ ] Use standard Sky widget for the PopupMenu
-- [ ] Do not require dev branch of Sky
+- [x] Use standard Sky widget for the PopupMenu
+- [x] Do not require dev branch of Sky
 - [ ] Add Navigation support to Sky app
 - [ ] Efficient implementation of Datastore.lookup()
 - [ ] Ledger integration

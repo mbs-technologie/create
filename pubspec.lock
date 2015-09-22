@@ -128,7 +128,7 @@ packages:
   pub_semver:
     description: pub_semver
     source: hosted
-    version: "1.2.1"
+    version: "1.2.2"
   quiver:
     description: quiver
     source: hosted
@@ -154,19 +154,17 @@ packages:
     source: hosted
     version: "0.0.1+4"
   sky:
-    description:
-      path: "../sky_engine/sky/packages/sky"
-      relative: true
-    source: path
-    version: "0.0.46"
+    description: sky
+    source: hosted
+    version: "0.0.47"
   sky_engine:
     description: sky_engine
     source: hosted
-    version: "0.0.23"
+    version: "0.0.24"
   sky_services:
     description: sky_services
     source: hosted
-    version: "0.0.23"
+    version: "0.0.24"
   sky_tools:
     description: sky_tools
     source: hosted

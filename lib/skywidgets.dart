@@ -271,7 +271,11 @@ class SelectionComponent extends Component {
 
     final List<PopupMenuItem> menuItems = new List.from(selection.options.elements.map(
       (option) => new PopupMenuItem(
-          child: new Text(selection.display(option), style: textStyle),
+          child: new Row([
+            new IconButton(icon: (option == selection.model.value
+                ? RADIO_BUTTON_CHECKED_ICON
+                : RADIO_BUTTON_UNCHECKED_ICON).id),
+            new Text(selection.display(option), style: textStyle)]),
           onPressed: () => _selected(option)
       )
     ));

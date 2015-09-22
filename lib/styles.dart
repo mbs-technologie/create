@@ -82,3 +82,5 @@ const IconId CLOUD_ICON = const IconId('file/cloud');
 const IconId ADD_ICON = const IconId('content/add');
 const IconId ADD_CIRCLE_ICON = const IconId('content/add_circle');
 const IconId REMOVE_CIRCLE_ICON = const IconId('content/remove_circle');
+const IconId RADIO_BUTTON_CHECKED_ICON = const IconId('toggle/radio_button_checked');
+const IconId RADIO_BUTTON_UNCHECKED_ICON = const IconId('toggle/radio_button_unchecked');
