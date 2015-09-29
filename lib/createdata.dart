@@ -125,7 +125,9 @@ class ViewRecord extends CreateRecord {
 // Talked at length with gbracha@ about this, there is no easy workaround;
 // making the Datastore parameter dynamic is the least invasive solution.
 class CreateData extends Datastore/*<CreateRecord>*/ {
-  CreateData(List<CreateRecord> initialState): super(initialState);
+  CreateData(List<CreateRecord> initialState): super(initialState) {
+    new DataSyncer(this).start();
+  }
 
   ReadList<DataRecord> getDataRecords(DataType dataType, Context context) =>
     runQuery((record) => record.dataType == dataType, context);

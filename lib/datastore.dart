@@ -2,15 +2,16 @@
 
 library datastore;
 
+import 'dart:collection';
+import 'dart:convert' as convert;
 import 'dart:math' as math;
 import 'elements.dart';
 import 'elementsruntime.dart';
 
 class DataType {
+  // TODO(dynin): eventually we'll have namespaces in addition to names.
   final String _name;
-
   const DataType(this._name);
-
   String toString() => _name.toString();
 }
 
@@ -113,5 +114,40 @@ class _LiveQuery<R extends Record> implements Disposable {
 
   void dispose() {
     _datastore.unregister(this);
+  }
+}
+
+const String DATATYPE_FIELD = 'datatype';
+const String DATAID_FIELD = 'dataid';
+const String NAME_FIELD = 'name';
+
+class DataSyncer {
+  Datastore _datastore;
+
+  DataSyncer(this._datastore);
+
+  void start() {
+    print('Syncing datastore with ${_datastore._records.length} records.');
+    List jsonRecords = new List.from(_datastore._records.map(_recordToJson));
+    String encoded = convert.JSON.encode({ "records": jsonRecords });
+    print('encoded: $encoded');
+  }
+
+  Map<String, Object> _recordToJson(Record record) {
+    MarshalOutput output = new MarshalOutput();
+
+    output.stringField(DATATYPE_FIELD, record.dataType.toString());
+    output.stringField(DATAID_FIELD, record.dataId.toString());
+    output.stringField(NAME_FIELD, record.name.value);
+
+    return output.fieldMap;
+  }
+}
+
+class MarshalOutput {
+  Map<String, Object> fieldMap = new LinkedHashMap<String, Object>();
+
+  void stringField(String name, String value) {
+    fieldMap[name] = value;
   }
 }
