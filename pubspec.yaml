@@ -3,6 +3,8 @@ author: Misha Dynin <dynin@google.com>
 dependencies:
   sky: any
   sky_tools: any
-#dependency_overrides:
-#  sky:
-#    path: ../sky_engine/sky/packages/sky
+dependency_overrides:
+  material_design_icons:
+    path: ../../sky/packages/material_design_icons
+  sky:
+    path: ../../sky/packages/sky

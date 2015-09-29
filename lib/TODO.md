@@ -17,7 +17,7 @@
 - [ ] Datastore persistence
 - [ ] Bootstrapping Create
 - [ ] Live syntax check
-- [ ] Standalone Android app
+- [x] Standalone Android app
 - [ ] Prohibit recursive view declarations
 - [ ] Implement ReactiveBuild that autocreates subcontexts
 - [ ] Make styles computable

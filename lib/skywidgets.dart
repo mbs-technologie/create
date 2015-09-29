@@ -250,12 +250,16 @@ class TextComponent extends StatefulComponent {
 class SelectionComponent extends Component {
   SelectionInput selection;
   SkyWidgets skyWidgets;
+  List<PopupMenuItem> menuItems;
 
   SelectionComponent(this.selection, this.skyWidgets);
 
   TextStyle get textStyle => textStyleOf(selection);
 
   Widget build() {
+    // We do this during build(), because otherwise we may get an exception from Sky
+    menuItems = _buildMenuItems();
+
     return new FlatButton(
       child: new Row([
         new Text(selection.display(selection.model.value), style: textStyle),
@@ -265,11 +269,8 @@ class SelectionComponent extends Component {
     );
   }
 
-  void _showSelectionMenu() {
-    Point dropdownTopLeft = localToGlobal(new Point(0.0, 0.0));
-    MenuPosition position = new MenuPosition(left: dropdownTopLeft.x, top: dropdownTopLeft.y);
-
-    final List<PopupMenuItem> menuItems = new List.from(selection.options.elements.map(
+  List<PopupMenuItem> _buildMenuItems() {
+    return new List.from(selection.options.elements.map(
       (option) => new PopupMenuItem(
           child: new Row([
             new IconButton(icon: (option == selection.model.value
@@ -277,8 +278,14 @@ class SelectionComponent extends Component {
                 : RADIO_BUTTON_UNCHECKED_ICON).id),
             new Text(selection.display(option), style: textStyle)]),
           onPressed: () => _selected(option)
-      )
-    ));
+      )));
+  }
+
+  void _showSelectionMenu() {
+    Point dropdownTopLeft = localToGlobal(new Point(0.0, 0.0));
+    MenuPosition position = new MenuPosition(left: dropdownTopLeft.x, top: dropdownTopLeft.y);
+
+    assert (menuItems != null); // We populated this in build()
 
     skyWidgets.showPopupMenu(menuItems, position);
   }
