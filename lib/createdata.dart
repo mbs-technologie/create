@@ -34,22 +34,24 @@ const TypeId CODE_TYPE = const TypeId('Code');
 
 class DataRecord extends CreateRecord {
   final DataType dataType;
+  final DataId dataId;
   final Ref<String> name;
   final Ref<TypeId> typeId;
   final Ref<String> state;
 
-  DataRecord(this.dataType, String name, TypeId typeId, String state):
+  DataRecord(this.dataType, this.dataId, String name, TypeId typeId, String state):
       name = new State<String>(name),
       typeId = new State<TypeId>(typeId),
       state = new State<String>(state);
 }
 
 class StyleRecord extends CreateRecord implements Style {
+  final DataId dataId;
   final Ref<String> name;
   final Ref<double> fontSize;
   final Ref<NamedColor> color;
 
-  StyleRecord(String name, double fontSize, NamedColor color):
+  StyleRecord(this.dataId, String name, double fontSize, NamedColor color):
       name = new State<String>(name),
       fontSize = new State<double>(fontSize),
       color = new State<NamedColor>(color);
@@ -72,6 +74,7 @@ const ViewId COLUMN_VIEW = const ViewId('Column');
 const ViewId ROW_VIEW = const ViewId('Row');
 
 class ViewRecord extends CreateRecord {
+  final DataId dataId;
   final Ref<String> name;
   final Ref<ViewId> viewId;
   final Ref<Style> style;
@@ -79,7 +82,7 @@ class ViewRecord extends CreateRecord {
   final Ref<DataRecord> action;
   final MutableList<ViewRecord> subviews;
 
-  ViewRecord.Label(String name, Style style, DataRecord content):
+  ViewRecord.Label(this.dataId, String name, Style style, DataRecord content):
       name = new State<String>(name),
       viewId = new State<ViewId>(LABEL_VIEW),
       style = new State<Style>(style),
@@ -87,7 +90,7 @@ class ViewRecord extends CreateRecord {
       action = new State<DataRecord>(null),
       subviews = new MutableList<ViewRecord>();
 
-  ViewRecord.Button(String name, Style style, DataRecord content, DataRecord action):
+  ViewRecord.Button(this.dataId, String name, Style style, DataRecord content, DataRecord action):
       name = new State<String>(name),
       viewId = new State<ViewId>(BUTTON_VIEW),
       style = new State<Style>(style),
@@ -95,7 +98,7 @@ class ViewRecord extends CreateRecord {
       action = new State<DataRecord>(action),
       subviews = new MutableList<ViewRecord>();
 
-  ViewRecord.Column(String name, Style style, MutableList<ViewRecord> columns):
+  ViewRecord.Column(this.dataId, String name, Style style, MutableList<ViewRecord> columns):
       name = new State<String>(name),
       viewId = new State<ViewId>(COLUMN_VIEW),
       style = new State<Style>(style),
@@ -103,7 +106,7 @@ class ViewRecord extends CreateRecord {
       action = new State<DataRecord>(null),
       subviews = columns;
 
-  ViewRecord.Row(String name, Style style, MutableList<ViewRecord> rows):
+  ViewRecord.Row(this.dataId, String name, Style style, MutableList<ViewRecord> rows):
       name = new State<String>(name),
       viewId = new State<ViewId>(ROW_VIEW),
       style = new State<Style>(style),
@@ -164,29 +167,34 @@ class CreateData extends Datastore/*<CreateRecord>*/ {
 String MAIN_NAME = 'main';
 
 List<CreateRecord> buildInitialCreateData() {
-  DataRecord buttontext = new DataRecord(PARAMETER_DATATYPE, 'buttontext', STRING_TYPE,
-      'Increase the counter value');
-  DataRecord describestate = new DataRecord(OPERATION_DATATYPE, 'describestate', TEMPLATE_TYPE,
-      'The counter value is \$counter');
-  DataRecord increase = new DataRecord(OPERATION_DATATYPE, 'increase', CODE_TYPE,
-      'counter += increaseby');
-  ViewRecord counterlabel = new ViewRecord.Label('counterlabel', BODY1_STYLE, describestate);
-  ViewRecord counterbutton = new ViewRecord.Button('counterbutton', BUTTON_STYLE, buttontext,
-      increase);
+  DataIdSource ids = new SequentialIdSource();
+
+  DataRecord buttontext = new DataRecord(PARAMETER_DATATYPE, ids.nextId(),
+      'buttontext', STRING_TYPE, 'Increase the counter value');
+  DataRecord describestate = new DataRecord(OPERATION_DATATYPE, ids.nextId(),
+      'describestate', TEMPLATE_TYPE, 'The counter value is \$counter');
+  DataRecord increase = new DataRecord(OPERATION_DATATYPE, ids.nextId(),
+      'increase', CODE_TYPE, 'counter += increaseby');
+
+  ViewRecord counterlabel = new ViewRecord.Label(ids.nextId(),
+      'counterlabel', BODY1_STYLE, describestate);
+  ViewRecord counterbutton = new ViewRecord.Button(ids.nextId(),
+      'counterbutton', BUTTON_STYLE, buttontext, increase);
 
   return [
-    new DataRecord(PARAMETER_DATATYPE, 'hello', STRING_TYPE, 'Hello, world!'),
-    new DataRecord(DATA_DATATYPE, 'counter', INTEGER_TYPE, '68'),
+    new DataRecord(PARAMETER_DATATYPE, ids.nextId(), 'hello', STRING_TYPE, 'Hello, world!'),
+    new DataRecord(DATA_DATATYPE, ids.nextId(), 'counter', INTEGER_TYPE, '68'),
     buttontext,
-    new DataRecord(PARAMETER_DATATYPE, 'increaseby', INTEGER_TYPE, '1'),
-    new DataRecord(SERVICE_DATATYPE, 'today', STRING_TYPE, _today()), // Hack for the demo
+    new DataRecord(PARAMETER_DATATYPE, ids.nextId(), 'increaseby', INTEGER_TYPE, '1'),
+    // Hack for the demo
+    new DataRecord(SERVICE_DATATYPE, ids.nextId(), 'today', STRING_TYPE, _today()),
     describestate,
     increase,
-    new StyleRecord('Largefont', 24.0, BLACK_COLOR),
-    new StyleRecord('Bigred', 32.0, RED_COLOR),
+    new StyleRecord(ids.nextId(), 'Largefont', 24.0, BLACK_COLOR),
+    new StyleRecord(ids.nextId(), 'Bigred', 32.0, RED_COLOR),
     counterlabel,
     counterbutton,
-    new ViewRecord.Column(MAIN_NAME, null,
+    new ViewRecord.Column(ids.nextId(), MAIN_NAME, null,
         new MutableList<ViewRecord>([counterlabel, counterbutton]))
   ];
 }

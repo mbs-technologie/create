@@ -123,26 +123,28 @@ class CreateApp extends BaseZone implements AppState {
   Operation makeAddOperation(AppMode mode) {
     if (mode == SCHEMA_MODE) {
       return makeOperation(() {
-        datastore.add(new DataRecord(DATA_DATATYPE, datastore.newRecordName('data'),
-            STRING_TYPE, '?'));
+        datastore.add(new DataRecord(DATA_DATATYPE, datastore.nextId(),
+            datastore.newRecordName('data'), STRING_TYPE, '?'));
       });
     } else if (mode == PARAMETERS_MODE) {
       return makeOperation(() {
-        datastore.add(new DataRecord(PARAMETER_DATATYPE, datastore.newRecordName('param'),
-            STRING_TYPE, '?'));
+        datastore.add(new DataRecord(PARAMETER_DATATYPE, datastore.nextId(),
+            datastore.newRecordName('param'), STRING_TYPE, '?'));
       });
     } else if (mode == OPERATIONS_MODE) {
       return makeOperation(() {
-        datastore.add(new DataRecord(OPERATION_DATATYPE, datastore.newRecordName('op'),
-            TEMPLATE_TYPE, 'foo'));
+        datastore.add(new DataRecord(OPERATION_DATATYPE, datastore.nextId(),
+            datastore.newRecordName('op'), TEMPLATE_TYPE, 'foo'));
       });
     } else if (mode == STYLES_MODE) {
       return makeOperation(() {
-        datastore.add(new StyleRecord(datastore.newRecordName('style'), null, BLACK_COLOR));
+        datastore.add(new StyleRecord(datastore.nextId(),
+            datastore.newRecordName('style'), null, BLACK_COLOR));
       });
     } else if (mode == VIEWS_MODE) {
       return makeOperation(() {
-        datastore.add(new ViewRecord.Label(datastore.newRecordName('view'), null, null));
+        datastore.add(new ViewRecord.Label(datastore.nextId(),
+            datastore.newRecordName('view'), null, null));
       });
     } else {
       return null;

@@ -2,6 +2,7 @@
 
 library datastore;
 
+import 'dart:math' as math;
 import 'elements.dart';
 import 'elementsruntime.dart';
 
@@ -14,9 +15,10 @@ class DataType {
 }
 
 class DataId {
-  int _idNumber;
+  // TODO(dynin): switch to using UUIDs.
+  final int _idNumber;
 
-  DataId(this._idNumber);
+  const DataId(this._idNumber);
 
   String toString() => _idNumber.toString();
 
@@ -30,25 +32,32 @@ abstract class DataIdSource {
 
 class SequentialIdSource extends DataIdSource {
   int _nextNumber = 0;
+  DataId nextId() => new DataId(_nextNumber++);
+}
 
-  @override DataId nextId() {
-    return new DataId(_nextNumber++);
-  }
+class RandomIdSource extends DataIdSource {
+  math.Random _random = new math.Random();
+  DataId nextId() => new DataId(_random.nextInt(math.pow(2, 31)));
 }
 
 abstract class Record {
   // Data types are immutable for the lifetime of the data object
   DataType get dataType;
+  // Data ids are immutable and globally unique
+  DataId get dataId;
   ReadRef<String> get name;
 }
 
 typedef bool QueryType(Object);
 
-class Datastore<R extends Record> extends BaseZone {
+class Datastore<R extends Record> extends BaseZone implements DataIdSource {
   final List<R> _records;
   final Set<_LiveQuery> _liveQueries = new Set<_LiveQuery>();
+  final DataIdSource _dataIdSource = new RandomIdSource();
 
   Datastore(this._records);
+
+  DataId nextId() => _dataIdSource.nextId();
 
   /// Retrieve a record by name
   R lookup(String name) {
