@@ -5,6 +5,7 @@ library styles;
 import 'dart:sky' show Color;
 import 'package:sky/src/painting/text_style.dart';
 import 'package:sky/material.dart';
+import 'elements.dart';
 
 abstract class Style {
   String get styleName;
@@ -34,13 +35,9 @@ List<ThemedStyle> ALL_THEMED_STYLES = [
   BUTTON_STYLE
 ];
 
-class NamedColor {
-  final String name;
+class NamedColor extends Named {
   final Color colorValue;
-
-  const NamedColor(this.name, this.colorValue);
-
-  String toString() => name;
+  const NamedColor(String name, this.colorValue): super(name);
 }
 
 NamedColor BLACK_COLOR = new NamedColor("Black", Colors.black);

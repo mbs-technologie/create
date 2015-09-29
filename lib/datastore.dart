@@ -8,11 +8,9 @@ import 'dart:math' as math;
 import 'elements.dart';
 import 'elementsruntime.dart';
 
-class DataType {
+class DataType extends Named {
   // TODO(dynin): eventually we'll have namespaces in addition to names.
-  final String _name;
-  const DataType(this._name);
-  String toString() => _name.toString();
+  const DataType(String name): super(name);
 }
 
 class DataId {
@@ -47,6 +45,13 @@ abstract class Record {
   // Data ids are immutable and globally unique
   DataId get dataId;
   ReadRef<String> get name;
+
+  void marshal(MarshalOutput output);
+}
+
+abstract class MarshalOutput {
+  void stringField(String fieldName, String value);
+  void namedField(String fieldName, Named value);
 }
 
 typedef bool QueryType(Object);
@@ -134,20 +139,26 @@ class DataSyncer {
   }
 
   Map<String, Object> _recordToJson(Record record) {
-    MarshalOutput output = new MarshalOutput();
+    _MapOutput output = new _MapOutput();
 
     output.stringField(DATATYPE_FIELD, record.dataType.toString());
     output.stringField(DATAID_FIELD, record.dataId.toString());
     output.stringField(NAME_FIELD, record.name.value);
 
+    record.marshal(output);
+
     return output.fieldMap;
   }
 }
 
-class MarshalOutput {
+class _MapOutput implements MarshalOutput {
   Map<String, Object> fieldMap = new LinkedHashMap<String, Object>();
 
-  void stringField(String name, String value) {
-    fieldMap[name] = value;
+  void stringField(String fieldName, String value) {
+    fieldMap[fieldName] = value;
+  }
+
+  void namedField(String fieldName, Named value) {
+    fieldMap[fieldName] = value.name;
   }
 }

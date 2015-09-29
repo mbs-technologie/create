@@ -277,3 +277,6 @@ bool isLetter(int c) {
 bool isLetterOrDigit(int c) {
   return isLetter(c) || isDigit(c);
 }
+
+/// A function that returns a name for displaying to the user.
+String displayName(Named named) => named.name;

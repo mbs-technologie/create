@@ -21,16 +21,17 @@ const DataType SERVICE_DATATYPE = const DataType('service');
 const DataType STYLE_DATATYPE = const DataType('style');
 const DataType VIEW_DATATYPE = const DataType('view');
 
-class TypeId {
-  final String name;
-  const TypeId(this.name);
-  String toString() => name;
+class TypeId extends Named {
+  const TypeId(String name): super(name);
 }
 
 const TypeId STRING_TYPE = const TypeId('String');
 const TypeId INTEGER_TYPE = const TypeId('Integer');
 const TypeId TEMPLATE_TYPE = const TypeId('Template');
 const TypeId CODE_TYPE = const TypeId('Code');
+
+const String TYPEID_FIELD = 'typeid';
+const String STATE_FIELD = 'state';
 
 class DataRecord extends CreateRecord {
   final DataType dataType;
@@ -43,6 +44,11 @@ class DataRecord extends CreateRecord {
       name = new State<String>(name),
       typeId = new State<TypeId>(typeId),
       state = new State<String>(state);
+
+  void marshal(MarshalOutput output) {
+    output.namedField(TYPEID_FIELD, typeId.value);
+    output.stringField(STATE_FIELD, state.value);
+  }
 }
 
 class StyleRecord extends CreateRecord implements Style {
@@ -60,12 +66,14 @@ class StyleRecord extends CreateRecord implements Style {
   String get styleName => name.value;
   TextStyle get textStyle =>
       new TextStyle(fontSize: fontSize.value, color: color.value.colorValue);
+
+  void marshal(MarshalOutput output) {
+    // TODO
+  }
 }
 
-class ViewId {
-  final String name;
-  const ViewId(this.name);
-  String toString() => name;
+class ViewId extends Named {
+  const ViewId(String name): super(name);
 }
 
 const ViewId LABEL_VIEW = const ViewId('Label');
@@ -115,6 +123,10 @@ class ViewRecord extends CreateRecord {
       subviews = rows;
 
   DataType get dataType => VIEW_DATATYPE;
+
+  void marshal(MarshalOutput output) {
+    // TODO
+  }
 }
 
 // Dart in checked mode throws an exception because of reified generic types.

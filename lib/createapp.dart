@@ -9,11 +9,9 @@ import 'createeval.dart';
 import 'styles.dart';
 import 'views.dart';
 
-class AppMode {
-  final String name;
+class AppMode extends Named {
   final IconId icon;
-  const AppMode(this.name, this.icon);
-  String toString() => name;
+  const AppMode(String name, this.icon): super(name);
 }
 
 const AppMode MODULES_MODE = const AppMode('Modules', WIDGETS_ICON);
@@ -71,7 +69,6 @@ List<ViewId> VIEW_TYPES = [
   ROW_VIEW
 ];
 
-String displayTypeId(TypeId typeId) => typeId.name;
 String displayToString(object) => object != null ? object.toString() : '<default>';
 
 class CreateApp extends BaseZone implements AppState {
@@ -181,7 +178,7 @@ class CreateApp extends BaseZone implements AppState {
     return new SelectionInput<TypeId>(
       typeId,
       new ImmutableList<TypeId>(PRIMITIVE_TYPES),
-      displayTypeId
+      displayName
     );
   }
 
@@ -227,7 +224,7 @@ class CreateApp extends BaseZone implements AppState {
       new SelectionInput<TypeId>(
         record.typeId,
         new ImmutableList<TypeId>(OPERATION_TYPES),
-        displayTypeId
+        displayName
       ),
       new TextInput(
         record.state,
@@ -312,8 +309,7 @@ class CreateApp extends BaseZone implements AppState {
   }
 
   View makeViewIdInput(Ref<ViewId> viewId, Context context) {
-    return new SelectionInput<ViewId>(viewId, new ImmutableList<ViewId>(VIEW_TYPES),
-      (ViewId id) => id.name);
+    return new SelectionInput<ViewId>(viewId, new ImmutableList<ViewId>(VIEW_TYPES), displayName);
   }
 
   View makeViewInput(Ref<ViewRecord> view, ViewRecord currentView, Context context) {

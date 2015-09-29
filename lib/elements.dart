@@ -96,3 +96,11 @@ abstract class ReadList<E> implements Observable {
 
 /// An alias for procedure with no arguments.
 typedef void Procedure();
+
+/// Type for values each of which has a unique name.
+/// Used for enum-like types.
+abstract class Named {
+  final String name;
+  const Named(this.name);
+  String toString() => name;
+}
