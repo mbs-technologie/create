@@ -5,7 +5,40 @@ library datastore;
 import 'elements.dart';
 import 'elementsruntime.dart';
 
+class DataType {
+  final String _name;
+
+  const DataType(this._name);
+
+  String toString() => _name.toString();
+}
+
+class DataId {
+  int _idNumber;
+
+  DataId(this._idNumber);
+
+  String toString() => _idNumber.toString();
+
+  bool operator ==(o) => o is DataId && _idNumber == o._idNumber;
+  int get hashCode => _idNumber.hashCode;
+}
+
+abstract class DataIdSource {
+  DataId nextId();
+}
+
+class SequentialIdSource extends DataIdSource {
+  int _nextNumber = 0;
+
+  @override DataId nextId() {
+    return new DataId(_nextNumber++);
+  }
+}
+
 abstract class Record {
+  // Data types are immutable for the lifetime of the data object
+  DataType get dataType;
   ReadRef<String> get name;
 }
 

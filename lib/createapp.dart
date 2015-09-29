@@ -123,17 +123,17 @@ class CreateApp extends BaseZone implements AppState {
   Operation makeAddOperation(AppMode mode) {
     if (mode == SCHEMA_MODE) {
       return makeOperation(() {
-        datastore.add(new DataRecord(RecordType.DATA, datastore.newRecordName('data'),
+        datastore.add(new DataRecord(DATA_DATATYPE, datastore.newRecordName('data'),
             STRING_TYPE, '?'));
       });
     } else if (mode == PARAMETERS_MODE) {
       return makeOperation(() {
-        datastore.add(new DataRecord(RecordType.PARAMETER, datastore.newRecordName('param'),
+        datastore.add(new DataRecord(PARAMETER_DATATYPE, datastore.newRecordName('param'),
             STRING_TYPE, '?'));
       });
     } else if (mode == OPERATIONS_MODE) {
       return makeOperation(() {
-        datastore.add(new DataRecord(RecordType.OPERATION, datastore.newRecordName('op'),
+        datastore.add(new DataRecord(OPERATION_DATATYPE, datastore.newRecordName('op'),
             TEMPLATE_TYPE, 'foo'));
       });
     } else if (mode == STYLES_MODE) {
@@ -443,7 +443,7 @@ class CreateApp extends BaseZone implements AppState {
   }
 
   ReadRef<String> evaluateRecord(DataRecord record, Context context) {
-    if (record.type == RecordType.OPERATION && record.typeId.value == TEMPLATE_TYPE) {
+    if (record.dataType == OPERATION_DATATYPE && record.typeId.value == TEMPLATE_TYPE) {
       // TODO: make a reactive function which updates if template changes
       return evaluateTemplate(record.state.value, context);
     }

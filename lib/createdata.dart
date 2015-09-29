@@ -14,7 +14,12 @@ abstract class CreateRecord implements Record {
   String toString() => name.value;
 }
 
-enum RecordType { DATA, PARAMETER, OPERATION, SERVICE }
+const DataType DATA_DATATYPE = const DataType('data');
+const DataType PARAMETER_DATATYPE = const DataType('parameter');
+const DataType OPERATION_DATATYPE = const DataType('operation');
+const DataType SERVICE_DATATYPE = const DataType('service');
+const DataType STYLE_DATATYPE = const DataType('style');
+const DataType VIEW_DATATYPE = const DataType('view');
 
 class TypeId {
   final String name;
@@ -28,12 +33,12 @@ const TypeId TEMPLATE_TYPE = const TypeId('Template');
 const TypeId CODE_TYPE = const TypeId('Code');
 
 class DataRecord extends CreateRecord {
-  final RecordType type;
+  final DataType dataType;
   final Ref<String> name;
   final Ref<TypeId> typeId;
   final Ref<String> state;
 
-  DataRecord(this.type, String name, TypeId typeId, String state):
+  DataRecord(this.dataType, String name, TypeId typeId, String state):
       name = new State<String>(name),
       typeId = new State<TypeId>(typeId),
       state = new State<String>(state);
@@ -49,6 +54,7 @@ class StyleRecord extends CreateRecord implements Style {
       fontSize = new State<double>(fontSize),
       color = new State<NamedColor>(color);
 
+  DataType get dataType => STYLE_DATATYPE;
   String get styleName => name.value;
   TextStyle get textStyle =>
       new TextStyle(fontSize: fontSize.value, color: color.value.colorValue);
@@ -104,6 +110,8 @@ class ViewRecord extends CreateRecord {
       content = new State<DataRecord>(null),
       action = new State<DataRecord>(null),
       subviews = rows;
+
+  DataType get dataType => VIEW_DATATYPE;
 }
 
 // Dart in checked mode throws an exception because of reified generic types.
@@ -116,20 +124,20 @@ class ViewRecord extends CreateRecord {
 class CreateData extends Datastore/*<CreateRecord>*/ {
   CreateData(List<CreateRecord> initialState): super(initialState);
 
-  ReadList<DataRecord> getDataRecords(RecordType type, Context context) =>
-    runQuery((record) => record is DataRecord && record.type == type, context);
+  ReadList<DataRecord> getDataRecords(DataType dataType, Context context) =>
+    runQuery((record) => record.dataType == dataType, context);
 
   ReadList<DataRecord> getData(Context context) =>
-    getDataRecords(RecordType.DATA, context);
+    getDataRecords(DATA_DATATYPE, context);
 
   ReadList<DataRecord> getParameters(Context context) =>
-    getDataRecords(RecordType.PARAMETER, context);
+    getDataRecords(PARAMETER_DATATYPE, context);
 
   ReadList<DataRecord> getOperations(Context context) =>
-    getDataRecords(RecordType.OPERATION, context);
+    getDataRecords(OPERATION_DATATYPE, context);
 
   ReadList<DataRecord> getServices(Context context) =>
-    getDataRecords(RecordType.SERVICE, context);
+    getDataRecords(SERVICE_DATATYPE, context);
 
   ReadList<StyleRecord> getStyles(Context context) =>
     runQuery((record) => record is StyleRecord, context);
@@ -156,22 +164,22 @@ class CreateData extends Datastore/*<CreateRecord>*/ {
 String MAIN_NAME = 'main';
 
 List<CreateRecord> buildInitialCreateData() {
-  DataRecord buttontext = new DataRecord(RecordType.PARAMETER, 'buttontext', STRING_TYPE,
+  DataRecord buttontext = new DataRecord(PARAMETER_DATATYPE, 'buttontext', STRING_TYPE,
       'Increase the counter value');
-  DataRecord describestate = new DataRecord(RecordType.OPERATION, 'describestate', TEMPLATE_TYPE,
+  DataRecord describestate = new DataRecord(OPERATION_DATATYPE, 'describestate', TEMPLATE_TYPE,
       'The counter value is \$counter');
-  DataRecord increase = new DataRecord(RecordType.OPERATION, 'increase', CODE_TYPE,
+  DataRecord increase = new DataRecord(OPERATION_DATATYPE, 'increase', CODE_TYPE,
       'counter += increaseby');
   ViewRecord counterlabel = new ViewRecord.Label('counterlabel', BODY1_STYLE, describestate);
   ViewRecord counterbutton = new ViewRecord.Button('counterbutton', BUTTON_STYLE, buttontext,
       increase);
 
   return [
-    new DataRecord(RecordType.PARAMETER, 'hello', STRING_TYPE, 'Hello, world!'),
-    new DataRecord(RecordType.DATA, 'counter', INTEGER_TYPE, '68'),
+    new DataRecord(PARAMETER_DATATYPE, 'hello', STRING_TYPE, 'Hello, world!'),
+    new DataRecord(DATA_DATATYPE, 'counter', INTEGER_TYPE, '68'),
     buttontext,
-    new DataRecord(RecordType.PARAMETER, 'increaseby', INTEGER_TYPE, '1'),
-    new DataRecord(RecordType.SERVICE, 'today', STRING_TYPE, _today()), // Hack for the demo
+    new DataRecord(PARAMETER_DATATYPE, 'increaseby', INTEGER_TYPE, '1'),
+    new DataRecord(SERVICE_DATATYPE, 'today', STRING_TYPE, _today()), // Hack for the demo
     describestate,
     increase,
     new StyleRecord('Largefont', 24.0, BLACK_COLOR),
