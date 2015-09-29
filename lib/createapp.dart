@@ -183,7 +183,7 @@ class CreateApp extends BaseZone implements AppState {
   }
 
   View nameInput(CreateRecord record) {
-    return new TextInput(record.name, new Constant<Style>(BODY2_STYLE));
+    return new TextInput(record.recordName, new Constant<Style>(BODY2_STYLE));
   }
 
   View schemaRowView(DataRecord record) {
@@ -250,7 +250,7 @@ class CreateApp extends BaseZone implements AppState {
   View servicesRowView(DataRecord record) {
     return new RowView(new ImmutableList<View>([
       new LabelView(
-        record.name,
+        record.recordName,
         new Constant<Style>(SUBHEAD_STYLE)
       ),
       typeView(record.typeId)
@@ -291,7 +291,8 @@ class CreateApp extends BaseZone implements AppState {
   }
 
   View makeStyleInput(Ref<Style> style, Context context) {
-    String displayStyle(Style s) => s != null ? s.styleName : '<no style>';
+    // TODO: add generic displayer with a specified null string
+    String displayStyle(Style s) => s != null ? s.name : '<no style>';
     List<Style> styleOptions = [ null ];
     styleOptions.addAll(datastore.getStyles(null).elements);
     styleOptions.addAll(ALL_THEMED_STYLES);
@@ -316,7 +317,7 @@ class CreateApp extends BaseZone implements AppState {
     List<ViewRecord> viewOptions = [ null ];
     // We filter out attempts to create recursive views
     viewOptions.addAll(datastore.getViews(null).elements.where((v) => v != currentView));
-    String viewToString(view) => view != null ? view.name.value : '<none>';
+    String viewToString(view) => view != null ? view.name : '<none>';
     return new SelectionInput<ViewRecord>(view, new ImmutableList<ViewRecord>(viewOptions),
         viewToString);
   }
@@ -398,7 +399,7 @@ class CreateApp extends BaseZone implements AppState {
   View dataRowView(DataRecord record) {
     return new RowView(new ImmutableList<View>([
       new LabelView(
-        record.name,
+        record.recordName,
         new Constant<Style>(SUBHEAD_STYLE)
       ),
       typeView(record.typeId),
@@ -486,7 +487,7 @@ class CreateApp extends BaseZone implements AppState {
       return;
     }
 
-    print('Executing ${action.name.value}');
+    print('Executing ${action.name}');
     Construct code = parseCode(action.state.value);
     code.evaluate(datastore);
   }

@@ -9,9 +9,8 @@ import 'elementsruntime.dart';
 import 'datastore.dart';
 import 'styles.dart';
 
-abstract class CreateRecord implements Record {
-  Ref<String> get name;
-  String toString() => name.value;
+abstract class CreateRecord extends Record {
+  Ref<String> get recordName;
 }
 
 const DataType DATA_DATATYPE = const DataType('data');
@@ -36,12 +35,12 @@ const String STATE_FIELD = 'state';
 class DataRecord extends CreateRecord {
   final DataType dataType;
   final DataId dataId;
-  final Ref<String> name;
+  final Ref<String> recordName;
   final Ref<TypeId> typeId;
   final Ref<String> state;
 
-  DataRecord(this.dataType, this.dataId, String name, TypeId typeId, String state):
-      name = new State<String>(name),
+  DataRecord(this.dataType, this.dataId, String recordName, TypeId typeId, String state):
+      recordName = new State<String>(recordName),
       typeId = new State<TypeId>(typeId),
       state = new State<String>(state);
 
@@ -51,24 +50,27 @@ class DataRecord extends CreateRecord {
   }
 }
 
+const String FONT_SIZE_FIELD = 'font_size';
+const String COLOR_FIELD = 'color';
+
 class StyleRecord extends CreateRecord implements Style {
   final DataId dataId;
-  final Ref<String> name;
+  final Ref<String> recordName;
   final Ref<double> fontSize;
   final Ref<NamedColor> color;
 
-  StyleRecord(this.dataId, String name, double fontSize, NamedColor color):
-      name = new State<String>(name),
+  StyleRecord(this.dataId, String recordName, double fontSize, NamedColor color):
+      recordName = new State<String>(recordName),
       fontSize = new State<double>(fontSize),
       color = new State<NamedColor>(color);
 
   DataType get dataType => STYLE_DATATYPE;
-  String get styleName => name.value;
   TextStyle get textStyle =>
       new TextStyle(fontSize: fontSize.value, color: color.value.colorValue);
 
   void marshal(MarshalOutput output) {
-    // TODO
+    output.doubleField(FONT_SIZE_FIELD, fontSize.value);
+    output.namedField(COLOR_FIELD, color.value);
   }
 }
 
@@ -81,41 +83,48 @@ const ViewId BUTTON_VIEW = const ViewId('Button');
 const ViewId COLUMN_VIEW = const ViewId('Column');
 const ViewId ROW_VIEW = const ViewId('Row');
 
+const String VIEW_ID_FIELD = 'view_id';
+const String STYLE_FIELD = 'style';
+const String CONTENT_FIELD = 'content';
+const String ACTION_FIELD = 'action';
+const String SUBVIEWS_FIELD = 'subviews';
+
 class ViewRecord extends CreateRecord {
   final DataId dataId;
-  final Ref<String> name;
+  final Ref<String> recordName;
   final Ref<ViewId> viewId;
   final Ref<Style> style;
   final Ref<DataRecord> content;
   final Ref<DataRecord> action;
   final MutableList<ViewRecord> subviews;
 
-  ViewRecord.Label(this.dataId, String name, Style style, DataRecord content):
-      name = new State<String>(name),
+  ViewRecord.Label(this.dataId, String recordName, Style style, DataRecord content):
+      recordName = new State<String>(recordName),
       viewId = new State<ViewId>(LABEL_VIEW),
       style = new State<Style>(style),
       content = new State<DataRecord>(content),
       action = new State<DataRecord>(null),
       subviews = new MutableList<ViewRecord>();
 
-  ViewRecord.Button(this.dataId, String name, Style style, DataRecord content, DataRecord action):
-      name = new State<String>(name),
+  ViewRecord.Button(this.dataId, String recordName, Style style, DataRecord content,
+          DataRecord action):
+      recordName = new State<String>(recordName),
       viewId = new State<ViewId>(BUTTON_VIEW),
       style = new State<Style>(style),
       content = new State<DataRecord>(content),
       action = new State<DataRecord>(action),
       subviews = new MutableList<ViewRecord>();
 
-  ViewRecord.Column(this.dataId, String name, Style style, MutableList<ViewRecord> columns):
-      name = new State<String>(name),
+  ViewRecord.Column(this.dataId, String recordName, Style style, MutableList<ViewRecord> columns):
+      recordName = new State<String>(recordName),
       viewId = new State<ViewId>(COLUMN_VIEW),
       style = new State<Style>(style),
       content = new State<DataRecord>(null),
       action = new State<DataRecord>(null),
       subviews = columns;
 
-  ViewRecord.Row(this.dataId, String name, Style style, MutableList<ViewRecord> rows):
-      name = new State<String>(name),
+  ViewRecord.Row(this.dataId, String recordName, Style style, MutableList<ViewRecord> rows):
+      recordName = new State<String>(recordName),
       viewId = new State<ViewId>(ROW_VIEW),
       style = new State<Style>(style),
       content = new State<DataRecord>(null),
@@ -125,7 +134,10 @@ class ViewRecord extends CreateRecord {
   DataType get dataType => VIEW_DATATYPE;
 
   void marshal(MarshalOutput output) {
-    // TODO
+    output.namedField(VIEW_ID_FIELD, viewId.value);
+    output.namedField(STYLE_FIELD, style.value);
+    output.dataField(CONTENT_FIELD, content.value);
+    output.dataField(ACTION_FIELD, action.value);
   }
 }
 

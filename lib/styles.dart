@@ -7,16 +7,13 @@ import 'package:sky/src/painting/text_style.dart';
 import 'package:sky/material.dart';
 import 'elements.dart';
 
-abstract class Style {
-  String get styleName;
+abstract class Style implements Named {
   TextStyle get textStyle;
 }
 
-class ThemedStyle extends Style {
-  final String styleName;
+class ThemedStyle extends Named implements Style {
   final TextStyle textStyle;
-
-  ThemedStyle(this.styleName, this.textStyle);
+  ThemedStyle(String name, this.textStyle): super(name);
 }
 
 ThemedStyle TITLE_STYLE = new ThemedStyle("Title", Typography.black.title);

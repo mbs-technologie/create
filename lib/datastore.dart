@@ -39,19 +39,24 @@ class RandomIdSource extends DataIdSource {
   DataId nextId() => new DataId(_random.nextInt(math.pow(2, 31)));
 }
 
-abstract class Record {
+abstract class Record implements Named {
   // Data types are immutable for the lifetime of the data object
   DataType get dataType;
   // Data ids are immutable and globally unique
   DataId get dataId;
-  ReadRef<String> get name;
+  ReadRef<String> get recordName;
+
+  String get name => recordName.value;
+  String toString() => recordName.value;
 
   void marshal(MarshalOutput output);
 }
 
 abstract class MarshalOutput {
   void stringField(String fieldName, String value);
+  void doubleField(String fieldName, double value);
   void namedField(String fieldName, Named value);
+  void dataField(String fieldName, Record value);
 }
 
 typedef bool QueryType(Object);
@@ -69,7 +74,7 @@ class Datastore<R extends Record> extends BaseZone implements DataIdSource {
   R lookup(String name) {
     // TODO: we should use an index here if we care about scaling,
     // but that would be somewhat complicated because names can be updated.
-    return _records.firstWhere((element) => (element.name.value == name), orElse: () => null);
+    return _records.firstWhere((element) => (element.name == name), orElse: () => null);
   }
 
   /// Run a query and get a list of matching results back.
@@ -143,7 +148,7 @@ class DataSyncer {
 
     output.stringField(DATATYPE_FIELD, record.dataType.toString());
     output.stringField(DATAID_FIELD, record.dataId.toString());
-    output.stringField(NAME_FIELD, record.name.value);
+    output.stringField(NAME_FIELD, record.name);
 
     record.marshal(output);
 
@@ -158,7 +163,19 @@ class _MapOutput implements MarshalOutput {
     fieldMap[fieldName] = value;
   }
 
+  void doubleField(String fieldName, double value) {
+    fieldMap[fieldName] = value;
+  }
+
   void namedField(String fieldName, Named value) {
-    fieldMap[fieldName] = value.name;
+    fieldMap[fieldName] = value != null ? value.name : null;
+  }
+
+  void dataField(String fieldName, Record value) {
+    if (value == null) {
+      fieldMap[fieldName] = null;
+    } else {
+      fieldMap[fieldName] = value.dataId.toString() + '/' + value.name;
+    }
   }
 }
