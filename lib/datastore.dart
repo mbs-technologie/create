@@ -47,13 +47,14 @@ abstract class FieldVisitor {
   void stringField(String fieldName, Ref<String> field);
   void doubleField(String fieldName, Ref<double> field);
   void dataField(String fieldName, Ref<Data> field);
-  void listField(String fieldName, ReadList<Data> field);
+  void listField(String fieldName, MutableList<Data> field);
 }
 
 typedef bool QueryType(Object);
 
 class Datastore<R extends Record> extends BaseZone implements DataIdSource {
   final List<R> _records;
+  final Map<DataId, R> _recordsById = new HashMap<DataId, R>();
   final Set<_LiveQuery> _liveQueries = new Set<_LiveQuery>();
   final DataIdSource _dataIdSource = new RandomIdSource();
 
@@ -89,6 +90,7 @@ class Datastore<R extends Record> extends BaseZone implements DataIdSource {
 
   void add(R record) {
     _records.add(record);
+    _recordsById[record.dataId] = record;
     _liveQueries.forEach((q) => q.newRecordAdded(record));
   }
 
@@ -183,7 +185,7 @@ class _Marshaller implements FieldVisitor {
     fieldMap[fieldName] = _dataRef(field.value);
   }
 
-  void listField(String fieldName, ReadList<Data> field) {
+  void listField(String fieldName, MutableList<Data> field) {
     fieldMap[fieldName] = new List.from(field.elements.map(_dataRef));
   }
 }
