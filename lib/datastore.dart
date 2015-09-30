@@ -40,14 +40,14 @@ abstract class Record implements Data, Named {
   String get name => recordName.value;
   String toString() => name;
 
-  void marshal(MarshalContext context);
+  void visit(FieldVisitor visitor);
 }
 
-abstract class MarshalContext {
+abstract class FieldVisitor {
   void stringField(String fieldName, Ref<String> field);
   void doubleField(String fieldName, Ref<double> field);
   void dataField(String fieldName, Ref<Data> field);
-  void listField(String fieldName, ReadList<Record> field);
+  void listField(String fieldName, ReadList<Data> field);
 }
 
 typedef bool QueryType(Object);
@@ -118,8 +118,9 @@ class _LiveQuery<R extends Record> implements Disposable {
   }
 }
 
-const String ID_FIELD = '#';
-const String NAME_FIELD = 'name';
+const String RECORDS_LIST = 'records';
+const String TYPE_FIELD = '#type';
+const String ID_FIELD = '#id';
 
 class DataSyncer {
   Datastore _datastore;
@@ -130,28 +131,23 @@ class DataSyncer {
   void start() {
     print('Syncing datastore with ${_datastore._records.length} records.');
     List jsonRecords = new List.from(_datastore._records.map(_recordToJson));
-    String encoded = encoder.convert({ "records": jsonRecords });
+    String encoded = encoder.convert({ RECORDS_LIST: jsonRecords });
     print(encoded);
   }
 
   Map<String, Object> _recordToJson(Record record) {
-    _MapOutput output = new _MapOutput();
-
-    output.specialField(ID_FIELD, record.dataType.name + ':' + record.dataId.toString());
-    // TODO: record name field should be part of Record class
-    output.specialField(NAME_FIELD, record.name);
-
-    record.marshal(output);
-
-    return output.fieldMap;
+    _Marshaller marshaller = new _Marshaller(record);
+    record.visit(marshaller);
+    return marshaller.fieldMap;
   }
 }
 
-class _MapOutput implements MarshalContext {
+class _Marshaller implements FieldVisitor {
   Map<String, Object> fieldMap = new LinkedHashMap<String, Object>();
 
-  void specialField(String fieldName, String value) {
-    fieldMap[fieldName] = value;
+  _Marshaller(Record record) {
+    fieldMap[TYPE_FIELD] = record.dataType.name;
+    fieldMap[ID_FIELD] = record.dataId.toString();
   }
 
   void stringField(String fieldName, Ref<String> field) {
@@ -187,7 +183,7 @@ class _MapOutput implements MarshalContext {
     fieldMap[fieldName] = _dataRef(field.value);
   }
 
-  void listField(String fieldName, ReadList<Record> field) {
+  void listField(String fieldName, ReadList<Data> field) {
     fieldMap[fieldName] = new List.from(field.elements.map(_dataRef));
   }
 }
