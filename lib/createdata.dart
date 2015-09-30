@@ -44,9 +44,9 @@ class DataRecord extends CreateRecord {
       typeId = new State<TypeId>(typeId),
       state = new State<String>(state);
 
-  void marshal(MarshalOutput output) {
-    output.namedField(TYPEID_FIELD, typeId.value);
-    output.stringField(STATE_FIELD, state.value);
+  void marshal(MarshalContext context) {
+    context.namedField(TYPEID_FIELD, typeId);
+    context.stringField(STATE_FIELD, state);
   }
 }
 
@@ -68,9 +68,9 @@ class StyleRecord extends CreateRecord implements Style {
   TextStyle get textStyle =>
       new TextStyle(fontSize: fontSize.value, color: color.value.colorValue);
 
-  void marshal(MarshalOutput output) {
-    output.doubleField(FONT_SIZE_FIELD, fontSize.value);
-    output.namedField(COLOR_FIELD, color.value);
+  void marshal(MarshalContext context) {
+    context.doubleField(FONT_SIZE_FIELD, fontSize);
+    context.namedField(COLOR_FIELD, color);
   }
 }
 
@@ -133,11 +133,12 @@ class ViewRecord extends CreateRecord {
 
   DataType get dataType => VIEW_DATATYPE;
 
-  void marshal(MarshalOutput output) {
-    output.namedField(VIEW_ID_FIELD, viewId.value);
-    output.namedField(STYLE_FIELD, style.value);
-    output.dataField(CONTENT_FIELD, content.value);
-    output.dataField(ACTION_FIELD, action.value);
+  void marshal(MarshalContext context) {
+    context.namedField(VIEW_ID_FIELD, viewId);
+    context.namedField(STYLE_FIELD, style);
+    context.recordField(CONTENT_FIELD, content);
+    context.recordField(ACTION_FIELD, action);
+    context.listField(SUBVIEWS_FIELD, subviews);
   }
 }
 

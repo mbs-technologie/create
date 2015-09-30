@@ -49,14 +49,15 @@ abstract class Record implements Named {
   String get name => recordName.value;
   String toString() => recordName.value;
 
-  void marshal(MarshalOutput output);
+  void marshal(MarshalContext context);
 }
 
-abstract class MarshalOutput {
-  void stringField(String fieldName, String value);
-  void doubleField(String fieldName, double value);
-  void namedField(String fieldName, Named value);
-  void dataField(String fieldName, Record value);
+abstract class MarshalContext {
+  void stringField(String fieldName, Ref<String> field);
+  void doubleField(String fieldName, Ref<double> field);
+  void namedField(String fieldName, Ref<Named> field);
+  void recordField(String fieldName, Ref<Record> field);
+  void listField(String fieldName, ReadList<Record> field);
 }
 
 typedef bool QueryType(Object);
@@ -133,22 +134,24 @@ const String NAME_FIELD = 'name';
 
 class DataSyncer {
   Datastore _datastore;
+  convert.JsonEncoder encoder = const convert.JsonEncoder.withIndent('  ');
 
   DataSyncer(this._datastore);
 
   void start() {
     print('Syncing datastore with ${_datastore._records.length} records.');
     List jsonRecords = new List.from(_datastore._records.map(_recordToJson));
-    String encoded = convert.JSON.encode({ "records": jsonRecords });
-    print('encoded: $encoded');
+    String encoded = encoder.convert({ "records": jsonRecords });
+    print(encoded);
   }
 
   Map<String, Object> _recordToJson(Record record) {
     _MapOutput output = new _MapOutput();
 
-    output.stringField(DATATYPE_FIELD, record.dataType.toString());
-    output.stringField(DATAID_FIELD, record.dataId.toString());
-    output.stringField(NAME_FIELD, record.name);
+    output.specialField(DATATYPE_FIELD, record.dataType.toString());
+    output.specialField(DATAID_FIELD, record.dataId.toString());
+    // TODO: record name field should be part of Record class
+    output.specialField(NAME_FIELD, record.name);
 
     record.marshal(output);
 
@@ -156,26 +159,38 @@ class DataSyncer {
   }
 }
 
-class _MapOutput implements MarshalOutput {
+class _MapOutput implements MarshalContext {
   Map<String, Object> fieldMap = new LinkedHashMap<String, Object>();
 
-  void stringField(String fieldName, String value) {
+  void specialField(String fieldName, String value) {
     fieldMap[fieldName] = value;
   }
 
-  void doubleField(String fieldName, double value) {
-    fieldMap[fieldName] = value;
+  void stringField(String fieldName, Ref<String> field) {
+    fieldMap[fieldName] = field.value;
   }
 
-  void namedField(String fieldName, Named value) {
-    fieldMap[fieldName] = value != null ? value.name : null;
+  void doubleField(String fieldName, Ref<double> field) {
+    fieldMap[fieldName] = field.value;
   }
 
-  void dataField(String fieldName, Record value) {
-    if (value == null) {
-      fieldMap[fieldName] = null;
+  String _recordRef(Record record) {
+    return record != null ? record.dataId.toString() + '/' + record.name : null;
+  }
+
+  void namedField(String fieldName, Ref<Named> field) {
+    if (field.value is Record) {
+      recordField(fieldName, field);
     } else {
-      fieldMap[fieldName] = value.dataId.toString() + '/' + value.name;
+      fieldMap[fieldName] = field.value != null ? field.value.name : null;
     }
+  }
+
+  void recordField(String fieldName, Ref<Record> field) {
+    fieldMap[fieldName] = _recordRef(field.value);
+  }
+
+  void listField(String fieldName, ReadList<Record> field) {
+    fieldMap[fieldName] = new List.from(field.elements.map(_recordRef));
   }
 }
