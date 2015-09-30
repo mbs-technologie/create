@@ -4,6 +4,7 @@ library createapp;
 
 import 'elements.dart';
 import 'elementsruntime.dart';
+import 'datastore.dart';
 import 'createdata.dart';
 import 'createeval.dart';
 import 'styles.dart';
@@ -182,13 +183,13 @@ class CreateApp extends BaseZone implements AppState {
     );
   }
 
-  View nameInput(CreateRecord record) {
-    return new TextInput(record.recordName, new Constant<Style>(BODY2_STYLE));
+  View nameInput(Ref<String> recordName) {
+    return new TextInput(recordName, new Constant<Style>(BODY2_STYLE));
   }
 
   View schemaRowView(DataRecord record) {
     return new RowView(new ImmutableList<View>([
-      nameInput(record),
+      nameInput(record.recordName),
       makePrimitiveTypeInput(record.typeId)
     ]));
   }
@@ -202,7 +203,7 @@ class CreateApp extends BaseZone implements AppState {
 
   View parametersRowView(DataRecord record) {
     return new RowView(new ImmutableList<View>([
-      nameInput(record),
+      nameInput(record.recordName),
       makePrimitiveTypeInput(record.typeId),
       new TextInput(
         record.state,
@@ -220,7 +221,7 @@ class CreateApp extends BaseZone implements AppState {
 
   View operationsRowView(DataRecord record) {
     return new RowView(new ImmutableList<View>([
-      nameInput(record),
+      nameInput(record.recordName),
       new SelectionInput<TypeId>(
         record.typeId,
         new ImmutableList<TypeId>(OPERATION_TYPES),
@@ -265,7 +266,7 @@ class CreateApp extends BaseZone implements AppState {
 
   View stylesRowView(StyleRecord record) {
     return new RowView(new ImmutableList<View>([
-      nameInput(record),
+      nameInput(record.recordName),
       new LabelView(
         new Constant<String>('Font:'),
         new Constant<Style>(BODY2_STYLE)
@@ -374,7 +375,7 @@ class CreateApp extends BaseZone implements AppState {
   bool renderInRow(ViewId viewId) => viewId != COLUMN_VIEW && viewId != ROW_VIEW;
 
   void populateRowView(MutableList<View> rowElements, ViewRecord record, Context context) {
-    rowElements.add(nameInput(record));
+    rowElements.add(nameInput(record.recordName));
     if (renderInRow(record.viewId.value)) {
       rowElements.add(makeViewIdInput(record.viewId, context));
       rowElements.add(makeStyleInput(record.style, context));
@@ -416,7 +417,7 @@ class CreateApp extends BaseZone implements AppState {
   }
 
   View launchView(Context context) {
-    CreateRecord mainRecord = datastore.lookup(MAIN_NAME);
+    Record mainRecord = datastore.lookup(MAIN_NAME);
     if (mainRecord == null || !(mainRecord is ViewRecord)) {
       return _showError('Main view not found.');
     }

@@ -9,10 +9,6 @@ import 'elementsruntime.dart';
 import 'datastore.dart';
 import 'styles.dart';
 
-abstract class CreateRecord extends Record {
-  Ref<String> get recordName;
-}
-
 const DataType DATA_DATATYPE = const DataType('data');
 const DataType PARAMETER_DATATYPE = const DataType('parameter');
 const DataType OPERATION_DATATYPE = const DataType('operation');
@@ -32,7 +28,7 @@ const TypeId CODE_TYPE = const TypeId('Code');
 const String TYPEID_FIELD = 'typeid';
 const String STATE_FIELD = 'state';
 
-class DataRecord extends CreateRecord {
+class DataRecord extends Record {
   final DataType dataType;
   final DataId dataId;
   final Ref<String> recordName;
@@ -53,7 +49,7 @@ class DataRecord extends CreateRecord {
 const String FONT_SIZE_FIELD = 'font_size';
 const String COLOR_FIELD = 'color';
 
-class StyleRecord extends CreateRecord implements Style {
+class StyleRecord extends Record implements Style {
   final DataId dataId;
   final Ref<String> recordName;
   final Ref<double> fontSize;
@@ -89,7 +85,7 @@ const String CONTENT_FIELD = 'content';
 const String ACTION_FIELD = 'action';
 const String SUBVIEWS_FIELD = 'subviews';
 
-class ViewRecord extends CreateRecord {
+class ViewRecord extends Record {
   final DataId dataId;
   final Ref<String> recordName;
   final Ref<ViewId> viewId;
@@ -142,15 +138,8 @@ class ViewRecord extends CreateRecord {
   }
 }
 
-// Dart in checked mode throws an exception because of reified generic types.
-// We get an error:
-//   type 'MutableList<CreateRecord>' is not a subtype of type 'ReadList<ViewRecord>' of
-//   'function result'.
-// when trying to invoke getViews() if the type parameter is uncommented.
-// Talked at length with gbracha@ about this, there is no easy workaround;
-// making the Datastore parameter dynamic is the least invasive solution.
-class CreateData extends Datastore/*<CreateRecord>*/ {
-  CreateData(List<CreateRecord> initialState): super(initialState) {
+class CreateData extends Datastore {
+  CreateData(List<Record> initialState): super(initialState) {
     new DataSyncer(this).start();
   }
 
@@ -193,7 +182,7 @@ class CreateData extends Datastore/*<CreateRecord>*/ {
 
 String MAIN_NAME = 'main';
 
-List<CreateRecord> buildInitialCreateData() {
+List<Record> buildInitialCreateData() {
   DataIdSource ids = new SequentialIdSource();
 
   DataRecord buttontext = new DataRecord(PARAMETER_DATATYPE, ids.nextId(),
