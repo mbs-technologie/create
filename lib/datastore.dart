@@ -3,6 +3,7 @@
 library datastore;
 
 import 'dart:collection';
+import 'dart:io';
 import 'dart:convert' as convert;
 import 'dart:math' as math;
 import 'elements.dart';
@@ -120,13 +121,17 @@ class _LiveQuery<R extends Record> implements Disposable {
   }
 }
 
+const String SYNC_ENDPOITNT = 'http://create-ledger.appspot.com/data';
+
 const String RECORDS_LIST = 'records';
 const String TYPE_FIELD = '#type';
 const String ID_FIELD = '#id';
 
 class DataSyncer {
-  Datastore _datastore;
-  convert.JsonEncoder encoder = const convert.JsonEncoder.withIndent('  ');
+  final Datastore _datastore;
+  final HttpClient client = new HttpClient();
+  final Uri syncUri = Uri.parse(SYNC_ENDPOITNT);
+  final convert.JsonEncoder encoder = const convert.JsonEncoder.withIndent('  ');
 
   DataSyncer(this._datastore);
 
@@ -134,7 +139,20 @@ class DataSyncer {
     print('Syncing datastore with ${_datastore._records.length} records.');
     List jsonRecords = new List.from(_datastore._records.map(_recordToJson));
     String encoded = encoder.convert({ RECORDS_LIST: jsonRecords });
-    print(encoded);
+
+    client.putUrl(syncUri)
+      .then((HttpClientRequest request) {
+        request.headers.contentType = new ContentType("text", "plain", charset: "utf-8");
+        request.write(encoded);
+        print('Sync/put: write completed');
+        return request.close();
+      })
+      .then((HttpClientResponse response) {
+        response.transform(convert.UTF8.decoder).listen((contents) {
+          String responseBody = contents.toString();
+          print('Sync/put: got response body: $responseBody');
+        });
+      });
   }
 
   Map<String, Object> _recordToJson(Record record) {
