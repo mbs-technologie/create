@@ -8,16 +8,11 @@ import 'dart:math' as math;
 import 'elements.dart';
 import 'elementsruntime.dart';
 
-class DataType extends Named {
-  // TODO(dynin): eventually we'll have namespaces in addition to names.
-  const DataType(String name): super(name);
-}
-
-class DataId {
+class NumberedDataId implements DataId {
   // TODO(dynin): switch to using UUIDs.
   final int _idNumber;
 
-  const DataId(this._idNumber);
+  const NumberedDataId(this._idNumber);
 
   String toString() => _idNumber.toString();
 
@@ -31,23 +26,19 @@ abstract class DataIdSource {
 
 class SequentialIdSource extends DataIdSource {
   int _nextNumber = 0;
-  DataId nextId() => new DataId(_nextNumber++);
+  DataId nextId() => new NumberedDataId(_nextNumber++);
 }
 
 class RandomIdSource extends DataIdSource {
   math.Random _random = new math.Random();
-  DataId nextId() => new DataId(_random.nextInt(math.pow(2, 31)));
+  DataId nextId() => new NumberedDataId(_random.nextInt(math.pow(2, 31)));
 }
 
-abstract class Record implements Named {
-  // Data types are immutable for the lifetime of the data object
-  DataType get dataType;
-  // Data ids are immutable and globally unique
-  DataId get dataId;
+abstract class Record implements Data, Named {
   ReadRef<String> get recordName;
 
   String get name => recordName.value;
-  String toString() => recordName.value;
+  String toString() => name;
 
   void marshal(MarshalContext context);
 }
@@ -55,8 +46,7 @@ abstract class Record implements Named {
 abstract class MarshalContext {
   void stringField(String fieldName, Ref<String> field);
   void doubleField(String fieldName, Ref<double> field);
-  void namedField(String fieldName, Ref<Named> field);
-  void recordField(String fieldName, Ref<Record> field);
+  void dataField(String fieldName, Ref<Data> field);
   void listField(String fieldName, ReadList<Record> field);
 }
 
@@ -128,8 +118,7 @@ class _LiveQuery<R extends Record> implements Disposable {
   }
 }
 
-const String DATATYPE_FIELD = 'datatype';
-const String DATAID_FIELD = 'dataid';
+const String ID_FIELD = '#';
 const String NAME_FIELD = 'name';
 
 class DataSyncer {
@@ -148,8 +137,7 @@ class DataSyncer {
   Map<String, Object> _recordToJson(Record record) {
     _MapOutput output = new _MapOutput();
 
-    output.specialField(DATATYPE_FIELD, record.dataType.toString());
-    output.specialField(DATAID_FIELD, record.dataId.toString());
+    output.specialField(ID_FIELD, record.dataType.name + ':' + record.dataId.toString());
     // TODO: record name field should be part of Record class
     output.specialField(NAME_FIELD, record.name);
 
@@ -174,23 +162,32 @@ class _MapOutput implements MarshalContext {
     fieldMap[fieldName] = field.value;
   }
 
-  String _recordRef(Record record) {
-    return record != null ? record.dataId.toString() + '/' + record.name : null;
-  }
-
-  void namedField(String fieldName, Ref<Named> field) {
-    if (field.value is Record) {
-      recordField(fieldName, field);
-    } else {
-      fieldMap[fieldName] = field.value != null ? field.value.name : null;
+  String _dataRef(Data data) {
+    if (data == null) {
+      return null;
     }
+
+    StringBuffer result = new StringBuffer(data.dataType.name);
+    result.write(':');
+
+    if (data is EnumData) {
+      result.write(data.name);
+    } else {
+      result.write(data.dataId.toString());
+      if (data is Named) {
+        result.write('/');
+        result.write((data as Named).name);
+      }
+    }
+
+    return result.toString();
   }
 
-  void recordField(String fieldName, Ref<Record> field) {
-    fieldMap[fieldName] = _recordRef(field.value);
+  void dataField(String fieldName, Ref<Data> field) {
+    fieldMap[fieldName] = _dataRef(field.value);
   }
 
   void listField(String fieldName, ReadList<Record> field) {
-    fieldMap[fieldName] = new List.from(field.elements.map(_recordRef));
+    fieldMap[fieldName] = new List.from(field.elements.map(_dataRef));
   }
 }

@@ -104,3 +104,38 @@ abstract class Named {
   const Named(this.name);
   String toString() => name;
 }
+
+/// Data types identify runtime type of Data objects.
+class DataType extends Named {
+  // TODO(dynin): eventually we'll have namespaces in addition to names.
+  const DataType(String name): super(name);
+}
+
+/// Data IDs uniquely identify instances of Data objects.
+/// Equality and hashCode should be correctly defined on DataIds.
+abstract class DataId {
+}
+
+/// Data objects are have type and identity.
+abstract class Data {
+  // Data types are immutable for the lifetime of the data object
+  DataType get dataType;
+  // Data ids are immutable and globally unique
+  DataId get dataId;
+}
+
+/// Data types for EnumData objects.
+class EnumDataType extends DataType {
+  const EnumDataType(String name): super(name);
+  // TODO: get all values
+}
+
+/// Enum values are immutable data objects that are of the specified type.
+abstract class EnumData extends Named implements Data, DataId {
+  const EnumData(String name): super(name);
+
+  /// Enum data value is its own dataId
+  DataId get dataId => this;
+
+  EnumDataType get dataType;
+}

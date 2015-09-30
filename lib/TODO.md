@@ -21,7 +21,7 @@
 - [ ] Prohibit recursive view declarations
 - [ ] Implement ReactiveBuild that autocreates subcontexts
 - [ ] Make styles computable
-- [ ] Factor out Named interface
+- [x] Factor out Named interface
 - [ ] Implement FilteredList and JoinedList
 - [ ] Scheduler for actions and observers
 - [ ] Parametrized operations

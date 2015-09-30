@@ -7,13 +7,18 @@ import 'package:sky/src/painting/text_style.dart';
 import 'package:sky/material.dart';
 import 'elements.dart';
 
-abstract class Style implements Named {
+abstract class Style implements Data, Named {
   TextStyle get textStyle;
 }
 
-class ThemedStyle extends Named implements Style {
+const EnumDataType THEMED_STYLE_DATATYPE = const EnumDataType('themed_style');
+
+class ThemedStyle extends EnumData implements Style {
   final TextStyle textStyle;
+
   ThemedStyle(String name, this.textStyle): super(name);
+
+  EnumDataType get dataType => THEMED_STYLE_DATATYPE;
 }
 
 ThemedStyle TITLE_STYLE = new ThemedStyle("Title", Typography.black.title);
@@ -32,9 +37,12 @@ List<ThemedStyle> ALL_THEMED_STYLES = [
   BUTTON_STYLE
 ];
 
-class NamedColor extends Named {
+const EnumDataType NAMED_COLOR_DATATYPE = const EnumDataType('named_color');
+
+class NamedColor extends EnumData {
   final Color colorValue;
   const NamedColor(String name, this.colorValue): super(name);
+  EnumDataType get dataType => NAMED_COLOR_DATATYPE;
 }
 
 NamedColor BLACK_COLOR = new NamedColor("Black", Colors.black);

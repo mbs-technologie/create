@@ -16,8 +16,12 @@ const DataType SERVICE_DATATYPE = const DataType('service');
 const DataType STYLE_DATATYPE = const DataType('style');
 const DataType VIEW_DATATYPE = const DataType('view');
 
-class TypeId extends Named {
+const EnumDataType TYPE_ID_DATATYPE = const EnumDataType('type_id');
+const EnumDataType VIEW_ID_DATATYPE = const EnumDataType('view_id');
+
+class TypeId extends EnumData {
   const TypeId(String name): super(name);
+  EnumDataType get dataType => TYPE_ID_DATATYPE;
 }
 
 const TypeId STRING_TYPE = const TypeId('String');
@@ -25,7 +29,7 @@ const TypeId INTEGER_TYPE = const TypeId('Integer');
 const TypeId TEMPLATE_TYPE = const TypeId('Template');
 const TypeId CODE_TYPE = const TypeId('Code');
 
-const String TYPEID_FIELD = 'typeid';
+const String TYPE_ID_FIELD = 'type_id';
 const String STATE_FIELD = 'state';
 
 class DataRecord extends Record {
@@ -41,7 +45,7 @@ class DataRecord extends Record {
       state = new State<String>(state);
 
   void marshal(MarshalContext context) {
-    context.namedField(TYPEID_FIELD, typeId);
+    context.dataField(TYPE_ID_FIELD, typeId);
     context.stringField(STATE_FIELD, state);
   }
 }
@@ -66,12 +70,13 @@ class StyleRecord extends Record implements Style {
 
   void marshal(MarshalContext context) {
     context.doubleField(FONT_SIZE_FIELD, fontSize);
-    context.namedField(COLOR_FIELD, color);
+    context.dataField(COLOR_FIELD, color);
   }
 }
 
-class ViewId extends Named {
+class ViewId extends EnumData {
   const ViewId(String name): super(name);
+  EnumDataType get dataType => VIEW_ID_DATATYPE;
 }
 
 const ViewId LABEL_VIEW = const ViewId('Label');
@@ -130,10 +135,10 @@ class ViewRecord extends Record {
   DataType get dataType => VIEW_DATATYPE;
 
   void marshal(MarshalContext context) {
-    context.namedField(VIEW_ID_FIELD, viewId);
-    context.namedField(STYLE_FIELD, style);
-    context.recordField(CONTENT_FIELD, content);
-    context.recordField(ACTION_FIELD, action);
+    context.dataField(VIEW_ID_FIELD, viewId);
+    context.dataField(STYLE_FIELD, style);
+    context.dataField(CONTENT_FIELD, content);
+    context.dataField(ACTION_FIELD, action);
     context.listField(SUBVIEWS_FIELD, subviews);
   }
 }
