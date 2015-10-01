@@ -2,6 +2,7 @@
 
 library datastore;
 
+import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 import 'dart:convert' as convert;
@@ -114,13 +115,19 @@ class Datastore<R extends Record> extends BaseZone implements DataIdSource {
     }
   }
 
+  VersionId _advanceVersion() {
+    version = version.nextVersion();
+    return version;
+  }
+
   void add(R record) {
+    record.version = _advanceVersion();
     _records.add(record);
     _recordsById[record.dataId] = record;
     _liveQueries.forEach((q) => q.newRecordAdded(record));
   }
 
-  void unregister(_LiveQuery liveQuery) {
+  void _unregister(_LiveQuery liveQuery) {
     _liveQueries.remove(liveQuery);
     print('Datastore: query removed; ${_liveQueries.length} active queries.');
   }
@@ -142,11 +149,12 @@ class _LiveQuery<R extends Record> implements Disposable {
   }
 
   void dispose() {
-    _datastore.unregister(this);
+    _datastore._unregister(this);
   }
 }
 
 const String SYNC_ENDPOITNT = 'http://create-ledger.appspot.com/data';
+const SYNC_INTERVAL = const Duration(seconds: 1);
 
 const String RECORDS_FIELD = 'records';
 const String TYPE_FIELD = '#type';
@@ -158,27 +166,47 @@ class DataSyncer {
   final HttpClient client = new HttpClient();
   final Uri syncUri = Uri.parse(SYNC_ENDPOITNT);
   final convert.JsonEncoder encoder = const convert.JsonEncoder.withIndent('  ');
+  VersionId lastUploaded;
 
   DataSyncer(this._datastore);
 
   void start() {
-    print('Syncing datastore with ${_datastore._records.length} records.');
+    upload();
+  }
+
+  void scheduleSync() {
+    new Timer(SYNC_INTERVAL, sync);
+  }
+
+  void sync() {
+    if (_datastore.version != lastUploaded) {
+      upload();
+    } else {
+      print('Sync: no changes.');
+      scheduleSync();
+    }
+  }
+
+  void upload() {
+    print('Uploading datastore with ${_datastore._records.length} records.');
     List jsonRecords = new List.from(_datastore._records.map(_recordToJson));
-    Map datastoreJson = { VERSION_FIELD: _datastore.version.marshal(), RECORDS_FIELD: jsonRecords };
+    lastUploaded = _datastore.version;
+    Map datastoreJson = { VERSION_FIELD: lastUploaded.marshal(), RECORDS_FIELD: jsonRecords };
 
     client.putUrl(syncUri)
       .then((HttpClientRequest request) {
         request.headers.contentType = new ContentType("text", "plain", charset: "utf-8");
         request.write(encoder.convert(datastoreJson));
-        print('Sync/put: write completed');
+        print('Uploading: write completed');
         return request.close();
       })
       .then((HttpClientResponse response) {
         response.transform(convert.UTF8.decoder).listen((contents) {
           String responseBody = contents.toString();
-          print('Sync/put: got response body: $responseBody');
+          print('Uploading: got response body: $responseBody');
         });
-      });
+      })
+      .whenComplete(scheduleSync);
   }
 
   Map<String, Object> _recordToJson(Record record) {
