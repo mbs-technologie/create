@@ -9,6 +9,29 @@ import 'dart:math' as math;
 import 'elements.dart';
 import 'elementsruntime.dart';
 
+abstract class VersionId {
+  VersionId nextVersion();
+  bool isAfter(VersionId other);
+  Object marshal();
+}
+
+VersionId VERSION_ZERO = new Timestamp(0);
+
+class Timestamp implements VersionId {
+  final int _timestamp;
+
+  const Timestamp(this._timestamp);
+
+  VersionId nextVersion() => new Timestamp(new DateTime.now().millisecondsSinceEpoch);
+  bool isAfter(VersionId other) => _timestamp > ((other as Timestamp)._timestamp);
+  Object marshal() => _timestamp;
+
+  String toString() => _timestamp.toString();
+
+  bool operator ==(o) => o is Timestamp && _timestamp == o._timestamp;
+  int get hashCode => _timestamp.hashCode;
+}
+
 class NumberedDataId implements DataId {
   // TODO(dynin): switch to using UUIDs.
   final int _idNumber;
@@ -36,6 +59,7 @@ class RandomIdSource extends DataIdSource {
 }
 
 abstract class Record implements Data, Named {
+  VersionId version = VERSION_ZERO;
   ReadRef<String> get recordName;
 
   String get name => recordName.value;
@@ -55,6 +79,7 @@ typedef bool QueryType(Object);
 
 class Datastore<R extends Record> extends BaseZone implements DataIdSource {
   final List<R> _records;
+  VersionId version = VERSION_ZERO;
   final Map<DataId, R> _recordsById = new HashMap<DataId, R>();
   final Set<_LiveQuery> _liveQueries = new Set<_LiveQuery>();
   final DataIdSource _dataIdSource = new RandomIdSource();
@@ -123,9 +148,10 @@ class _LiveQuery<R extends Record> implements Disposable {
 
 const String SYNC_ENDPOITNT = 'http://create-ledger.appspot.com/data';
 
-const String RECORDS_LIST = 'records';
+const String RECORDS_FIELD = 'records';
 const String TYPE_FIELD = '#type';
 const String ID_FIELD = '#id';
+const String VERSION_FIELD = '#version';
 
 class DataSyncer {
   final Datastore _datastore;
@@ -138,12 +164,12 @@ class DataSyncer {
   void start() {
     print('Syncing datastore with ${_datastore._records.length} records.');
     List jsonRecords = new List.from(_datastore._records.map(_recordToJson));
-    String encoded = encoder.convert({ RECORDS_LIST: jsonRecords });
+    Map datastoreJson = { VERSION_FIELD: _datastore.version.marshal(), RECORDS_FIELD: jsonRecords };
 
     client.putUrl(syncUri)
       .then((HttpClientRequest request) {
         request.headers.contentType = new ContentType("text", "plain", charset: "utf-8");
-        request.write(encoded);
+        request.write(encoder.convert(datastoreJson));
         print('Sync/put: write completed');
         return request.close();
       })
@@ -168,6 +194,7 @@ class _Marshaller implements FieldVisitor {
   _Marshaller(Record record) {
     fieldMap[TYPE_FIELD] = record.dataType.name;
     fieldMap[ID_FIELD] = record.dataId.toString();
+    fieldMap[VERSION_FIELD] = record.version.marshal();
   }
 
   void stringField(String fieldName, Ref<String> field) {
