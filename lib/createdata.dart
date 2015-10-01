@@ -183,11 +183,14 @@ List<DataType> ALL_CREATE_TYPES = [
   NAMED_COLOR_DATATYPE
 ];
 
+/// Prefix for ids
+String CREATE_NAMESPACE = 'cr:';
+
 /// Name of the view that Launch mode will display
 String MAIN_NAME = 'main';
 
 class CreateData extends Datastore {
-  CreateData(): super(ALL_CREATE_TYPES);
+  CreateData(): super(CREATE_NAMESPACE, ALL_CREATE_TYPES);
 
   ReadList<DataRecord> getDataRecords(CompositeDataType dataType, Context context) =>
     runQuery((record) => record.dataType == dataType, context);

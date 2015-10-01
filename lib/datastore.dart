@@ -33,16 +33,15 @@ class Timestamp implements VersionId {
   int get hashCode => _timestamp.hashCode;
 }
 
-class NumberedDataId implements DataId {
+class TaggedDataId implements DataId {
   // TODO(dynin): switch to using UUIDs.
-  final int _idNumber;
+  final String _tag;
 
-  const NumberedDataId(this._idNumber);
+  const TaggedDataId(this._tag);
 
-  String toString() => _idNumber.toString();
-
-  bool operator ==(o) => o is DataId && _idNumber == o._idNumber;
-  int get hashCode => _idNumber.hashCode;
+  String toString() => _tag;
+  bool operator ==(o) => o is DataId && _tag == o._tag;
+  int get hashCode => _tag.hashCode;
 }
 
 abstract class DataIdSource {
@@ -50,13 +49,20 @@ abstract class DataIdSource {
 }
 
 class SequentialIdSource extends DataIdSource {
+  String namespace;
   int _nextNumber = 0;
-  DataId nextId() => new NumberedDataId(_nextNumber++);
+
+  SequentialIdSource(this.namespace);
+
+  DataId nextId() => new TaggedDataId(namespace + (_nextNumber++).toString());
 }
 
 class RandomIdSource extends DataIdSource {
+  String namespace;
   math.Random _random = new math.Random();
-  DataId nextId() => new NumberedDataId(_random.nextInt(math.pow(2, 31)));
+
+  RandomIdSource(this.namespace);
+  DataId nextId() => new TaggedDataId(namespace + _random.nextInt(math.pow(2, 31)).toString());
 }
 
 abstract class Record implements Data, Named {
@@ -96,12 +102,13 @@ class Datastore<R extends Record> extends BaseZone implements DataIdSource {
   final Map<String, DataType> _typesByName = new Map<String, DataType>();
   final List<R> _records = new List<R>();
   final Map<DataId, R> _recordsById = new HashMap<DataId, R>();
+  final Set<_LiveQuery> _liveQueries = new Set<_LiveQuery>();
+  DataIdSource _dataIdSource;
   VersionId version = VERSION_ZERO;
   bool _bulkUpdateInProgress = false;
-  final Set<_LiveQuery> _liveQueries = new Set<_LiveQuery>();
-  final DataIdSource _dataIdSource = new RandomIdSource();
 
-  Datastore(List<DataType> types) {
+  Datastore(String namespace, List<DataType> types) {
+    _dataIdSource = new RandomIdSource(namespace);
     types.forEach((DataType type) => _typesByName[type.name] = type);
   }
 
@@ -137,9 +144,9 @@ class Datastore<R extends Record> extends BaseZone implements DataIdSource {
     return _typesByName[type.name] == type;
   }
 
-  void startBulkUpdate() {
+  void startBulkUpdate(VersionId version) {
     assert (!_bulkUpdateInProgress);
-    version = version.nextVersion();
+    this.version = version;
     _bulkUpdateInProgress = true;
   }
 
@@ -167,8 +174,8 @@ class Datastore<R extends Record> extends BaseZone implements DataIdSource {
     _liveQueries.forEach((q) => q.newRecordAdded(record));
   }
 
-  void addAll(List<R> records) {
-    startBulkUpdate();
+  void addAll(List<R> records, VersionId version) {
+    startBulkUpdate(version);
     records.forEach((record) => add(record));
     stopBulkUpdate();
   }

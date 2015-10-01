@@ -8,7 +8,7 @@ import 'styles.dart';
 import 'createdata.dart';
 
 List<Record> buildInitialCreateData() {
-  DataIdSource ids = new SequentialIdSource();
+  DataIdSource ids = new SequentialIdSource(CREATE_NAMESPACE);
 
   DataRecord buttontext = new DataRecord(PARAMETER_DATATYPE, ids.nextId(),
       'buttontext', STRING_TYPE, 'Increase the counter value');

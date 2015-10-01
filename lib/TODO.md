@@ -25,3 +25,7 @@
 - [ ] Implement FilteredList and JoinedList
 - [ ] Scheduler for actions and observers
 - [ ] Parametrized operations
+- [ ] Factor out skystyles
+- [ ] Support multiple datstores on the server
+- [ ] Support multiple versions on the client
+- [ ] Start implementing code generation

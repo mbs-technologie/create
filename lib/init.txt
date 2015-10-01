@@ -3,7 +3,7 @@
   "records": [
     {
       "#type": "parameter",
-      "#id": "5",
+      "#id": "cr:5",
       "#version": 0,
       "record_name": "hello",
       "type_id": "type_id:String",
@@ -11,7 +11,7 @@
     },
     {
       "#type": "data",
-      "#id": "6",
+      "#id": "cr:6",
       "#version": 0,
       "record_name": "counter",
       "type_id": "type_id:Integer",
@@ -19,7 +19,7 @@
     },
     {
       "#type": "parameter",
-      "#id": "0",
+      "#id": "cr:0",
       "#version": 0,
       "record_name": "buttontext",
       "type_id": "type_id:String",
@@ -27,7 +27,7 @@
     },
     {
       "#type": "parameter",
-      "#id": "7",
+      "#id": "cr:7",
       "#version": 0,
       "record_name": "increaseby",
       "type_id": "type_id:Integer",
@@ -35,15 +35,15 @@
     },
     {
       "#type": "service",
-      "#id": "8",
+      "#id": "cr:8",
       "#version": 0,
       "record_name": "today",
       "type_id": "type_id:String",
-      "state": "9/30/2015"
+      "state": "10/1/2015"
     },
     {
       "#type": "operation",
-      "#id": "1",
+      "#id": "cr:1",
       "#version": 0,
       "record_name": "describestate",
       "type_id": "type_id:Template",
@@ -51,7 +51,7 @@
     },
     {
       "#type": "operation",
-      "#id": "2",
+      "#id": "cr:2",
       "#version": 0,
       "record_name": "increase",
       "type_id": "type_id:Code",
@@ -59,7 +59,7 @@
     },
     {
       "#type": "style",
-      "#id": "9",
+      "#id": "cr:9",
       "#version": 0,
       "record_name": "Largefont",
       "font_size": 24.0,
@@ -67,7 +67,7 @@
     },
     {
       "#type": "style",
-      "#id": "10",
+      "#id": "cr:10",
       "#version": 0,
       "record_name": "Bigred",
       "font_size": 32.0,
@@ -75,29 +75,29 @@
     },
     {
       "#type": "view",
-      "#id": "3",
+      "#id": "cr:3",
       "#version": 0,
       "record_name": "counterlabel",
       "view_id": "view_id:Label",
       "style": "themed_style:Body1",
-      "content": "operation:1/describestate",
+      "content": "operation:cr:1/describestate",
       "action": null,
       "subviews": []
     },
     {
       "#type": "view",
-      "#id": "4",
+      "#id": "cr:4",
       "#version": 0,
       "record_name": "counterbutton",
       "view_id": "view_id:Button",
       "style": "themed_style:Button",
-      "content": "parameter:0/buttontext",
-      "action": "operation:2/increase",
+      "content": "parameter:cr:0/buttontext",
+      "action": "operation:cr:2/increase",
       "subviews": []
     },
     {
       "#type": "view",
-      "#id": "11",
+      "#id": "cr:11",
       "#version": 0,
       "record_name": "main",
       "view_id": "view_id:Column",
@@ -105,8 +105,8 @@
       "content": null,
       "action": null,
       "subviews": [
-        "view:3/counterlabel",
-        "view:4/counterbutton"
+        "view:cr:3/counterlabel",
+        "view:cr:4/counterbutton"
       ]
     }
   ]
