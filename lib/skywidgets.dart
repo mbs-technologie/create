@@ -2,9 +2,12 @@
 
 library skywidgets;
 
-import 'package:sky/widgets.dart';
-import 'package:sky/src/widgets/input.dart';
-import 'package:sky/src/widgets/popup_menu.dart';
+import 'dart:async';
+
+import 'package:sky/painting.dart';
+import 'package:sky/rendering.dart';
+import 'package:sky/widgets_next.dart';
+import 'package:sky/widgets_next.dart' as widgets show State;
 
 import 'elements.dart';
 import 'elementsruntime.dart';
@@ -16,7 +19,7 @@ abstract class SkyWidgets {
 
   void rebuildApp();
 
-  void showPopupMenu(List<PopupMenuItem> menuItems, MenuPosition position);
+  Future showPopupMenu(List<PopupMenuItem> menuItems, MenuPosition position);
 
   Widget viewToWidget(View view, Context context) {
     _cleanupView(view);
@@ -189,54 +192,52 @@ TextStyle textStyleOf(View view) {
 
 // TODO: Make better use of Sky widgets
 class TextComponent extends StatefulComponent {
-  TextInput input;
-  Context context;
-  bool editing;
-  GlobalKey inputKey;
+  TextComponent(this.input, this.context);
+
+  final TextInput input;
+  final Context context;
+
+  TextComponentState createState() => new TextComponentState();
+}
+
+class TextComponentState extends widgets.State<TextComponent> {
+
+  bool editing = false;
+  GlobalKey inputKey = new GlobalKey();
   String widgetText;
   bool observing = false;
 
-  TextComponent(this.input, this.context): editing = false, inputKey = new GlobalKey();
+  TextStyle get textStyle => textStyleOf(config.input);
 
-  void syncConstructorArguments(TextComponent source) {
-    this.input = source.input;
-    this.context = source.context;
-    this.editing = source.editing;
-    this.inputKey = source.inputKey;
-    this.widgetText = source.widgetText;
-  }
-
-  TextStyle get textStyle => textStyleOf(input);
-
-  Widget build() {
+  Widget build(BuildContext context) {
     registerOberverIfNeeded();
     return new Container(
       width: 300.0,
       child: new Row([
         new IconButton(icon: MODE_EDIT_ICON.id, onPressed: _editPressed),
         editing
-          ? new Input(key: inputKey, initialValue: input.model.value, onChanged : widgetChanged)
-          : new Text(input.model.value, style: textStyle)
+          ? new Input(key: inputKey, initialValue: config.input.model.value, onChanged: widgetChanged)
+          : new Text(config.input.model.value, style: textStyle)
       ])
     );
   }
 
   void registerOberverIfNeeded() {
     if (!observing) {
-      input.model.observe(context.zone.makeOperation(modelChanged), context);
+      config.input.model.observe(config.context.zone.makeOperation(modelChanged), config.context);
       observing = true;
     }
   }
 
   void modelChanged() {
-    if (input.model.value != widgetText) {
+    if (config.input.model.value != widgetText) {
       setState(() { });
     }
   }
 
   void widgetChanged(String newValue) {
     widgetText = newValue;
-    input.model.value = newValue;
+    config.input.model.value = newValue;
   }
 
   void _editPressed() {
@@ -247,47 +248,40 @@ class TextComponent extends StatefulComponent {
 }
 
 // TODO: Use Sky widget once it's implemented
-class SelectionComponent extends Component {
-  SelectionInput selection;
-  SkyWidgets skyWidgets;
-  List<PopupMenuItem> menuItems;
+class SelectionComponent extends StatelessComponent {
 
   SelectionComponent(this.selection, this.skyWidgets);
 
+  final SelectionInput selection;
+  final SkyWidgets skyWidgets;
+
   TextStyle get textStyle => textStyleOf(selection);
 
-  Widget build() {
-    // We do this during build(), because otherwise we may get an exception from Sky
-    menuItems = _buildMenuItems();
-
+  Widget build(BuildContext context) {
     return new FlatButton(
       child: new Row([
         new Text(selection.display(selection.model.value), style: textStyle),
         new Icon(type: ARROW_DROP_DOWN_ICON.id, size: 24)
       ]),
-      onPressed: _showSelectionMenu
+      onPressed: () { _showSelectionMenu(context); }
     );
   }
 
-  List<PopupMenuItem> _buildMenuItems() {
-    return new List.from(selection.options.elements.map(
+  void _showSelectionMenu(BuildContext context) {
+    Point dropdownTopLeft = (context.findRenderObject() as RenderBox).localToGlobal(new Point(0.0, 0.0));
+    MenuPosition position = new MenuPosition(left: dropdownTopLeft.x, top: dropdownTopLeft.y);
+
+    final List<PopupMenuItem> menuItems = new List.from(selection.options.elements.map(
       (option) => new PopupMenuItem(
           child: new Row([
             new IconButton(icon: (option == selection.model.value
                 ? RADIO_BUTTON_CHECKED_ICON
                 : RADIO_BUTTON_UNCHECKED_ICON).id),
             new Text(selection.display(option), style: textStyle)]),
-          onPressed: () => _selected(option)
+          value: option
       )));
-  }
 
-  void _showSelectionMenu() {
-    Point dropdownTopLeft = localToGlobal(new Point(0.0, 0.0));
-    MenuPosition position = new MenuPosition(left: dropdownTopLeft.x, top: dropdownTopLeft.y);
-
-    assert (menuItems != null); // We populated this in build()
-
-    skyWidgets.showPopupMenu(menuItems, position);
+    skyWidgets.showPopupMenu(menuItems, position).then((value) { if (value != null) _selected(value); });
   }
 
   void _selected(option) {
