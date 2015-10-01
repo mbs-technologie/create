@@ -9,12 +9,12 @@ import 'elementsruntime.dart';
 import 'datastore.dart';
 import 'styles.dart';
 
-const DataType DATA_DATATYPE = const DataType('data');
-const DataType PARAMETER_DATATYPE = const DataType('parameter');
-const DataType OPERATION_DATATYPE = const DataType('operation');
-const DataType SERVICE_DATATYPE = const DataType('service');
-const DataType STYLE_DATATYPE = const DataType('style');
-const DataType VIEW_DATATYPE = const DataType('view');
+const CompositeDataType DATA_DATATYPE = const CompositeDataType('data');
+const CompositeDataType PARAMETER_DATATYPE = const CompositeDataType('parameter');
+const CompositeDataType OPERATION_DATATYPE = const CompositeDataType('operation');
+const CompositeDataType SERVICE_DATATYPE = const CompositeDataType('service');
+const CompositeDataType STYLE_DATATYPE = const CompositeDataType('style');
+const CompositeDataType VIEW_DATATYPE = const CompositeDataType('view');
 
 const TypeIdDataType TYPE_ID_DATATYPE = const TypeIdDataType();
 
@@ -44,7 +44,7 @@ const String TYPE_ID_FIELD = 'type_id';
 const String STATE_FIELD = 'state';
 
 class DataRecord extends Record {
-  final DataType dataType;
+  final CompositeDataType dataType;
   final DataId dataId;
   final Ref<String> recordName;
   final Ref<TypeId> typeId;
@@ -76,7 +76,7 @@ class StyleRecord extends Record implements Style {
       fontSize = new State<double>(fontSize),
       color = new State<NamedColor>(color);
 
-  DataType get dataType => STYLE_DATATYPE;
+  CompositeDataType get dataType => STYLE_DATATYPE;
   TextStyle get textStyle =>
       new TextStyle(fontSize: fontSize.value, color: color.value.colorValue);
 
@@ -158,7 +158,7 @@ class ViewRecord extends Record {
       action = new State<DataRecord>(null),
       subviews = rows;
 
-  DataType get dataType => VIEW_DATATYPE;
+  CompositeDataType get dataType => VIEW_DATATYPE;
 
   void visit(FieldVisitor visitor) {
     visitor.stringField(RECORD_NAME_FIELD, recordName);
@@ -183,13 +183,13 @@ List<DataType> ALL_CREATE_TYPES = [
   NAMED_COLOR_DATATYPE
 ];
 
-class CreateData extends Datastore {
-  CreateData(List<Record> initialState): super(ALL_CREATE_TYPES) {
-    addAll(buildInitialCreateData());
-    new DataSyncer(this).start();
-  }
+/// Name of the view that Launch mode will display
+String MAIN_NAME = 'main';
 
-  ReadList<DataRecord> getDataRecords(DataType dataType, Context context) =>
+class CreateData extends Datastore {
+  CreateData(): super(ALL_CREATE_TYPES);
+
+  ReadList<DataRecord> getDataRecords(CompositeDataType dataType, Context context) =>
     runQuery((record) => record.dataType == dataType, context);
 
   ReadList<DataRecord> getData(Context context) =>
@@ -224,44 +224,4 @@ class CreateData extends Datastore {
     }
     return prefix + index.toString();
   }
-}
-
-String MAIN_NAME = 'main';
-
-List<Record> buildInitialCreateData() {
-  DataIdSource ids = new SequentialIdSource();
-
-  DataRecord buttontext = new DataRecord(PARAMETER_DATATYPE, ids.nextId(),
-      'buttontext', STRING_TYPE, 'Increase the counter value');
-  DataRecord describestate = new DataRecord(OPERATION_DATATYPE, ids.nextId(),
-      'describestate', TEMPLATE_TYPE, 'The counter value is \$counter');
-  DataRecord increase = new DataRecord(OPERATION_DATATYPE, ids.nextId(),
-      'increase', CODE_TYPE, 'counter += increaseby');
-
-  ViewRecord counterlabel = new ViewRecord.Label(ids.nextId(),
-      'counterlabel', BODY1_STYLE, describestate);
-  ViewRecord counterbutton = new ViewRecord.Button(ids.nextId(),
-      'counterbutton', BUTTON_STYLE, buttontext, increase);
-
-  return [
-    new DataRecord(PARAMETER_DATATYPE, ids.nextId(), 'hello', STRING_TYPE, 'Hello, world!'),
-    new DataRecord(DATA_DATATYPE, ids.nextId(), 'counter', INTEGER_TYPE, '68'),
-    buttontext,
-    new DataRecord(PARAMETER_DATATYPE, ids.nextId(), 'increaseby', INTEGER_TYPE, '1'),
-    // Hack for the demo
-    new DataRecord(SERVICE_DATATYPE, ids.nextId(), 'today', STRING_TYPE, _today()),
-    describestate,
-    increase,
-    new StyleRecord(ids.nextId(), 'Largefont', 24.0, BLACK_COLOR),
-    new StyleRecord(ids.nextId(), 'Bigred', 32.0, RED_COLOR),
-    counterlabel,
-    counterbutton,
-    new ViewRecord.Column(ids.nextId(), MAIN_NAME, null,
-        new MutableList<ViewRecord>([counterlabel, counterbutton]))
-  ];
-}
-
-String _today() {
-  DateTime date = new DateTime.now().toLocal();
-  return date.month.toString() + '/' + date.day.toString() + '/' + date.year.toString();
 }

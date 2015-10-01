@@ -60,6 +60,7 @@ class RandomIdSource extends DataIdSource {
 }
 
 abstract class Record implements Data, Named {
+  CompositeDataType get dataType;
   VersionId version = VERSION_ZERO;
   ReadRef<String> get recordName;
 
@@ -94,9 +95,9 @@ typedef bool QueryType(Record);
 class Datastore<R extends Record> extends BaseZone implements DataIdSource {
   final Map<String, DataType> _typesByName = new Map<String, DataType>();
   final List<R> _records = new List<R>();
+  final Map<DataId, R> _recordsById = new HashMap<DataId, R>();
   VersionId version = VERSION_ZERO;
   bool _bulkUpdateInProgress = false;
-  final Map<DataId, R> _recordsById = new HashMap<DataId, R>();
   final Set<_LiveQuery> _liveQueries = new Set<_LiveQuery>();
   final DataIdSource _dataIdSource = new RandomIdSource();
 

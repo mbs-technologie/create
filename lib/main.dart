@@ -1,25 +1,30 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 
+import 'datastore.dart';
 import 'views.dart';
 import 'skyapp.dart';
 import 'counter.dart';
 import 'createdata.dart';
+import 'createinit.dart';
 import 'createapp.dart';
 
-enum Run { COUNTER, CREATE }
+enum AppChoice { COUNTER, CREATE }
 
 void main() {
-  Run app = Run.CREATE;  // Change to run the Counter app
-  AppState appState;
+  AppChoice appChoice = AppChoice.CREATE;  // Change to run the Counter app
+  AppState app;
 
-  switch (app) {
-    case Run.COUNTER:
-      appState = new CounterApp(new CounterData());
+  switch (appChoice) {
+    case AppChoice.COUNTER:
+      app = new CounterApp(new CounterData());
       break;
-    case Run.CREATE:
-      appState = new CreateApp(new CreateData(buildInitialCreateData()));
+    case AppChoice.CREATE:
+      CreateData datastore = new CreateData();
+      datastore.addAll(buildInitialCreateData());
+      new DataSyncer(datastore).start();
+      app = new CreateApp(datastore);
       break;
   }
 
-  new SkyApp(appState).run();
+  new SkyApp(app).run();
 }

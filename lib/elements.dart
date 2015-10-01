@@ -106,7 +106,7 @@ abstract class Named {
 }
 
 /// Data types identify runtime type of Data objects.
-class DataType extends Named {
+abstract class DataType extends Named {
   // TODO(dynin): eventually we'll have namespaces in addition to names.
   const DataType(String name): super(name);
 }
@@ -139,4 +139,9 @@ abstract class EnumData extends Named implements Data, DataId {
   DataId get dataId => this;
 
   EnumDataType get dataType;
+}
+
+/// Data types for composite objects (regular classes, not enums.)
+class CompositeDataType extends DataType {
+  const CompositeDataType(String name): super(name);
 }
