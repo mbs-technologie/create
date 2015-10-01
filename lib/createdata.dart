@@ -148,7 +148,8 @@ class ViewRecord extends Record {
 }
 
 class CreateData extends Datastore {
-  CreateData(List<Record> initialState): super(initialState) {
+  CreateData(List<Record> initialState) {
+    addAll(buildInitialCreateData());
     new DataSyncer(this).start();
   }
 

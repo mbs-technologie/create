@@ -76,16 +76,28 @@ abstract class FieldVisitor {
   void listField(String fieldName, MutableList<Data> field);
 }
 
-typedef bool QueryType(Object);
+typedef void ObserveProcedure(Observable);
+
+class ObserveFields implements FieldVisitor {
+  ObserveProcedure visitor;
+
+  ObserveFields(this.visitor);
+
+  void stringField(String fieldName, Ref<String> field) => visitor(field);
+  void doubleField(String fieldName, Ref<double> field) => visitor(field);
+  void dataField(String fieldName, Ref<Data> field) => visitor(field);
+  void listField(String fieldName, MutableList<Data> field) => visitor(field);
+}
+
+typedef bool QueryType(Record);
 
 class Datastore<R extends Record> extends BaseZone implements DataIdSource {
-  final List<R> _records;
+  final List<R> _records = new List<R>();
   VersionId version = VERSION_ZERO;
+  bool _bulkUpdateInProgress = false;
   final Map<DataId, R> _recordsById = new HashMap<DataId, R>();
   final Set<_LiveQuery> _liveQueries = new Set<_LiveQuery>();
   final DataIdSource _dataIdSource = new RandomIdSource();
-
-  Datastore(this._records);
 
   DataId nextId() => _dataIdSource.nextId();
 
@@ -115,16 +127,39 @@ class Datastore<R extends Record> extends BaseZone implements DataIdSource {
     }
   }
 
-  VersionId _advanceVersion() {
+  void startBulkUpdate() {
+    assert (!_bulkUpdateInProgress);
     version = version.nextVersion();
+    _bulkUpdateInProgress = true;
+  }
+
+  VersionId _advanceVersion() {
+    if (!_bulkUpdateInProgress) {
+      version = version.nextVersion();
+    }
     return version;
+  }
+
+  void stopBulkUpdate() {
+    assert (_bulkUpdateInProgress);
+    _bulkUpdateInProgress = false;
   }
 
   void add(R record) {
     record.version = _advanceVersion();
+    // We advance the version on both the record and the datastore
+    Operation bumpVersion = makeOperation(() => record.version = _advanceVersion());
+    void register(Observable observable) => observable.observe(bumpVersion, this);
+    record.visit(new ObserveFields(register));
     _records.add(record);
     _recordsById[record.dataId] = record;
     _liveQueries.forEach((q) => q.newRecordAdded(record));
+  }
+
+  void addAll(List<R> records) {
+    startBulkUpdate();
+    records.forEach((record) => add(record));
+    stopBulkUpdate();
   }
 
   void _unregister(_LiveQuery liveQuery) {
