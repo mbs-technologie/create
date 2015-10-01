@@ -92,12 +92,17 @@ class ObserveFields implements FieldVisitor {
 typedef bool QueryType(Record);
 
 class Datastore<R extends Record> extends BaseZone implements DataIdSource {
+  final Map<String, DataType> _typesByName = new Map<String, DataType>();
   final List<R> _records = new List<R>();
   VersionId version = VERSION_ZERO;
   bool _bulkUpdateInProgress = false;
   final Map<DataId, R> _recordsById = new HashMap<DataId, R>();
   final Set<_LiveQuery> _liveQueries = new Set<_LiveQuery>();
   final DataIdSource _dataIdSource = new RandomIdSource();
+
+  Datastore(List<DataType> types) {
+    types.forEach((DataType type) => _typesByName[type.name] = type);
+  }
 
   DataId nextId() => _dataIdSource.nextId();
 
@@ -127,6 +132,10 @@ class Datastore<R extends Record> extends BaseZone implements DataIdSource {
     }
   }
 
+  bool _isKnownType(DataType type) {
+    return _typesByName[type.name] == type;
+  }
+
   void startBulkUpdate() {
     assert (!_bulkUpdateInProgress);
     version = version.nextVersion();
@@ -146,6 +155,7 @@ class Datastore<R extends Record> extends BaseZone implements DataIdSource {
   }
 
   void add(R record) {
+    assert (_isKnownType(record.dataType));
     record.version = _advanceVersion();
     // We advance the version on both the record and the datastore
     Operation bumpVersion = makeOperation(() => record.version = _advanceVersion());

@@ -63,13 +63,6 @@ List<double> FONT_SIZES = [
   112.0,
 ];
 
-List<ViewId> VIEW_TYPES = [
-  LABEL_VIEW,
-  BUTTON_VIEW,
-  COLUMN_VIEW,
-  ROW_VIEW
-];
-
 String displayToString(object) => object != null ? object.toString() : '<default>';
 
 class CreateApp extends BaseZone implements AppState {
@@ -278,7 +271,7 @@ class CreateApp extends BaseZone implements AppState {
       ),
       new SelectionInput<NamedColor>(
         record.color,
-        new ImmutableList<NamedColor>(ALL_COLORS),
+        new ImmutableList<NamedColor>(NAMED_COLOR_DATATYPE.values),
         displayToString
       )
     ]));
@@ -296,7 +289,7 @@ class CreateApp extends BaseZone implements AppState {
     String displayStyle(Style s) => s != null ? s.name : '<no style>';
     List<Style> styleOptions = [ null ];
     styleOptions.addAll(datastore.getStyles(null).elements);
-    styleOptions.addAll(ALL_THEMED_STYLES);
+    styleOptions.addAll(THEMED_STYLE_DATATYPE.values);
     return new SelectionInput<Style>(style, new ImmutableList<Style>(styleOptions), displayStyle);
   }
 
@@ -311,7 +304,8 @@ class CreateApp extends BaseZone implements AppState {
   }
 
   View makeViewIdInput(Ref<ViewId> viewId, Context context) {
-    return new SelectionInput<ViewId>(viewId, new ImmutableList<ViewId>(VIEW_TYPES), displayName);
+    return new SelectionInput<ViewId>(viewId, new ImmutableList<ViewId>(VIEW_ID_DATATYPE.values),
+        displayName);
   }
 
   View makeViewInput(Ref<ViewRecord> view, ViewRecord currentView, Context context) {

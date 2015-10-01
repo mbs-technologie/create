@@ -16,8 +16,18 @@ const DataType SERVICE_DATATYPE = const DataType('service');
 const DataType STYLE_DATATYPE = const DataType('style');
 const DataType VIEW_DATATYPE = const DataType('view');
 
-const EnumDataType TYPE_ID_DATATYPE = const EnumDataType('type_id');
-const EnumDataType VIEW_ID_DATATYPE = const EnumDataType('view_id');
+const TypeIdDataType TYPE_ID_DATATYPE = const TypeIdDataType();
+
+class TypeIdDataType extends EnumDataType {
+  const TypeIdDataType(): super('type_id');
+
+  List<TypeId> get values => [
+    STRING_TYPE,
+    INTEGER_TYPE,
+    TEMPLATE_TYPE,
+    CODE_TYPE
+  ];
+}
 
 class TypeId extends EnumData {
   const TypeId(String name): super(name);
@@ -75,6 +85,19 @@ class StyleRecord extends Record implements Style {
     visitor.doubleField(FONT_SIZE_FIELD, fontSize);
     visitor.dataField(COLOR_FIELD, color);
   }
+}
+
+const ViewIdDataType VIEW_ID_DATATYPE = const ViewIdDataType();
+
+class ViewIdDataType extends EnumDataType {
+  const ViewIdDataType(): super('view_id');
+
+  List<ViewId> get values => [
+    LABEL_VIEW,
+    BUTTON_VIEW,
+    COLUMN_VIEW,
+    ROW_VIEW
+  ];
 }
 
 class ViewId extends EnumData {
@@ -147,8 +170,21 @@ class ViewRecord extends Record {
   }
 }
 
+List<DataType> ALL_CREATE_TYPES = [
+  DATA_DATATYPE,
+  PARAMETER_DATATYPE,
+  OPERATION_DATATYPE,
+  SERVICE_DATATYPE,
+  STYLE_DATATYPE,
+  VIEW_DATATYPE,
+  TYPE_ID_DATATYPE,
+  VIEW_ID_DATATYPE,
+  THEMED_STYLE_DATATYPE,
+  NAMED_COLOR_DATATYPE
+];
+
 class CreateData extends Datastore {
-  CreateData(List<Record> initialState) {
+  CreateData(List<Record> initialState): super(ALL_CREATE_TYPES) {
     addAll(buildInitialCreateData());
     new DataSyncer(this).start();
   }

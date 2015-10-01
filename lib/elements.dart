@@ -125,9 +125,10 @@ abstract class Data {
 }
 
 /// Data types for EnumData objects.
-class EnumDataType extends DataType {
+abstract class EnumDataType extends DataType {
   const EnumDataType(String name): super(name);
-  // TODO: get all values
+
+  List<EnumData> get values;
 }
 
 /// Enum values are immutable data objects that are of the specified type.

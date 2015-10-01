@@ -251,7 +251,10 @@ class _ListCell<E> implements Ref<E> {
 
   E get value => list.elements[index];
   void set value(E newValue) {
-    list.elements[index] = newValue;
+    if (list.elements[index] != newValue) {
+      list.elements[index] = newValue;
+      list._triggerObservers();
+    }
   }
 
   // TODO: precise observer.
