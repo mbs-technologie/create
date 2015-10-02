@@ -30,3 +30,5 @@
 - [ ] Support multiple versions on the client
 - [ ] Start implementing code generation
 - [ ] Merge in new Sky widgets
+- [ ] Make EnumDataType const
+- [ ] Optimize unmarshalling of enum types

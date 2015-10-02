@@ -21,13 +21,13 @@ const String ID_FIELD = '#id';
 const String VERSION_FIELD = '#version';
 
 class DataSyncer {
-  final Datastore _datastore;
-  final Uri uri;
+  final Datastore datastore;
+  final String syncUri;
   VersionId lastUploaded;
   final HttpClient client = new HttpClient();
   final convert.JsonEncoder encoder = const convert.JsonEncoder.withIndent('  ');
 
-  DataSyncer(this._datastore, String syncUri): uri = Uri.parse(syncUri);
+  DataSyncer(this.datastore, this.syncUri);
 
   void start() {
     upload();
@@ -38,7 +38,7 @@ class DataSyncer {
   }
 
   void sync() {
-    if (_datastore.version != lastUploaded) {
+    if (datastore.version != lastUploaded) {
       upload();
     } else {
       print('Sync: no changes.');
@@ -46,14 +46,15 @@ class DataSyncer {
     }
   }
 
+  List<Record> get _allRecords => datastore.runQuery((x) => true, null).elements;
+
   void upload() {
-    print('Uploading datastore: ${_datastore.describe}');
-    List<Record> allRecords = _datastore.runQuery((x) => true, null).elements;
-    List jsonRecords = new List.from(allRecords.map(_recordToJson));
-    lastUploaded = _datastore.version;
+    print('Uploading datastore: ${datastore.describe}');
+    List jsonRecords = new List.from(_allRecords.map(_recordToJson));
+    lastUploaded = datastore.version;
     Map datastoreJson = { VERSION_FIELD: lastUploaded.marshal(), RECORDS_FIELD: jsonRecords };
 
-    client.putUrl(uri)
+    client.putUrl(Uri.parse(syncUri))
       .then((HttpClientRequest request) {
         request.headers.contentType = new ContentType("text", "plain", charset: "utf-8");
         request.write(encoder.convert(datastoreJson));
@@ -76,19 +77,56 @@ class DataSyncer {
   }
 
   void initialize(String fallbackDatastoreState) {
-    client.getUrl(uri)
-      .then((HttpClientRequest request) {
-        print('Initializing: request complete');
-        return request.close();
-      })
+    client.getUrl(Uri.parse(syncUri))
+      .then((HttpClientRequest request) => request.close())
       .then((HttpClientResponse response) {
-        response.transform(convert.UTF8.decoder).listen((contents) {
-          String responseBody = contents.toString();
-          print('Initializing: got response body: $responseBody');
-          initFallback(fallbackDatastoreState);
+        response.transform(convert.UTF8.decoder)
+        .transform(convert.JSON.decoder)
+        .listen((responseJson) {
+          print('Initializing: got response');
+          if (tryUmarshalling(responseJson)) {
+            print('Initializing: got state from server');
+            _initCompleted();
+          } else {
+            initFallback(fallbackDatastoreState);
+          }
         });
+      }, onError: (e) {
+        print('Initializing: got error $e');
+        initFallback(fallbackDatastoreState);
       })
       .whenComplete(scheduleSync);
+  }
+
+  void _initCompleted() {
+    datastore.syncStatus.value = SyncStatus.ONLINE;
+  }
+
+  bool tryUmarshalling(Map responseJson) {
+    try {
+      print('Trying to unmarshal...');
+      //, response size ${responseBody.length}...');
+      Map<String, Object> datastoreJson = responseJson;
+      /*
+      Map<String, Object> datastoreJson = convert.JSON.decode(responseBody);
+      if (datastoreJson == null) {
+        print('Decoded content is null');
+        return false;
+      }
+      */
+      VersionId newVersion = unmarshalVersion(datastoreJson[VERSION_FIELD]);
+      List<Map> jsonRecords = datastoreJson[RECORDS_FIELD];
+      if (newVersion == null || jsonRecords == null) {
+        print('JSON fields missing');
+        return false;
+      }
+      print('Unmarshaling ${jsonRecords.length} records.');
+      unmarshalDatastore(newVersion, jsonRecords);
+      return true;
+    } catch (e) {
+      print('Got error $e');
+      return false;
+    }
   }
 
   void initFallback(String fallbackDatastoreState) {
@@ -97,17 +135,17 @@ class DataSyncer {
     List<Map> jsonRecords = datastoreJson[RECORDS_FIELD];
     print('Initializing fallback with ${jsonRecords.length} records.');
     unmarshalDatastore(newVersion, jsonRecords);
-    _datastore.syncStatus.value = SyncStatus.ONLINE;
+    _initCompleted();
   }
 
   void unmarshalDatastore(VersionId newVersion, List<Map> jsonRecords) {
     List<_Unmarshaller> rawRecords = new List.from(
-        jsonRecords.map((fields) => new _Unmarshaller(fields, _datastore)));
-    _datastore.startBulkUpdate(newVersion);
-    rawRecords.forEach((unmarshaller) => unmarshaller.createRecord());
+        jsonRecords.map((fields) => new _Unmarshaller(fields, datastore)));
+    datastore.startBulkUpdate(newVersion);
+    rawRecords.forEach((unmarshaller) => unmarshaller.prepareRecord());
     rawRecords.forEach((unmarshaller) => unmarshaller.populateRecord());
-    _datastore.stopBulkUpdate();
-    print('Unmarshalling done: ${_datastore.describe}');
+    datastore.stopBulkUpdate();
+    print('Unmarshalling done: ${datastore.describe}');
   }
 }
 
@@ -165,7 +203,7 @@ class _Unmarshaller implements FieldVisitor {
 
   _Unmarshaller(this.fieldMap, this.datastore);
 
-  void createRecord() {
+  void prepareRecord() {
     DataType dataType = datastore.lookupType(fieldMap[TYPE_FIELD] as String);
     DataId dataId = unmarshalDataId(fieldMap[ID_FIELD]);
     VersionId version = unmarshalVersion(fieldMap[VERSION_FIELD]);
@@ -174,9 +212,19 @@ class _Unmarshaller implements FieldVisitor {
     }
 
     assert (dataType is CompositeDataType);
-    record = datastore.newRecord(dataType as CompositeDataType, dataId);
-    record.version = version;
-    datastore.add(record);
+    Record oldRecord = datastore.lookupById(dataId);
+    if (oldRecord == null) {
+      record = datastore.newRecord(dataType as CompositeDataType, dataId);
+      record.version = version;
+      datastore.add(record);
+    } else {
+      assert (oldRecord.dataType == dataType);
+      // We update state only if the unmarshaled record is newer than the one in the datastore
+      if (version.isAfter(oldRecord.version)) {
+        record = oldRecord;
+        record.version = version;
+      }
+    }
   }
 
   void populateRecord() {
