@@ -10,6 +10,8 @@ General components:
   a library of core reactive datatypes (implementation)
 - [datastore.dart](https://github.com/domokit/create/blob/master/lib/datastore.dart):
   datastore with live query support
+- [datasync.dart](https://github.com/domokit/create/blob/master/lib/datasync.dart):
+  code to synchronize the datastore state across the network
 - [styles.dart](https://github.com/domokit/create/blob/master/lib/styles.dart):
   encapsulating presentation attributes
 - [views.dart](https://github.com/domokit/create/blob/master/lib/views.dart):

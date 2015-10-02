@@ -1,6 +1,6 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 
-import 'datastore.dart';
+import 'datasync.dart';
 import 'views.dart';
 import 'skyapp.dart';
 import 'counter.dart';
