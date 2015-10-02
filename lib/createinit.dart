@@ -44,3 +44,118 @@ String _today() {
   DateTime date = new DateTime.now().toLocal();
   return date.month.toString() + '/' + date.day.toString() + '/' + date.year.toString();
 }
+
+String INITIAL_STATE =
+r'''{
+  "#version": 0,
+  "records": [
+    {
+      "#type": "parameter",
+      "#id": "cr:5",
+      "#version": 0,
+      "record_name": "hello",
+      "type_id": "type_id:String",
+      "state": "Hello, world!"
+    },
+    {
+      "#type": "data",
+      "#id": "cr:6",
+      "#version": 0,
+      "record_name": "counter",
+      "type_id": "type_id:Integer",
+      "state": "68"
+    },
+    {
+      "#type": "parameter",
+      "#id": "cr:0",
+      "#version": 0,
+      "record_name": "buttontext",
+      "type_id": "type_id:String",
+      "state": "Increase the counter value"
+    },
+    {
+      "#type": "parameter",
+      "#id": "cr:7",
+      "#version": 0,
+      "record_name": "increaseby",
+      "type_id": "type_id:Integer",
+      "state": "1"
+    },
+    {
+      "#type": "service",
+      "#id": "cr:8",
+      "#version": 0,
+      "record_name": "today",
+      "type_id": "type_id:String",
+      "state": "10/2/2015"
+    },
+    {
+      "#type": "operation",
+      "#id": "cr:1",
+      "#version": 0,
+      "record_name": "describestate",
+      "type_id": "type_id:Template",
+      "state": "The counter value is $counter"
+    },
+    {
+      "#type": "operation",
+      "#id": "cr:2",
+      "#version": 0,
+      "record_name": "increase",
+      "type_id": "type_id:Code",
+      "state": "counter += increaseby"
+    },
+    {
+      "#type": "style",
+      "#id": "cr:9",
+      "#version": 0,
+      "record_name": "Largefont",
+      "font_size": 24.0,
+      "color": "named_color:Black"
+    },
+    {
+      "#type": "style",
+      "#id": "cr:10",
+      "#version": 0,
+      "record_name": "Bigred",
+      "font_size": 32.0,
+      "color": "named_color:Red"
+    },
+    {
+      "#type": "view",
+      "#id": "cr:3",
+      "#version": 0,
+      "record_name": "counterlabel",
+      "view_id": "view_id:Label",
+      "style": "themed_style:Body1",
+      "content": "operation:cr:1//describestate",
+      "action": null,
+      "subviews": []
+    },
+    {
+      "#type": "view",
+      "#id": "cr:4",
+      "#version": 0,
+      "record_name": "counterbutton",
+      "view_id": "view_id:Button",
+      "style": "themed_style:Button",
+      "content": "parameter:cr:0//buttontext",
+      "action": "operation:cr:2//increase",
+      "subviews": []
+    },
+    {
+      "#type": "view",
+      "#id": "cr:11",
+      "#version": 0,
+      "record_name": "main",
+      "view_id": "view_id:Column",
+      "style": null,
+      "content": null,
+      "action": null,
+      "subviews": [
+        "view:cr:3//counterlabel",
+        "view:cr:4//counterbutton"
+      ]
+    }
+  ]
+}''';

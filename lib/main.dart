@@ -20,8 +20,8 @@ void main() {
       break;
     case AppChoice.CREATE:
       CreateData datastore = new CreateData();
-      datastore.addAll(buildInitialCreateData(), datastore.version);
-      new DataSyncer(datastore).start();
+      //datastore.addAll(buildInitialCreateData(), datastore.version);
+      new DataSyncer(datastore).initialize(INITIAL_STATE);
       app = new CreateApp(datastore);
       break;
   }

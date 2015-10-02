@@ -12,7 +12,7 @@ abstract class Style implements Data, Named {
 }
 
 class ThemedStyleDataType extends EnumDataType {
-  const ThemedStyleDataType(): super('themed_style');
+  ThemedStyleDataType(): super('themed_style');
 
   List<ThemedStyle> get values => [
     TITLE_STYLE,
@@ -24,7 +24,7 @@ class ThemedStyleDataType extends EnumDataType {
   ];
 }
 
-const ThemedStyleDataType THEMED_STYLE_DATATYPE = const ThemedStyleDataType();
+final ThemedStyleDataType THEMED_STYLE_DATATYPE = new ThemedStyleDataType();
 
 class ThemedStyle extends EnumData implements Style {
   final TextStyle textStyle;
@@ -34,15 +34,15 @@ class ThemedStyle extends EnumData implements Style {
   EnumDataType get dataType => THEMED_STYLE_DATATYPE;
 }
 
-ThemedStyle TITLE_STYLE = new ThemedStyle("Title", Typography.black.title);
-ThemedStyle SUBHEAD_STYLE = new ThemedStyle("Subhead", Typography.black.subhead);
-ThemedStyle BODY2_STYLE = new ThemedStyle("Body2", Typography.black.body2);
-ThemedStyle BODY1_STYLE = new ThemedStyle("Body1", Typography.black.body1);
-ThemedStyle CAPTION_STYLE = new ThemedStyle("Caption", Typography.black.caption);
-ThemedStyle BUTTON_STYLE = new ThemedStyle("Button", Typography.black.button);
+final ThemedStyle TITLE_STYLE = new ThemedStyle("Title", Typography.black.title);
+final ThemedStyle SUBHEAD_STYLE = new ThemedStyle("Subhead", Typography.black.subhead);
+final ThemedStyle BODY2_STYLE = new ThemedStyle("Body2", Typography.black.body2);
+final ThemedStyle BODY1_STYLE = new ThemedStyle("Body1", Typography.black.body1);
+final ThemedStyle CAPTION_STYLE = new ThemedStyle("Caption", Typography.black.caption);
+final ThemedStyle BUTTON_STYLE = new ThemedStyle("Button", Typography.black.button);
 
 class NamedColorDataType extends EnumDataType {
-  const NamedColorDataType(): super('named_color');
+  NamedColorDataType(): super('named_color');
 
   List<NamedColor> get values => [
     BLACK_COLOR,
@@ -52,18 +52,18 @@ class NamedColorDataType extends EnumDataType {
   ];
 }
 
-const NamedColorDataType NAMED_COLOR_DATATYPE = const NamedColorDataType();
+final NamedColorDataType NAMED_COLOR_DATATYPE = new NamedColorDataType();
 
 class NamedColor extends EnumData {
   final Color colorValue;
-  const NamedColor(String name, this.colorValue): super(name);
+  NamedColor(String name, this.colorValue): super(name);
   EnumDataType get dataType => NAMED_COLOR_DATATYPE;
 }
 
-NamedColor BLACK_COLOR = new NamedColor("Black", Colors.black);
-NamedColor RED_COLOR = new NamedColor("Red", Colors.red[500]);
-NamedColor GREEN_COLOR = new NamedColor("Green", Colors.green[500]);
-NamedColor BLUE_COLOR = new NamedColor("Blue", Colors.blue[500]);
+final NamedColor BLACK_COLOR = new NamedColor("Black", Colors.black);
+final NamedColor RED_COLOR = new NamedColor("Red", Colors.red[500]);
+final NamedColor GREEN_COLOR = new NamedColor("Green", Colors.green[500]);
+final NamedColor BLUE_COLOR = new NamedColor("Blue", Colors.blue[500]);
 
 // Icons from the Material Design library
 class IconId {

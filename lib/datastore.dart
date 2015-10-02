@@ -28,9 +28,13 @@ class Timestamp implements VersionId {
   Object marshal() => _timestamp;
 
   String toString() => _timestamp.toString();
-
   bool operator ==(o) => o is Timestamp && _timestamp == o._timestamp;
   int get hashCode => _timestamp.hashCode;
+}
+
+VersionId unmarshalVersion(Object object) {
+  // TODO: error handling
+  return new Timestamp(object as int);
 }
 
 class TaggedDataId implements DataId {
@@ -98,7 +102,7 @@ class ObserveFields implements FieldVisitor {
 
 typedef bool QueryType(Record);
 
-class Datastore<R extends Record> extends BaseZone implements DataIdSource {
+abstract class Datastore<R extends Record> extends BaseZone implements DataIdSource {
   final Map<String, DataType> _typesByName = new Map<String, DataType>();
   final List<R> _records = new List<R>();
   final Map<DataId, R> _recordsById = new HashMap<DataId, R>();
@@ -114,8 +118,13 @@ class Datastore<R extends Record> extends BaseZone implements DataIdSource {
 
   DataId nextId() => _dataIdSource.nextId();
 
+  /// Retrieve a record by id
+  R lookupById(DataId dataId) {
+    return _recordsById[dataId];
+  }
+
   /// Retrieve a record by name
-  R lookup(String name) {
+  R lookupByName(String name) {
     // TODO: we should use an index here if we care about scaling,
     // but that would be somewhat complicated because names can be updated.
     return _records.firstWhere((element) => (element.name == name), orElse: () => null);
@@ -184,6 +193,12 @@ class Datastore<R extends Record> extends BaseZone implements DataIdSource {
     _liveQueries.remove(liveQuery);
     print('Datastore: query removed; ${_liveQueries.length} active queries.');
   }
+
+  DataType lookupType(String name) {
+    return _typesByName[name];
+  }
+
+  Record newRecord(CompositeDataType dataType, DataId dataId);
 }
 
 class _LiveQuery<R extends Record> implements Disposable {
@@ -205,6 +220,9 @@ class _LiveQuery<R extends Record> implements Disposable {
     _datastore._unregister(this);
   }
 }
+
+const String ID_SEPARATOR = ':';
+const String NAME_SEPARATOR = '//';
 
 const String SYNC_ENDPOITNT = 'http://create-ledger.appspot.com/data';
 const SYNC_INTERVAL = const Duration(seconds: 1);
@@ -267,6 +285,21 @@ class DataSyncer {
     record.visit(marshaller);
     return marshaller.fieldMap;
   }
+
+  void initialize(String datastoreState) {
+    // TODO: error checking
+    Map<String, Object> datastoreJson = convert.JSON.decode(datastoreState);
+    VersionId newVersion = unmarshalVersion(datastoreJson[VERSION_FIELD]);
+    List<Map> jsonRecords = datastoreJson[RECORDS_FIELD];
+    print('Initializing datastore with ${jsonRecords.length} records.');
+    List<_Unmarshaller> rawRecords = new List.from(
+        jsonRecords.map((fields) => new _Unmarshaller(fields, _datastore)));
+    _datastore.startBulkUpdate(newVersion);
+    rawRecords.forEach((unmarshaller) => unmarshaller.createRecord());
+    rawRecords.forEach((unmarshaller) => unmarshaller.populateRecord());
+    _datastore.stopBulkUpdate();
+    print('Datastore now has ${_datastore._records.length} records.');
+  }
 }
 
 class _Marshaller implements FieldVisitor {
@@ -292,14 +325,14 @@ class _Marshaller implements FieldVisitor {
     }
 
     StringBuffer result = new StringBuffer(data.dataType.name);
-    result.write(':');
+    result.write(ID_SEPARATOR);
 
     if (data is EnumData) {
       result.write(data.name);
     } else {
       result.write(data.dataId.toString());
       if (data is Named) {
-        result.write('/');
+        result.write(NAME_SEPARATOR);
         result.write((data as Named).name);
       }
     }
@@ -313,5 +346,85 @@ class _Marshaller implements FieldVisitor {
 
   void listField(String fieldName, MutableList<Data> field) {
     fieldMap[fieldName] = new List.from(field.elements.map(_dataRef));
+  }
+}
+
+class _Unmarshaller implements FieldVisitor {
+  final Map<String, Object> fieldMap;
+  final Datastore datastore;
+  Record record;
+
+  _Unmarshaller(this.fieldMap, this.datastore);
+
+  void createRecord() {
+    DataType dataType = datastore.lookupType(fieldMap[TYPE_FIELD] as String);
+    DataId dataId = new TaggedDataId(fieldMap[ID_FIELD] as String);
+    VersionId version = unmarshalVersion(fieldMap[VERSION_FIELD]);
+    if (dataType == null || dataId == null || version == null) {
+      return;
+    }
+
+    assert (dataType is CompositeDataType);
+    record = datastore.newRecord(dataType as CompositeDataType, dataId);
+    record.version = version;
+    datastore.add(record);
+  }
+
+  void populateRecord() {
+    if (record == null) {
+      return;
+    }
+    record.visit(this);
+  }
+
+  void stringField(String fieldName, Ref<String> field) {
+    field.value = fieldMap[fieldName] as String;
+  }
+
+  void doubleField(String fieldName, Ref<double> field) {
+    field.value = fieldMap[fieldName] as double;
+  }
+
+  Data unmarshallData(String value) {
+    if (value == null) {
+      return null;
+    }
+
+    int idIndex = value.indexOf(ID_SEPARATOR);
+    if (idIndex < 0) {
+      return null;
+    }
+    DataType dataType = datastore.lookupType(value.substring(0, idIndex));
+
+    idIndex += ID_SEPARATOR.length;
+    String id;
+    int nameIndex = value.indexOf(NAME_SEPARATOR, idIndex);
+    if (nameIndex > 0) {
+      id = value.substring(idIndex, nameIndex);
+    } else {
+      id = value.substring(idIndex);
+    }
+
+    if (dataType is CompositeDataType) {
+      return datastore.lookupById(new TaggedDataId(id));
+    } else if (dataType is EnumDataType) {
+      return dataType.lookup(id);
+    } else {
+      print('Unknown type for ' + value);
+      return null;
+    }
+  }
+
+  void dataField(String fieldName, Ref<Data> field) {
+    field.value = unmarshallData(fieldMap[fieldName] as String);
+  }
+
+  void listField(String fieldName, MutableList<Data> field) {
+    List<String> jsonElements = fieldMap[fieldName] as List;
+    if (jsonElements == null) {
+      return;
+    }
+    List<Data> dataElements = new List.from(jsonElements.map((v) => unmarshallData(v)));
+    field.addAll(dataElements);
   }
 }

@@ -16,10 +16,10 @@ const CompositeDataType SERVICE_DATATYPE = const CompositeDataType('service');
 const CompositeDataType STYLE_DATATYPE = const CompositeDataType('style');
 const CompositeDataType VIEW_DATATYPE = const CompositeDataType('view');
 
-const TypeIdDataType TYPE_ID_DATATYPE = const TypeIdDataType();
+final TypeIdDataType TYPE_ID_DATATYPE = new TypeIdDataType();
 
 class TypeIdDataType extends EnumDataType {
-  const TypeIdDataType(): super('type_id');
+  TypeIdDataType(): super('type_id');
 
   List<TypeId> get values => [
     STRING_TYPE,
@@ -87,10 +87,10 @@ class StyleRecord extends Record implements Style {
   }
 }
 
-const ViewIdDataType VIEW_ID_DATATYPE = const ViewIdDataType();
+final ViewIdDataType VIEW_ID_DATATYPE = new ViewIdDataType();
 
 class ViewIdDataType extends EnumDataType {
-  const ViewIdDataType(): super('view_id');
+  ViewIdDataType(): super('view_id');
 
   List<ViewId> get values => [
     LABEL_VIEW,
@@ -124,6 +124,14 @@ class ViewRecord extends Record {
   final Ref<DataRecord> content;
   final Ref<DataRecord> action;
   final MutableList<ViewRecord> subviews;
+
+  ViewRecord(this.dataId, String recordName):
+      recordName = new State<String>(recordName),
+      viewId = new State<ViewId>(LABEL_VIEW),
+      style = new State<Style>(null),
+      content = new State<DataRecord>(null),
+      action = new State<DataRecord>(null),
+      subviews = new MutableList<ViewRecord>();
 
   ViewRecord.Label(this.dataId, String recordName, Style style, DataRecord content):
       recordName = new State<String>(recordName),
@@ -192,6 +200,22 @@ String MAIN_NAME = 'main';
 class CreateData extends Datastore {
   CreateData(): super(CREATE_NAMESPACE, ALL_CREATE_TYPES);
 
+  Record newRecord(CompositeDataType dataType, DataId dataId) {
+    if (dataType == STYLE_DATATYPE) {
+      return new StyleRecord(dataId, null, null, null);
+    } else if (dataType == VIEW_DATATYPE) {
+      return new ViewRecord(dataId, null);
+    } else {
+      assert(dataType == DATA_DATATYPE ||
+             dataType == PARAMETER_DATATYPE ||
+             dataType == OPERATION_DATATYPE ||
+             dataType == SERVICE_DATATYPE ||
+             dataType == TYPE_ID_DATATYPE ||
+             dataType == VIEW_ID_DATATYPE);
+      return new DataRecord(dataType, dataId, null, null, null);
+    }
+  }
+
   ReadList<DataRecord> getDataRecords(CompositeDataType dataType, Context context) =>
     runQuery((record) => record.dataType == dataType, context);
 
@@ -222,7 +246,7 @@ class CreateData extends Datastore {
 
   String newRecordName(String prefix) {
     int index = 0;
-    while (lookup(prefix + index.toString()) != null) {
+    while (lookupByName(prefix + index.toString()) != null) {
       ++index;
     }
     return prefix + index.toString();

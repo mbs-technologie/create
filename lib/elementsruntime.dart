@@ -236,6 +236,13 @@ class MutableList<E> extends ReadList<E> with _ObserverManager {
     _updateSizeAndTriggerObservers();
   }
 
+  void addAll(List<E> moreElements) {
+    if (moreElements.isNotEmpty) {
+      elements.addAll(moreElements);
+      _updateSizeAndTriggerObservers();
+    }
+  }
+
   void removeAt(int index) {
     assert (index >= 0 && index < elements.length);
     elements.removeAt(index);

@@ -134,8 +134,7 @@ class CreateApp extends BaseZone implements AppState {
       });
     } else if (mode == VIEWS_MODE) {
       return makeOperation(() {
-        datastore.add(new ViewRecord.Label(datastore.nextId(),
-            datastore.newRecordName('view'), null, null));
+        datastore.add(new ViewRecord(datastore.nextId(), datastore.newRecordName('view')));
       });
     } else {
       return null;
@@ -411,7 +410,7 @@ class CreateApp extends BaseZone implements AppState {
   }
 
   View launchView(Context context) {
-    Record mainRecord = datastore.lookup(MAIN_NAME);
+    Record mainRecord = datastore.lookupByName(MAIN_NAME);
     if (mainRecord == null || !(mainRecord is ViewRecord)) {
       return _showError('Main view not found.');
     }

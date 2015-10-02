@@ -126,9 +126,19 @@ abstract class Data {
 
 /// Data types for EnumData objects.
 abstract class EnumDataType extends DataType {
-  const EnumDataType(String name): super(name);
+  final Map<String, EnumData> _valueMap = new Map<String, EnumData>();
+
+  EnumDataType(String name): super(name);
 
   List<EnumData> get values;
+
+  EnumData lookup(String name) {
+    // Lazily populate the value map
+    if (_valueMap.isEmpty) {
+      values.forEach((EnumData data) => _valueMap[data.name] = data);
+    }
+    return _valueMap[name];
+  }
 }
 
 /// Enum values are immutable data objects that are of the specified type.
