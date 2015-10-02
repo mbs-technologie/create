@@ -48,6 +48,11 @@ class TaggedDataId implements DataId {
   int get hashCode => _tag.hashCode;
 }
 
+DataId unmarshalDataId(Object object) {
+  // TODO: error handling
+  return new TaggedDataId(object as String);
+}
+
 abstract class DataIdSource {
   DataId nextId();
 }
@@ -102,6 +107,8 @@ class ObserveFields implements FieldVisitor {
 
 typedef bool QueryType(Record);
 
+enum SyncStatus { INITIALIZING, ONLINE }
+
 abstract class Datastore<R extends Record> extends BaseZone implements DataIdSource {
   final Map<String, DataType> _typesByName = new Map<String, DataType>();
   final List<R> _records = new List<R>();
@@ -109,6 +116,7 @@ abstract class Datastore<R extends Record> extends BaseZone implements DataIdSou
   final Set<_LiveQuery> _liveQueries = new Set<_LiveQuery>();
   DataIdSource _dataIdSource;
   VersionId version = VERSION_ZERO;
+  Ref<SyncStatus> syncStatus = new State<SyncStatus>(SyncStatus.INITIALIZING);
   bool _bulkUpdateInProgress = false;
 
   Datastore(String namespace, List<DataType> types) {
@@ -224,7 +232,6 @@ class _LiveQuery<R extends Record> implements Disposable {
 const String ID_SEPARATOR = ':';
 const String NAME_SEPARATOR = '//';
 
-const String SYNC_ENDPOITNT = 'http://create-ledger.appspot.com/data';
 const SYNC_INTERVAL = const Duration(seconds: 1);
 
 const String RECORDS_FIELD = 'records';
@@ -234,12 +241,12 @@ const String VERSION_FIELD = '#version';
 
 class DataSyncer {
   final Datastore _datastore;
-  final HttpClient client = new HttpClient();
-  final Uri syncUri = Uri.parse(SYNC_ENDPOITNT);
-  final convert.JsonEncoder encoder = const convert.JsonEncoder.withIndent('  ');
+  final Uri uri;
   VersionId lastUploaded;
+  final HttpClient client = new HttpClient();
+  final convert.JsonEncoder encoder = const convert.JsonEncoder.withIndent('  ');
 
-  DataSyncer(this._datastore);
+  DataSyncer(this._datastore, String syncUri): uri = Uri.parse(syncUri);
 
   void start() {
     upload();
@@ -264,7 +271,7 @@ class DataSyncer {
     lastUploaded = _datastore.version;
     Map datastoreJson = { VERSION_FIELD: lastUploaded.marshal(), RECORDS_FIELD: jsonRecords };
 
-    client.putUrl(syncUri)
+    client.putUrl(uri)
       .then((HttpClientRequest request) {
         request.headers.contentType = new ContentType("text", "plain", charset: "utf-8");
         request.write(encoder.convert(datastoreJson));
@@ -286,12 +293,32 @@ class DataSyncer {
     return marshaller.fieldMap;
   }
 
-  void initialize(String datastoreState) {
-    // TODO: error checking
-    Map<String, Object> datastoreJson = convert.JSON.decode(datastoreState);
+  void initialize(String fallbackDatastoreState) {
+    client.getUrl(uri)
+      .then((HttpClientRequest request) {
+        print('Initializing: request complete');
+        return request.close();
+      })
+      .then((HttpClientResponse response) {
+        response.transform(convert.UTF8.decoder).listen((contents) {
+          String responseBody = contents.toString();
+          print('Initializing: got response body: $responseBody');
+          initFallback(fallbackDatastoreState);
+        });
+      });
+      //.whenComplete(scheduleSync);
+  }
+
+  void initFallback(String fallbackDatastoreState) {
+    Map<String, Object> datastoreJson = convert.JSON.decode(fallbackDatastoreState);
     VersionId newVersion = unmarshalVersion(datastoreJson[VERSION_FIELD]);
     List<Map> jsonRecords = datastoreJson[RECORDS_FIELD];
-    print('Initializing datastore with ${jsonRecords.length} records.');
+    print('Initializing fallback with ${jsonRecords.length} records.');
+    unmarshalDatastore(newVersion, jsonRecords);
+    _datastore.syncStatus.value = SyncStatus.ONLINE;
+  }
+
+  void unmarshalDatastore(VersionId newVersion, List<Map> jsonRecords) {
     List<_Unmarshaller> rawRecords = new List.from(
         jsonRecords.map((fields) => new _Unmarshaller(fields, _datastore)));
     _datastore.startBulkUpdate(newVersion);
@@ -358,7 +385,7 @@ class _Unmarshaller implements FieldVisitor {
 
   void createRecord() {
     DataType dataType = datastore.lookupType(fieldMap[TYPE_FIELD] as String);
-    DataId dataId = new TaggedDataId(fieldMap[ID_FIELD] as String);
+    DataId dataId = unmarshalDataId(fieldMap[ID_FIELD]);
     VersionId version = unmarshalVersion(fieldMap[VERSION_FIELD]);
     if (dataType == null || dataId == null || version == null) {
       return;
@@ -406,7 +433,7 @@ class _Unmarshaller implements FieldVisitor {
     }
 
     if (dataType is CompositeDataType) {
-      return datastore.lookupById(new TaggedDataId(id));
+      return datastore.lookupById(unmarshalDataId(id));
     } else if (dataType is EnumDataType) {
       return dataType.lookup(id);
     } else {

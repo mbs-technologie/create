@@ -10,6 +10,8 @@ import 'createapp.dart';
 
 enum AppChoice { COUNTER, CREATE }
 
+const String SYNC_URI = 'http://create-ledger.appspot.com/data';
+
 void main() {
   AppChoice appChoice = AppChoice.CREATE;  // Change to run the Counter app
   AppState app;
@@ -21,7 +23,7 @@ void main() {
     case AppChoice.CREATE:
       CreateData datastore = new CreateData();
       //datastore.addAll(buildInitialCreateData(), datastore.version);
-      new DataSyncer(datastore).initialize(INITIAL_STATE);
+      new DataSyncer(datastore, SYNC_URI).initialize(INITIAL_STATE);
       app = new CreateApp(datastore);
       break;
   }

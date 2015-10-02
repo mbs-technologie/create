@@ -15,6 +15,7 @@ class AppMode extends Named {
   const AppMode(String name, this.icon): super(name);
 }
 
+const AppMode INITIALIZING_MODE = const AppMode('Initializing', null);
 const AppMode MODULES_MODE = const AppMode('Modules', WIDGETS_ICON);
 const AppMode SCHEMA_MODE = const AppMode('Schema', SETTINGS_SYSTEM_DAYDREAM_ICON);
 const AppMode PARAMETERS_MODE = const AppMode('Parameters', SETTINGS_ICON);
@@ -25,7 +26,7 @@ const AppMode VIEWS_MODE = const AppMode('Views', VIEW_QUILT_ICON);
 const AppMode DATA_MODE = const AppMode('Data', CLOUD_ICON);
 const AppMode LAUNCH_MODE = const AppMode('Launch', LAUNCH_ICON);
 
-List<AppMode> ALL_MODES = [
+List<AppMode> DRAWER_MODES = [
   MODULES_MODE,
   SCHEMA_MODE,
   PARAMETERS_MODE,
@@ -67,7 +68,7 @@ String displayToString(object) => object != null ? object.toString() : '<default
 
 class CreateApp extends BaseZone implements AppState {
   final CreateData datastore;
-  final Ref<AppMode> appMode = new State<AppMode>(STARTUP_MODE);
+  final Ref<AppMode> appMode = new State<AppMode>(INITIALIZING_MODE);
   ReadRef<String> appTitle;
   ReadRef<View> mainView;
   ReadRef<Operation> addOperation;
@@ -80,6 +81,17 @@ class CreateApp extends BaseZone implements AppState {
         (String title, AppMode mode) => '$title \u{2022} ${mode.name}');
     mainView = new ReactiveFunction<AppMode, View>(appMode, this, makeMainView);
     addOperation = new ReactiveFunction<AppMode, Operation>(appMode, this, makeAddOperation);
+    if (datastore.syncStatus.value == SyncStatus.INITIALIZING) {
+      datastore.syncStatus.observe(makeOperation(_checkInitDone), this);
+    } else {
+      appMode.value = STARTUP_MODE;
+    }
+  }
+
+  void _checkInitDone() {
+    if (appMode.value == INITIALIZING_MODE && datastore.syncStatus.value == SyncStatus.ONLINE) {
+      appMode.value = STARTUP_MODE;
+    }
   }
 
   View makeMainView(AppMode mode) {
@@ -88,7 +100,9 @@ class CreateApp extends BaseZone implements AppState {
     }
     viewContext = makeSubContext();
 
-    if (mode == MODULES_MODE) {
+    if (mode == INITIALIZING_MODE) {
+      return initializingView();
+    } else if (mode == MODULES_MODE) {
       return modulesView(viewContext);
     } else if (mode == SCHEMA_MODE) {
       return schemaView(viewContext);
@@ -139,6 +153,11 @@ class CreateApp extends BaseZone implements AppState {
     } else {
       return null;
     }
+  }
+
+  View initializingView() {
+    return new LabelView(
+        new Constant<String>("Initial sync in progress..."), new Constant<Style>(TITLE_STYLE));
   }
 
   View modulesView(Context context) {
@@ -488,7 +507,7 @@ class CreateApp extends BaseZone implements AppState {
 
   @override DrawerView makeDrawer() {
     List<View> items = [ new HeaderView(new Constant<String>('Create!')) ];
-    items.addAll(ALL_MODES.map(_modeItem));
+    items.addAll(DRAWER_MODES.map(_modeItem));
     items.add(new DividerView());
     items.add(new ItemView(
       new Constant<String>('Help & Feedback'),
