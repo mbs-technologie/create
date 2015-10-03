@@ -77,14 +77,16 @@ class DataSyncer {
   }
 
   void initialize(String fallbackDatastoreState) {
+    StringBuffer responseContent = new StringBuffer();
     client.getUrl(Uri.parse(syncUri))
       .then((HttpClientRequest request) => request.close())
       .then((HttpClientResponse response) {
         response.transform(convert.UTF8.decoder)
-        .transform(convert.JSON.decoder)
-        .listen((responseJson) {
-          print('Initializing: got response');
-          if (tryUmarshalling(responseJson)) {
+        .listen((response) {
+          print('Initializing: got response chunk');
+          responseContent.write(response);
+        }, onDone: () {
+          if (tryUmarshalling(responseContent.toString())) {
             print('Initializing: got state from server');
             _initCompleted();
           } else {
@@ -92,7 +94,6 @@ class DataSyncer {
           }
         });
       }, onError: (e) {
-        print('Initializing: got error $e');
         initFallback(fallbackDatastoreState);
       })
       .whenComplete(scheduleSync);
@@ -102,18 +103,14 @@ class DataSyncer {
     datastore.syncStatus.value = SyncStatus.ONLINE;
   }
 
-  bool tryUmarshalling(Map responseJson) {
+  bool tryUmarshalling(String responseBody) {
     try {
-      print('Trying to unmarshal...');
-      //, response size ${responseBody.length}...');
-      Map<String, Object> datastoreJson = responseJson;
-      /*
+      print('Trying to unmarshal, response size ${responseBody.length}...');
       Map<String, Object> datastoreJson = convert.JSON.decode(responseBody);
       if (datastoreJson == null) {
         print('Decoded content is null');
         return false;
       }
-      */
       VersionId newVersion = unmarshalVersion(datastoreJson[VERSION_FIELD]);
       List<Map> jsonRecords = datastoreJson[RECORDS_FIELD];
       if (newVersion == null || jsonRecords == null) {
