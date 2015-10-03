@@ -10,7 +10,7 @@ import 'createapp.dart';
 
 enum AppChoice { COUNTER, CREATE }
 
-const String SYNC_URI = 'http://create-ledger.appspot.com/data';
+const String SYNC_URI = 'http://create-ledger.appspot.com/data?id=v01';
 
 void main() {
   AppChoice appChoice = AppChoice.CREATE;  // Change to run the Counter app

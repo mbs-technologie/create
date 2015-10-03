@@ -79,7 +79,6 @@ class DataSyncer {
       .then((HttpClientResponse response) {
         response.transform(convert.UTF8.decoder)
         .listen((response) {
-          print('Pulling: got response chunk');
           responseContent.write(response);
         }, onDone: () {
           tryUmarshalling(responseContent.toString(), datastore.version);
@@ -130,10 +129,10 @@ class DataSyncer {
         return false;
       }
       if (newVersion == currentVersion) {
-        print('Same datastore version, no unmarshaling.');
+        print('Same datastore version, no update.');
         return true;
       }
-      print('Unmarshaling ${jsonRecords.length} records.');
+      print('Unmarshalling ${jsonRecords.length} records.');
       unmarshalDatastore(newVersion, jsonRecords);
       return true;
     } catch (e) {
@@ -295,6 +294,6 @@ class _Unmarshaller implements FieldVisitor {
       return;
     }
     List<Data> dataElements = new List.from(jsonElements.map((v) => unmarshallData(v)));
-    field.addAll(dataElements);
+    field.replaceWith(dataElements);
   }
 }

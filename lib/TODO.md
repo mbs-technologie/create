@@ -13,7 +13,7 @@
 - [ ] Add Navigation support to Sky app
 - [ ] Efficient implementation of Datastore.lookup()
 - [ ] Ledger integration
-- [ ] Datastore initialization from JSON
+- [x] Datastore initialization from JSON
 - [ ] Datastore persistence
 - [ ] Bootstrapping Create
 - [ ] Live syntax check
@@ -26,9 +26,11 @@
 - [ ] Scheduler for actions and observers
 - [ ] Parametrized operations
 - [ ] Factor out skystyles
-- [ ] Support multiple datstores on the server
+- [ ] Support multiple datastores on the server
 - [ ] Support multiple versions on the client
 - [ ] Start implementing code generation
 - [ ] Merge in new Sky widgets
 - [ ] Make EnumDataType const
 - [ ] Optimize unmarshalling of enum types
+- [ ] Make StyleRecord observable
+- [ ] Unify initialize() and pull()

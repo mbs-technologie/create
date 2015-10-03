@@ -3,7 +3,7 @@
 A reactive programming framework built with Dart and Sky,
 along with two applcations: a simple counter demo and an app builder.
 
-General components:
+Generic components:
 - [elements.dart](https://github.com/domokit/create/blob/master/lib/elements.dart):
   a library of reactive datatypes (interfaces)
 - [elementsruntime.dart](https://github.com/domokit/create/blob/master/lib/elementsruntime.dart):
