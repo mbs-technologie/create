@@ -23,57 +23,69 @@ const String VERSION_FIELD = '#version';
 class DataSyncer {
   final Datastore datastore;
   final String syncUri;
-  VersionId lastUploaded;
+  VersionId lastPushed;
   final HttpClient client = new HttpClient();
   final convert.JsonEncoder encoder = const convert.JsonEncoder.withIndent('  ');
 
   DataSyncer(this.datastore, this.syncUri);
 
-  void start() {
-    upload();
-  }
-
-  void scheduleSync() {
+  void _scheduleSync() {
     new Timer(SYNC_INTERVAL, sync);
   }
 
   void sync() {
-    if (datastore.version != lastUploaded) {
-      upload();
+    if (datastore.version != lastPushed) {
+      push();
     } else {
-      print('Sync: no changes.');
-      scheduleSync();
+      pull();
     }
   }
 
   List<Record> get _allRecords => datastore.runQuery((x) => true, null).elements;
 
-  void upload() {
-    print('Uploading datastore: ${datastore.describe}');
+  void push() {
+    print('Pushing datastore: ${datastore.describe}');
     List jsonRecords = new List.from(_allRecords.map(_recordToJson));
-    lastUploaded = datastore.version;
-    Map datastoreJson = { VERSION_FIELD: lastUploaded.marshal(), RECORDS_FIELD: jsonRecords };
+    lastPushed = datastore.version;
+    Map datastoreJson = { VERSION_FIELD: lastPushed.marshal(), RECORDS_FIELD: jsonRecords };
 
     client.putUrl(Uri.parse(syncUri))
       .then((HttpClientRequest request) {
         request.headers.contentType = new ContentType("text", "plain", charset: "utf-8");
         request.write(encoder.convert(datastoreJson));
-        print('Uploading: write completed');
+        print('Pushing: write completed');
         return request.close();
       })
       .then((HttpClientResponse response) {
         response.transform(convert.UTF8.decoder).listen((contents) {
           String responseBody = contents.toString();
-          print('Uploading: got response body: $responseBody');
+          print('Pushing: got response body: $responseBody');
         });
       })
-      .whenComplete(scheduleSync);
+      .whenComplete(_scheduleSync);
   }
 
   Map<String, Object> _recordToJson(Record record) {
     _Marshaller marshaller = new _Marshaller(record);
     record.visit(marshaller);
     return marshaller.fieldMap;
+  }
+
+  void pull() {
+    print('Pulling datastore: ${datastore.describe}');
+    StringBuffer responseContent = new StringBuffer();
+    client.getUrl(Uri.parse(syncUri))
+      .then((HttpClientRequest request) => request.close())
+      .then((HttpClientResponse response) {
+        response.transform(convert.UTF8.decoder)
+        .listen((response) {
+          print('Pulling: got response chunk');
+          responseContent.write(response);
+        }, onDone: () {
+          tryUmarshalling(responseContent.toString(), datastore.version);
+        });
+      })
+      .whenComplete(_scheduleSync);
   }
 
   void initialize(String fallbackDatastoreState) {
@@ -86,7 +98,7 @@ class DataSyncer {
           print('Initializing: got response chunk');
           responseContent.write(response);
         }, onDone: () {
-          if (tryUmarshalling(responseContent.toString())) {
+          if (tryUmarshalling(responseContent.toString(), null)) {
             print('Initializing: got state from server');
             _initCompleted();
           } else {
@@ -96,14 +108,14 @@ class DataSyncer {
       }, onError: (e) {
         initFallback(fallbackDatastoreState);
       })
-      .whenComplete(scheduleSync);
+      .whenComplete(_scheduleSync);
   }
 
   void _initCompleted() {
     datastore.syncStatus.value = SyncStatus.ONLINE;
   }
 
-  bool tryUmarshalling(String responseBody) {
+  bool tryUmarshalling(String responseBody, VersionId currentVersion) {
     try {
       print('Trying to unmarshal, response size ${responseBody.length}...');
       Map<String, Object> datastoreJson = convert.JSON.decode(responseBody);
@@ -116,6 +128,10 @@ class DataSyncer {
       if (newVersion == null || jsonRecords == null) {
         print('JSON fields missing');
         return false;
+      }
+      if (newVersion == currentVersion) {
+        print('Same datastore version, no unmarshaling.');
+        return true;
       }
       print('Unmarshaling ${jsonRecords.length} records.');
       unmarshalDatastore(newVersion, jsonRecords);
