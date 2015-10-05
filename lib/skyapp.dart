@@ -2,8 +2,12 @@
 
 library skyapp;
 
-import 'package:sky/widgets.dart';
+import 'dart:async' hide Zone;
+
 import 'package:sky/material.dart';
+import 'package:sky/rendering.dart';
+import 'package:sky/widgets_next.dart' hide AppState, State;
+import 'package:sky/widgets_next.dart' as widgets show State;
 
 import 'elements.dart';
 import 'elementsruntime.dart';
@@ -17,46 +21,38 @@ ThemeData _APP_THEME = new ThemeData(
 );
 const EdgeDims _MAIN_VIEW_PADDING = const EdgeDims.all(10.0);
 
-// This is to make Dart happy: even optional arguments in mixin superclass generate an error.
-abstract class SkyAppShim extends App {
-  SkyAppShim(): super(key: new GlobalKey());
-}
+class SkyApp extends StatefulComponent {
+  SkyApp(this.appState);
 
-class SkyApp extends SkyAppShim with SkyWidgets {
   final AppState appState;
-  final Zone viewZone = new BaseZone();
-  final Ref<DrawerView> drawer = new State<DrawerView>(null);
-  NavigationState _navigationState;
-  Navigator _navigator;
 
-  SkyApp(this.appState) {
-    Operation rebuildOperation = viewZone.makeOperation(rebuildApp);
-    appState.appTitle.observe(rebuildOperation, viewZone);
-    appState.mainView.observe(rebuildOperation, viewZone);
-    drawer.observe(rebuildOperation, viewZone);
-  }
+  SkyAppState createState() => new SkyAppState();
 
   void run() {
     runApp(this);
   }
+}
 
-  @override Widget build() {
-    return new Theme(
-      data: _APP_THEME,
-      child: new Title(
-        title: appState.appTitle.value,
-        child: new Navigator(_navigationState)
-      )
-    );
+class SkyAppState extends widgets.State<SkyApp> with SkyWidgets {
+  final Zone viewZone = new BaseZone();
+  final Ref<DrawerView> drawer = new State<DrawerView>(null);
+
+  NavigatorState _navigator;
+
+  void initState() {
+    super.initState();
+    Operation rebuildOperation = viewZone.makeOperation(rebuildApp);
+    config.appState.appTitle.observe(rebuildOperation, viewZone);
+    config.appState.mainView.observe(rebuildOperation, viewZone);
+    drawer.observe(rebuildOperation, viewZone);
   }
 
-  @override void initState() {
-    _navigationState = new NavigationState([
-      new Route(
-        name: '/',
-        builder: (navigator, route) => _buildScaffold(navigator)
-      ),
-    ]);
+  @override Widget build(BuildContext context) {
+    return new App(
+      theme: _APP_THEME,
+      title: config.appState.appTitle.value,
+      routes: { '/': (navigator, route) => _buildScaffold(navigator) }
+    );
   }
 
   void rebuildApp() {
@@ -64,12 +60,12 @@ class SkyApp extends SkyAppShim with SkyWidgets {
     setState(() { });
   }
 
-  void showPopupMenu(List<PopupMenuItem> menuItems, MenuPosition position) {
-    showMenu(navigator: _navigator, position: position,
+  Future showPopupMenu(List<PopupMenuItem> menuItems, MenuPosition position) {
+    return showMenu(navigator: _navigator, position: position,
         builder: (navigator) => menuItems);
   }
 
-  Widget _buildScaffold(Navigator navigator) {
+  Widget _buildScaffold(NavigatorState navigator) {
     this._navigator = navigator;
     return new Scaffold(
       toolbar: _buildToolBar(),
@@ -85,7 +81,7 @@ class SkyApp extends SkyAppShim with SkyWidgets {
       type: MaterialType.canvas,
       child: new Container(
         padding: _MAIN_VIEW_PADDING,
-        child: viewToWidget(appState.mainView.value, viewZone)
+        child: viewToWidget(config.appState.mainView.value, viewZone)
       )
     );
   }
@@ -95,7 +91,7 @@ class SkyApp extends SkyAppShim with SkyWidgets {
         left: new IconButton(
           icon: MENU_ICON.id,
           onPressed: _openDrawer),
-        center: new Text(appState.appTitle.value),
+        center: new Text(config.appState.appTitle.value),
         right: [
           new IconButton(
             icon: SEARCH_ICON.id,
@@ -108,8 +104,8 @@ class SkyApp extends SkyAppShim with SkyWidgets {
   }
 
   Widget _buildFloatingActionButton() {
-    if (isNotNull(appState.addOperation)) {
-      Operation addOperation = appState.addOperation.value;
+    if (isNotNull(config.appState.addOperation)) {
+      Operation addOperation = config.appState.addOperation.value;
       return new FloatingActionButton(
         child: new Icon(type: ADD_ICON.id, size: 24),
         backgroundColor: Colors.redAccent[200],
@@ -121,7 +117,7 @@ class SkyApp extends SkyAppShim with SkyWidgets {
   }
 
   void _openDrawer() {
-    drawer.value = appState.makeDrawer();
+    drawer.value = config.appState.makeDrawer();
   }
 
   void _handleBeginSearch() => null; // TODO
