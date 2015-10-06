@@ -90,6 +90,7 @@ class SkyAppState extends widgets.State<SkyApp> with SkyWidgets {
           onPressed: _openDrawer),
         center: new Text(config.appState.appTitle.value),
         right: [
+          new Text(config.appState.appVersion.value),
           new IconButton(
             icon: SEARCH_ICON.id,
             onPressed: _handleBeginSearch),

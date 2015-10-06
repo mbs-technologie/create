@@ -5,6 +5,7 @@ library createapp;
 import 'elements.dart';
 import 'elementsruntime.dart';
 import 'datastore.dart';
+import 'config.dart';
 import 'createdata.dart';
 import 'createeval.dart';
 import 'styles.dart';
@@ -70,6 +71,7 @@ class CreateApp extends BaseZone implements AppState {
   final CreateData datastore;
   final Ref<AppMode> appMode = new State<AppMode>(INITIALIZING_MODE);
   ReadRef<String> appTitle;
+  ReadRef<String> appVersion = new Constant<String>(CREATE_VERSION);
   ReadRef<View> mainView;
   ReadRef<Operation> addOperation;
   Context viewContext;
