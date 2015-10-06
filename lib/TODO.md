@@ -1,4 +1,4 @@
-## Tasks
+# Tasks
 
 - [x] Color selection in styles mode
 - [x] UI for non-Label views
@@ -22,7 +22,8 @@
 - [ ] Implement ReactiveBuild that autocreates subcontexts
 - [ ] Make styles computable
 - [x] Factor out Named interface
-- [ ] Implement FilteredList and JoinedList
+- [ ] Implement FilteredList
+- [!] Implement JoinedList
 - [ ] Scheduler for actions and observers
 - [ ] Parametrized operations
 - [ ] Factor out skystyles
@@ -32,5 +33,5 @@
 - [x] Merge in new Sky widgets
 - [ ] Make EnumDataType const
 - [ ] Optimize unmarshalling of enum types
-- [ ] Make StyleRecord observable
-- [ ] Unify initialize() and pull()
+- [!] Make StyleRecord observable
+- [x] Unify initialize() and pull()

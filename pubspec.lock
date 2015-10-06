@@ -122,7 +122,7 @@ packages:
   petitparser:
     description: petitparser
     source: hosted
-    version: "1.4.3"
+    version: "1.5.0"
   plugin:
     description: plugin
     source: hosted
@@ -168,15 +168,15 @@ packages:
   sky_engine:
     description: sky_engine
     source: hosted
-    version: "0.0.30"
+    version: "0.0.31"
   sky_services:
     description: sky_services
     source: hosted
-    version: "0.0.30"
+    version: "0.0.31"
   sky_tools:
     description: sky_tools
     source: hosted
-    version: "0.0.15"
+    version: "0.0.16"
   source_map_stack_trace:
     description: source_map_stack_trace
     source: hosted

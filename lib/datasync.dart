@@ -73,39 +73,37 @@ class DataSyncer {
 
   void pull() {
     print('Pulling datastore: ${datastore.describe}');
-    StringBuffer responseContent = new StringBuffer();
-    client.getUrl(Uri.parse(syncUri))
-      .then((HttpClientRequest request) => request.close())
-      .then((HttpClientResponse response) {
-        response.transform(convert.UTF8.decoder)
-        .listen((response) {
-          responseContent.write(response);
-        }, onDone: () {
-          tryUmarshalling(responseContent.toString(), datastore.version);
-        });
-      })
-      .whenComplete(_scheduleSync);
+    doGet(datastore.version, null, null);
   }
 
   void initialize(String fallbackDatastoreState) {
+    doGet(null, _initCompleted, () => initFallback(fallbackDatastoreState));
+  }
+
+  void doGet(VersionId currentVersion, Procedure onSuccess, Procedure onFailure) {
     StringBuffer responseContent = new StringBuffer();
     client.getUrl(Uri.parse(syncUri))
       .then((HttpClientRequest request) => request.close())
       .then((HttpClientResponse response) {
         response.transform(convert.UTF8.decoder)
         .listen((response) {
-          print('Initializing: got response chunk');
           responseContent.write(response);
         }, onDone: () {
-          if (tryUmarshalling(responseContent.toString(), null)) {
-            print('Initializing: got state from server');
-            _initCompleted();
+          if (tryUmarshalling(responseContent.toString(), currentVersion)) {
+            print('Get: got state from server');
+            if (onSuccess != null) {
+              onSuccess();
+            }
           } else {
-            initFallback(fallbackDatastoreState);
+            if (onFailure != null) {
+              onFailure();
+            }
           }
         });
       }, onError: (e) {
-        initFallback(fallbackDatastoreState);
+        if (onFailure != null) {
+          onFailure();
+        }
       })
       .whenComplete(_scheduleSync);
   }
@@ -156,7 +154,7 @@ class DataSyncer {
 
     Map<DataId, _Unmarshaller> rawRecordsById = new Map<DataId, _Unmarshaller>();
     rawRecords.forEach((unmarshaller) => unmarshaller.addTo(rawRecordsById));
-    bool hasLocalChanges = _allRecords.any((Record record) => 
+    bool hasLocalChanges = _allRecords.any((Record record) =>
         !rawRecordsById.containsKey(record.dataId) ||
         record.version.isAfter(rawRecordsById[record.dataId].version));
 
