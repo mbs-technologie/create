@@ -34,6 +34,9 @@ abstract class SkyWidgets {
       }
       if (view.style != null) {
         view.style.observe(forceRefreshOp, view.cachedSubContext);
+        if (view.style.value != null) {
+          view.style.value.observe(forceRefreshOp, view.cachedSubContext);
+        }
       }
       // TODO: observe icon for ItemView, etc.
     }

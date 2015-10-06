@@ -6,8 +6,9 @@ import 'dart:sky' show Color;
 import 'package:sky/src/painting/text_style.dart';
 import 'package:sky/material.dart';
 import 'elements.dart';
+import 'elementsruntime.dart';
 
-abstract class Style implements Data, Named {
+abstract class Style implements Data, Named, Observable {
   TextStyle get textStyle;
 }
 
@@ -17,8 +18,7 @@ class ThemedStyleDataType extends EnumDataType {
   List<ThemedStyle> get values => [
     TITLE_STYLE,
     SUBHEAD_STYLE,
-    BODY2_STYLE,
-    BODY1_STYLE,
+    BODY_STYLE,
     CAPTION_STYLE,
     BUTTON_STYLE
   ];
@@ -26,7 +26,7 @@ class ThemedStyleDataType extends EnumDataType {
 
 final ThemedStyleDataType THEMED_STYLE_DATATYPE = new ThemedStyleDataType();
 
-class ThemedStyle extends EnumData implements Style {
+class ThemedStyle extends EnumData with BaseImmutable implements Style {
   final TextStyle textStyle;
 
   ThemedStyle(String name, this.textStyle): super(name);
@@ -36,8 +36,7 @@ class ThemedStyle extends EnumData implements Style {
 
 final ThemedStyle TITLE_STYLE = new ThemedStyle("Title", Typography.black.title);
 final ThemedStyle SUBHEAD_STYLE = new ThemedStyle("Subhead", Typography.black.subhead);
-final ThemedStyle BODY2_STYLE = new ThemedStyle("Body2", Typography.black.body2);
-final ThemedStyle BODY1_STYLE = new ThemedStyle("Body1", Typography.black.body1);
+final ThemedStyle BODY_STYLE = new ThemedStyle("Body", Typography.black.body1);
 final ThemedStyle CAPTION_STYLE = new ThemedStyle("Caption", Typography.black.caption);
 final ThemedStyle BUTTON_STYLE = new ThemedStyle("Button", Typography.black.button);
 

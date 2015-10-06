@@ -85,6 +85,12 @@ class StyleRecord extends Record implements Style {
     visitor.doubleField(FONT_SIZE_FIELD, fontSize);
     visitor.dataField(COLOR_FIELD, color);
   }
+
+  void observe(Operation observer, Context context) {
+    recordName.observe(observer, context);
+    fontSize.observe(observer, context);
+    color.observe(observer, context);
+  }
 }
 
 final ViewIdDataType VIEW_ID_DATATYPE = new ViewIdDataType();

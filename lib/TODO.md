@@ -33,5 +33,5 @@
 - [x] Merge in new Sky widgets
 - [ ] Make EnumDataType const
 - [ ] Optimize unmarshalling of enum types
-- [!] Make StyleRecord observable
+- [x] Make StyleRecord observable
 - [x] Unify initialize() and pull()

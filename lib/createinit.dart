@@ -18,7 +18,7 @@ List<Record> buildInitialCreateData() {
       'increase', CODE_TYPE, 'counter += increaseby');
 
   ViewRecord counterlabel = new ViewRecord.Label(ids.nextId(),
-      'counterlabel', BODY1_STYLE, describestate);
+      'counterlabel', BODY_STYLE, describestate);
   ViewRecord counterbutton = new ViewRecord.Button(ids.nextId(),
       'counterbutton', BUTTON_STYLE, buttontext, increase);
 
@@ -127,7 +127,7 @@ r'''{
       "#version": 0,
       "record_name": "counterlabel",
       "view_id": "view_id:Label",
-      "style": "themed_style:Body1",
+      "style": "themed_style:Body",
       "content": "operation:cr:1//describestate",
       "action": null,
       "subviews": []

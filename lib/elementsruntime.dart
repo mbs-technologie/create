@@ -61,11 +61,11 @@ class BaseZone extends Zone with _ResourceManager {
 
 /// A mixin for immutable state.  Adding observer is an noop since state never changes.
 /// A constant is a reference whose value never changes.
-abstract class _BaseImmutable implements Observable {
+abstract class BaseImmutable implements Observable {
   @override void observe(Operation observer, Context context) => null;
 }
 
-class Constant<T> extends ReadRef<T> with _BaseImmutable {
+class Constant<T> extends ReadRef<T> with BaseImmutable {
   final T value;
 
   Constant(this.value);
@@ -171,7 +171,7 @@ class ReactiveFunction2<S1, S2, T> extends _BaseState<T> {
 }
 
 /// An immutable list that implements ReadList interface.
-class ImmutableList<E> extends ReadList<E> with _BaseImmutable {
+class ImmutableList<E> extends ReadList<E> with BaseImmutable {
   final List<E> elements;
 
   ImmutableList(this.elements);

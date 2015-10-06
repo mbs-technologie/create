@@ -73,6 +73,7 @@ class RandomIdSource extends DataIdSource {
 
 abstract class Record implements Data, Named {
   CompositeDataType get dataType;
+  // TODO: version should be an observable Ref
   VersionId version = VERSION_ZERO;
   ReadRef<String> get recordName;
 

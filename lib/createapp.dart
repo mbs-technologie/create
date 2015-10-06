@@ -197,7 +197,7 @@ class CreateApp extends BaseZone implements AppState {
   }
 
   View nameInput(Ref<String> recordName) {
-    return new TextInput(recordName, new Constant<Style>(BODY2_STYLE));
+    return new TextInput(recordName, new Constant<Style>(BODY_STYLE));
   }
 
   View schemaRowView(DataRecord record) {
@@ -220,7 +220,7 @@ class CreateApp extends BaseZone implements AppState {
       makePrimitiveTypeInput(record.typeId),
       new TextInput(
         record.state,
-        new Constant<Style>(BODY2_STYLE)
+        new Constant<Style>(BODY_STYLE)
       )
     ]));
   }
@@ -242,7 +242,7 @@ class CreateApp extends BaseZone implements AppState {
       ),
       new TextInput(
         record.state,
-        new Constant<Style>(BODY2_STYLE)
+        new Constant<Style>(BODY_STYLE)
       )
     ]));
   }
@@ -282,7 +282,7 @@ class CreateApp extends BaseZone implements AppState {
       nameInput(record.recordName),
       new LabelView(
         new Constant<String>('Font:'),
-        new Constant<Style>(BODY2_STYLE)
+        new Constant<Style>(BODY_STYLE)
       ),
       new SelectionInput<double>(
         record.fontSize,
@@ -420,7 +420,7 @@ class CreateApp extends BaseZone implements AppState {
       typeView(record.typeId),
       new TextInput(
         record.state,
-        new Constant<Style>(BODY2_STYLE)
+        new Constant<Style>(BODY_STYLE)
         // TODO: switch to the number keyboard
       ),
     ]));

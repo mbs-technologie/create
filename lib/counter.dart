@@ -34,7 +34,7 @@ class CounterApp extends BaseZone implements AppState {
       new ImmutableList<View>([
         new LabelView(
           datastore.describeState,
-          new Constant<Style>(BODY1_STYLE)
+          new Constant<Style>(BODY_STYLE)
         ),
         new ButtonView(
           new Constant<String>('Increase the counter value'),
