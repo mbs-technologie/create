@@ -6,8 +6,8 @@ import 'dart:async' hide Zone;
 
 import 'package:sky/material.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/widgets_next.dart' hide AppState, State;
-import 'package:sky/widgets_next.dart' as widgets show State;
+import 'package:sky/widgets.dart' hide AppState, State;
+import 'package:sky/widgets.dart' as widgets show State;
 
 import 'elements.dart';
 import 'elementsruntime.dart';
@@ -35,7 +35,6 @@ class SkyApp extends StatefulComponent {
 
 class SkyAppState extends widgets.State<SkyApp> with SkyWidgets {
   final Zone viewZone = new BaseZone();
-  final Ref<DrawerView> drawer = new State<DrawerView>(null);
 
   NavigatorState _navigator;
 
@@ -44,14 +43,13 @@ class SkyAppState extends widgets.State<SkyApp> with SkyWidgets {
     Operation rebuildOperation = viewZone.makeOperation(rebuildApp);
     config.appState.appTitle.observe(rebuildOperation, viewZone);
     config.appState.mainView.observe(rebuildOperation, viewZone);
-    drawer.observe(rebuildOperation, viewZone);
   }
 
   @override Widget build(BuildContext context) {
     return new App(
       theme: _APP_THEME,
       title: config.appState.appTitle.value,
-      routes: { '/': (navigator, route) => _buildScaffold(navigator) }
+      routes: { '/': (RouteArguments args) => _buildScaffold(args.navigator) }
     );
   }
 
@@ -71,8 +69,7 @@ class SkyAppState extends widgets.State<SkyApp> with SkyWidgets {
       toolbar: _buildToolBar(),
       body: _buildMainCanvas(),
       snackBar: null,
-      floatingActionButton: _buildFloatingActionButton(),
-      drawer: drawer.value != null ? renderDrawer(drawer.value, viewZone) : null
+      floatingActionButton: _buildFloatingActionButton()
     );
   }
 
@@ -117,7 +114,15 @@ class SkyAppState extends widgets.State<SkyApp> with SkyWidgets {
   }
 
   void _openDrawer() {
-    drawer.value = config.appState.makeDrawer();
+    showDrawer(
+      navigator: _navigator,
+      child: renderDrawer(config.appState.makeDrawer(), viewZone)
+    );
+  }
+
+  void dismissDrawer() {
+    // This is Sky's way of making the drawer go away.
+    _navigator.pop();
   }
 
   void _handleBeginSearch() => null; // TODO

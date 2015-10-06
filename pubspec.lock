@@ -72,7 +72,7 @@ packages:
   logging:
     description: logging
     source: hosted
-    version: "0.11.1+1"
+    version: "0.11.2"
   matcher:
     description: matcher
     source: hosted
@@ -164,15 +164,15 @@ packages:
       path: "../../sky/packages/sky"
       relative: true
     source: path
-    version: "0.0.50"
+    version: "0.0.52"
   sky_engine:
     description: sky_engine
     source: hosted
-    version: "0.0.29"
+    version: "0.0.30"
   sky_services:
     description: sky_services
     source: hosted
-    version: "0.0.29"
+    version: "0.0.30"
   sky_tools:
     description: sky_tools
     source: hosted
@@ -220,4 +220,4 @@ packages:
   yaml:
     description: yaml
     source: hosted
-    version: "2.1.6"
+    version: "2.1.7"

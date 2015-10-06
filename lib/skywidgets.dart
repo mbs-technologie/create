@@ -6,8 +6,8 @@ import 'dart:async';
 
 import 'package:sky/painting.dart';
 import 'package:sky/rendering.dart';
-import 'package:sky/widgets_next.dart';
-import 'package:sky/widgets_next.dart' as widgets show State;
+import 'package:sky/widgets.dart';
+import 'package:sky/widgets.dart' as widgets show State;
 
 import 'elements.dart';
 import 'elementsruntime.dart';
@@ -15,9 +15,8 @@ import 'styles.dart';
 import 'views.dart';
 
 abstract class SkyWidgets {
-  Ref<DrawerView> get drawer;
-
   void rebuildApp();
+  void dismissDrawer();
 
   Future showPopupMenu(List<PopupMenuItem> menuItems, MenuPosition position);
 
@@ -134,9 +133,9 @@ abstract class SkyWidgets {
       icon: item.icon.value != null ? item.icon.value.id : null,
       selected: item.selected.value,
       onPressed: () {
+        dismissDrawer();
         if (isNotNull(item.action)) {
           // We dismiss the drawer as a side effect of an item selection.
-          drawer.value = null;
           item.action.value.scheduleAction();
         }
       }
@@ -158,12 +157,8 @@ abstract class SkyWidgets {
     );
   }
 
-  Drawer renderDrawer(DrawerView drawer, Context context) {
-    return new Drawer(
-      children: _buildWidgetList(drawer.model, context),
-      showing: true,
-      onDismissed: () => _dismissDrawer
-    );
+  Widget renderDrawer(DrawerView drawer, Context context) {
+    return new Block(_buildWidgetList(drawer.model, context));
   }
 
   Function _scheduleAction(ReadRef<Operation> action) => () {
@@ -175,10 +170,6 @@ abstract class SkyWidgets {
   List<Widget> _buildWidgetList(ReadList<View> views, Context context) {
     return new MappedList<View, Widget>(views,
         (view) => viewToWidget(view, context), context).elements;
-  }
-
-  void _dismissDrawer() {
-    drawer.value = null;
   }
 }
 
