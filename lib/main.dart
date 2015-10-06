@@ -1,5 +1,6 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 
+import 'config.dart';
 import 'datasync.dart';
 import 'views.dart';
 import 'skyapp.dart';
@@ -10,7 +11,6 @@ import 'createapp.dart';
 
 enum AppChoice { COUNTER, CREATE }
 
-const String CREATE_VERSION = 'http://create-ledger.appspot.com/data?id=v01';
 const String SYNC_URI = 'http://create-ledger.appspot.com/data?id=$CREATE_VERSION';
 
 void main() {

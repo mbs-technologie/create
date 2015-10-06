@@ -10,11 +10,18 @@ class DefaultPage(webapp2.RequestHandler):
     def get(self):
         respond(self.response, 'Ok')
 
-DEFAULT_STORE = 'datastore'
 SET_PARAM = 'set'
+ID_PARAM = 'id'
+DEFAULT_STORE = 'default'
 
 class Datastore(db.Model):
     state = db.TextProperty()
+
+def getstore(request):
+    if request.params.has_key(ID_PARAM):
+        return request.params[ID_PARAM]
+    else:
+        return DEFAULT_STORE
 
 def putdata(datakey, newstate):
     d = Datastore(key_name = datakey, state = newstate)
@@ -22,19 +29,22 @@ def putdata(datakey, newstate):
 
 def getdata(datakey):
     d = db.get(db.Key.from_path('Datastore', datakey))
-    return d.state
+    if d is None:
+        return 'none'
+    else:
+        return d.state
 
 class DataPage(webapp2.RequestHandler):
     def get(self):
         if self.request.params.has_key(SET_PARAM):
             newstate = self.request.params[SET_PARAM]
-            putdata(DEFAULT_STORE, newstate)
+            putdata(getstore(self.request), newstate)
             respond(self.response, 'Set to: ' + newstate)
         else:
-            respond(self.response, getdata(DEFAULT_STORE))
+            respond(self.response, getdata(getstore(self.request)))
 
     def put(self):
-        putdata(DEFAULT_STORE, self.request.body)
+        putdata(getstore(self.request), self.request.body)
         respond(self.response, 'Done')
 
 app = webapp2.WSGIApplication([

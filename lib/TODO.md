@@ -14,7 +14,7 @@
 - [ ] Efficient implementation of Datastore.lookup()
 - [ ] Ledger integration
 - [x] Datastore initialization from JSON
-- [ ] Datastore persistence
+- [x] Datastore persistence
 - [ ] Bootstrapping Create
 - [ ] Live syntax check
 - [x] Standalone Android app
@@ -26,8 +26,8 @@
 - [ ] Scheduler for actions and observers
 - [ ] Parametrized operations
 - [ ] Factor out skystyles
-- [ ] Support multiple datastores on the server
-- [ ] Support multiple versions on the client
+- [x] Support multiple datastores on the server
+- [x] Support multiple versions on the client
 - [ ] Start implementing code generation
 - [x] Merge in new Sky widgets
 - [ ] Make EnumDataType const
