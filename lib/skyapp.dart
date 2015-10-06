@@ -66,7 +66,7 @@ class SkyAppState extends widgets.State<SkyApp> with SkyWidgets {
   Widget _buildScaffold(NavigatorState navigator) {
     this._navigator = navigator;
     return new Scaffold(
-      toolbar: _buildToolBar(),
+      toolBar: _buildToolBar(),
       body: _buildMainCanvas(),
       snackBar: null,
       floatingActionButton: _buildFloatingActionButton()
