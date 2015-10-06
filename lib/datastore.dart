@@ -164,7 +164,7 @@ abstract class Datastore<R extends Record> extends BaseZone implements DataIdSou
     _bulkUpdateInProgress = true;
   }
 
-  VersionId _advanceVersion() {
+  VersionId advanceVersion() {
     if (!_bulkUpdateInProgress) {
       version = version.nextVersion();
     }
@@ -178,9 +178,9 @@ abstract class Datastore<R extends Record> extends BaseZone implements DataIdSou
 
   void add(R record) {
     assert (_isKnownType(record.dataType));
-    record.version = _advanceVersion();
+    record.version = advanceVersion();
     // We advance the version on both the record and the datastore
-    Operation bumpVersion = makeOperation(() => record.version = _advanceVersion());
+    Operation bumpVersion = makeOperation(() => record.version = advanceVersion());
     void register(Observable observable) => observable.observe(bumpVersion, this);
     record.visit(new ObserveFields(register));
     _records.add(record);

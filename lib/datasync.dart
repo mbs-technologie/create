@@ -153,7 +153,14 @@ class DataSyncer {
   void unmarshalDatastore(VersionId newVersion, List<Map> jsonRecords) {
     List<_Unmarshaller> rawRecords = new List.from(
         jsonRecords.map((fields) => new _Unmarshaller(fields, datastore)));
-    datastore.startBulkUpdate(newVersion);
+
+    Map<DataId, _Unmarshaller> rawRecordsById = new Map<DataId, _Unmarshaller>();
+    rawRecords.forEach((unmarshaller) => unmarshaller.addTo(rawRecordsById));
+    bool hasLocalChanges = _allRecords.any((Record record) => 
+        !rawRecordsById.containsKey(record.dataId) ||
+        record.version.isAfter(rawRecordsById[record.dataId].version));
+
+    datastore.startBulkUpdate(hasLocalChanges ? datastore.advanceVersion() : newVersion);
     rawRecords.forEach((unmarshaller) => unmarshaller.prepareRecord());
     rawRecords.forEach((unmarshaller) => unmarshaller.populateRecord());
     datastore.stopBulkUpdate();
@@ -211,15 +218,27 @@ class _Marshaller implements FieldVisitor {
 class _Unmarshaller implements FieldVisitor {
   final Map<String, Object> fieldMap;
   final Datastore datastore;
+  DataType dataType;
+  DataId dataId;
+  VersionId version;
   Record record;
 
-  _Unmarshaller(this.fieldMap, this.datastore);
+  _Unmarshaller(this.fieldMap, this.datastore) {
+    dataType = datastore.lookupType(fieldMap[TYPE_FIELD] as String);
+    dataId = unmarshalDataId(fieldMap[ID_FIELD]);
+    version = unmarshalVersion(fieldMap[VERSION_FIELD]);
+  }
+
+  bool get isValid => (dataType != null && dataId != null && version != null);
+
+  void addTo(Map<DataId, _Unmarshaller> rawRecordsById) {
+    if (isValid) {
+      rawRecordsById[dataId] = this;
+    }
+  }
 
   void prepareRecord() {
-    DataType dataType = datastore.lookupType(fieldMap[TYPE_FIELD] as String);
-    DataId dataId = unmarshalDataId(fieldMap[ID_FIELD]);
-    VersionId version = unmarshalVersion(fieldMap[VERSION_FIELD]);
-    if (dataType == null || dataId == null || version == null) {
+    if (!isValid) {
       return;
     }
 
