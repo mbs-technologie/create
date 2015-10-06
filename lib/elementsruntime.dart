@@ -205,6 +205,25 @@ class MappedList<S, T> extends ReadList<T> with _ObserverManager {
   }
 }
 
+/// Unify several lists into one, updating the joined list when any of the sublists change.
+class JoinedList<E> extends ReadList<E> with _ObserverManager {
+  final List<ReadList<E>> _source;
+  List<E> elements;
+  State<int> size = new State<int>(null);
+
+  JoinedList(this._source, Context context) {
+    Operation update = context.zone.makeOperation(_update);
+    _source.forEach((ReadList<E> sublist) => sublist.observe(update, context));
+    _update();
+  }
+
+  void _update() {
+    elements = new List<E>();
+    _source.forEach((ReadList<E> sublist) => elements.addAll(sublist.elements));
+    size.value = elements.length;
+  }
+}
+
 /// A list that can change state.
 class MutableList<E> extends ReadList<E> with _ObserverManager {
   final List<E> elements;

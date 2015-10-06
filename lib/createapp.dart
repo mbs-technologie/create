@@ -339,6 +339,7 @@ class CreateApp extends BaseZone implements AppState {
 
   void populateSubviewInput(MutableList<View> result, ViewRecord record, Context context) {
     int size = record.subviews.size.value;
+    // TODO: use MappedList here.
     for (int i = 0; i < size; ++i) {
       result.add(makeViewInput(record.subviews.at(i), record, context));
     }

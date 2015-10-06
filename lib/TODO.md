@@ -23,7 +23,7 @@
 - [ ] Make styles computable
 - [x] Factor out Named interface
 - [ ] Implement FilteredList
-- [!] Implement JoinedList
+- [x] Implement JoinedList
 - [ ] Scheduler for actions and observers
 - [ ] Parametrized operations
 - [ ] Factor out skystyles
