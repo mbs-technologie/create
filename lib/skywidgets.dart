@@ -209,9 +209,12 @@ class TextComponentState extends widgets.State<TextComponent> {
       width: 300.0,
       child: new Row([
         new IconButton(icon: MODE_EDIT_ICON.id, onPressed: _editPressed),
-        editing
-          ? new Input(key: inputKey, initialValue: config.input.model.value, onChanged: widgetChanged)
-          : new Text(config.input.model.value, style: textStyle)
+        new Flexible(
+          child: editing
+            ? new Input(key: inputKey, initialValue: config.input.model.value,
+                        onChanged: widgetChanged)
+            : new Text(config.input.model.value, style: textStyle)
+        )
       ])
     );
   }
