@@ -1,17 +1,21 @@
-<?xml version="1.0" encoding="utf-8"?>
+// Copyright 2015 The Chromium Authors. All rights reserved.
+
+import 'config.dart';
+
+String MANIFEST = '''<?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright 2015 The Chromium Authors. All rights reserved.
      Use of this source code is governed by a BSD-style license that can be
      found in the LICENSE file.
  -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.domokit.create.DEV"
+    package="org.domokit.create.$CREATE_VERSION"
     android:versionCode="1" android:versionName="0.0.1">
 
     <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="21" />
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application android:name="org.domokit.sky.shell.SkyApplication"
-            android:label="Create! DEV">
+            android:label="Create! $CREATE_VERSION">
         <activity android:name="org.domokit.sky.shell.SkyActivity"
                   android:launchMode="singleTask"
                   android:theme="@android:style/Theme.Black.NoTitleBar"
@@ -23,4 +27,8 @@
             </intent-filter>
         </activity>
     </application>
- </manifest>
+ </manifest>''';
+
+main() {
+  print(MANIFEST);
+}
