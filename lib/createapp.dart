@@ -67,9 +67,9 @@ List<double> FONT_SIZES = [
 
 String displayToString(object) => object != null ? object.toString() : '<default>';
 
-class CreateApp extends BaseZone implements AppState {
+class CreateApp extends BaseZone implements ApplicationState {
   final CreateData datastore;
-  final Ref<AppMode> appMode = new State<AppMode>(INITIALIZING_MODE);
+  final Ref<AppMode> appMode = new Boxed<AppMode>(INITIALIZING_MODE);
   ReadRef<String> appTitle;
   ReadRef<String> appVersion = new Constant<String>(CREATE_VERSION);
   ReadRef<View> mainView;
@@ -173,7 +173,7 @@ class CreateApp extends BaseZone implements AppState {
   View modulesRowView(String name) {
     return new RowView(new ImmutableList<View>([
       new CheckboxInput(
-        new State<bool>(true)
+        new Boxed<bool>(true)
       ),
       new LabelView(
         new Constant<String>(name),
@@ -468,7 +468,7 @@ class CreateApp extends BaseZone implements AppState {
 
   ReadRef<String> evaluateTemplate(String template, Context context) {
     Construct code = parseTemplate(template);
-    State<String> result = new State<String>(code.evaluate(datastore));
+    Ref<String> result = new Boxed<String>(code.evaluate(datastore));
     Operation reevaluate = makeOperation(() => result.value = code.evaluate(datastore));
     code.observe(datastore, reevaluate, context);
     return result;

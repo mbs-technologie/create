@@ -97,7 +97,7 @@ class DrawerView extends ContainerView {
 }
 
 /// Application state
-abstract class AppState implements Zone {
+abstract class ApplicationState implements Zone {
   ReadRef<String> get appTitle;
   ReadRef<String> get appVersion;
   ReadRef<View> get mainView;

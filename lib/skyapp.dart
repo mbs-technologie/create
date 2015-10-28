@@ -4,10 +4,8 @@ library skyapp;
 
 import 'dart:async' hide Zone;
 
-import 'package:sky/material.dart';
-import 'package:sky/rendering.dart';
-import 'package:sky/widgets.dart' hide AppState, State;
-import 'package:sky/widgets.dart' as widgets show State;
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import 'elements.dart';
 import 'elementsruntime.dart';
@@ -24,16 +22,20 @@ const EdgeDims _MAIN_VIEW_PADDING = const EdgeDims.all(10.0);
 class SkyApp extends StatefulComponent {
   SkyApp(this.appState);
 
-  final AppState appState;
+  final ApplicationState appState;
 
   SkyAppState createState() => new SkyAppState();
 
   void run() {
-    runApp(this);
+    runApp(new MaterialApp(
+      theme: _APP_THEME,
+      title: appState.appTitle.value,
+      routes: { '/': (RouteArguments args) => this }
+    ));
   }
 }
 
-class SkyAppState extends widgets.State<SkyApp> with SkyWidgets {
+class SkyAppState extends State<SkyApp> with SkyWidgets {
   final Zone viewZone = new BaseZone();
 
   NavigatorState _navigator;
@@ -46,11 +48,7 @@ class SkyAppState extends widgets.State<SkyApp> with SkyWidgets {
   }
 
   @override Widget build(BuildContext context) {
-    return new App(
-      theme: _APP_THEME,
-      title: config.appState.appTitle.value,
-      routes: { '/': (RouteArguments args) => _buildScaffold(args.navigator) }
-    );
+    return _buildScaffold(context);
   }
 
   void rebuildApp() {
@@ -58,15 +56,14 @@ class SkyAppState extends widgets.State<SkyApp> with SkyWidgets {
     setState(() { });
   }
 
-  Future showPopupMenu(List<PopupMenuItem> menuItems, MenuPosition position) {
-    return showMenu(navigator: _navigator, position: position,
-        builder: (navigator) => menuItems);
+  Future showPopupMenu(BuildContext context, List<PopupMenuItem> menuItems, MenuPosition position) {
+    return showMenu(context: context, position: position, items: menuItems);
   }
 
-  Widget _buildScaffold(NavigatorState navigator) {
-    this._navigator = navigator;
+  Widget _buildScaffold(BuildContext context) {
+    this._navigator = Navigator.of(context);
     return new Scaffold(
-      toolBar: _buildToolBar(),
+      toolBar: _buildToolBar(context),
       body: _buildMainCanvas(),
       snackBar: null,
       floatingActionButton: _buildFloatingActionButton()
@@ -83,11 +80,11 @@ class SkyAppState extends widgets.State<SkyApp> with SkyWidgets {
     );
   }
 
-  Widget _buildToolBar() {
+  Widget _buildToolBar(BuildContext context) {
     return new ToolBar(
         left: new IconButton(
           icon: MENU_ICON.id,
-          onPressed: _openDrawer),
+          onPressed: () => _openDrawer(context)),
         center: new Text(config.appState.appTitle.value),
         right: [
           new Text(config.appState.appVersion.value),
@@ -114,9 +111,11 @@ class SkyAppState extends widgets.State<SkyApp> with SkyWidgets {
     }
   }
 
-  void _openDrawer() {
+  void _openDrawer(BuildContext context) {
+    print('Open drawer!');
+    print('Context: $context');
     showDrawer(
-      navigator: _navigator,
+      context: context,
       child: renderDrawer(config.appState.makeDrawer(), viewZone)
     );
   }

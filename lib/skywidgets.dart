@@ -4,10 +4,9 @@ library skywidgets;
 
 import 'dart:async';
 
-import 'package:sky/painting.dart';
-import 'package:sky/rendering.dart';
-import 'package:sky/widgets.dart';
-import 'package:sky/widgets.dart' as widgets show State;
+import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/material.dart';
 
 import 'elements.dart';
 import 'elementsruntime.dart';
@@ -18,7 +17,7 @@ abstract class SkyWidgets {
   void rebuildApp();
   void dismissDrawer();
 
-  Future showPopupMenu(List<PopupMenuItem> menuItems, MenuPosition position);
+  Future showPopupMenu(BuildContext context, List<PopupMenuItem> menuItems, MenuPosition position);
 
   Widget viewToWidget(View view, Context context) {
     _cleanupView(view);
@@ -194,7 +193,7 @@ class TextComponent extends StatefulComponent {
   TextComponentState createState() => new TextComponentState();
 }
 
-class TextComponentState extends widgets.State<TextComponent> {
+class TextComponentState extends State<TextComponent> {
 
   bool editing = false;
   GlobalKey inputKey = new GlobalKey();
@@ -278,7 +277,8 @@ class SelectionComponent extends StatelessComponent {
           value: option
       )));
 
-    skyWidgets.showPopupMenu(menuItems, position).then((value) { if (value != null) _selected(value); });
+    skyWidgets.showPopupMenu(context, menuItems, position)
+        .then((value) { if (value != null) _selected(value); });
   }
 
   void _selected(option) {

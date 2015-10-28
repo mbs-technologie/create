@@ -107,9 +107,9 @@ abstract class _BaseState<T> extends ReadRef<T> with _ObserverManager {
   }
 }
 
-/// State is a read-write value, exposing `WriteRef.set()`.
-class State<T> extends _BaseState<T> implements Ref<T> {
-  State([T value]): super(value);
+/// Boxed read-write value, exposing `WriteRef.set()`.
+class Boxed<T> extends _BaseState<T> implements Ref<T> {
+  Boxed([T value]): super(value);
 
   @override void set value(T newValue) => _setState(newValue);
 }
@@ -209,7 +209,7 @@ class MappedList<S, T> extends ReadList<T> with _ObserverManager {
 class JoinedList<E> extends ReadList<E> with _ObserverManager {
   final List<ReadList<E>> _source;
   List<E> elements;
-  State<int> size = new State<int>(null);
+  Ref<int> size = new Boxed<int>(null);
 
   JoinedList(this._source, Context context) {
     Operation update = context.zone.makeOperation(_update);
@@ -227,10 +227,10 @@ class JoinedList<E> extends ReadList<E> with _ObserverManager {
 /// A list that can change state.
 class MutableList<E> extends ReadList<E> with _ObserverManager {
   final List<E> elements;
-  State<int> size;
+  Ref<int> size;
 
   MutableList([List<E> initialState]): elements = (initialState != null ? initialState : []) {
-    size = new State<int>(elements.length);
+    size = new Boxed<int>(elements.length);
   }
 
   Ref<E> at(int index) {

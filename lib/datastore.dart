@@ -114,7 +114,7 @@ abstract class Datastore<R extends Record> extends BaseZone implements DataIdSou
   final Set<_LiveQuery> _liveQueries = new Set<_LiveQuery>();
   DataIdSource _dataIdSource;
   VersionId version = VERSION_ZERO;
-  Ref<SyncStatus> syncStatus = new State<SyncStatus>(SyncStatus.INITIALIZING);
+  Ref<SyncStatus> syncStatus = new Boxed<SyncStatus>(SyncStatus.INITIALIZING);
   bool _bulkUpdateInProgress = false;
 
   Datastore(String namespace, List<DataType> types) {

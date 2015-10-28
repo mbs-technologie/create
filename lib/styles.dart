@@ -2,9 +2,9 @@
 
 library styles;
 
-import 'dart:sky' show Color;
-import 'package:sky/src/painting/text_style.dart';
-import 'package:sky/material.dart';
+import 'dart:ui' show Color;
+import 'package:flutter/painting.dart';
+import 'package:flutter/material.dart';
 import 'elements.dart';
 import 'elementsruntime.dart';
 

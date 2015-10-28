@@ -10,6 +10,7 @@
 - [ ] More primitives supported in the code
 - [x] Use standard Sky widget for the PopupMenu
 - [x] Do not require dev branch of Sky
+- [x] Make the app work with the latest version of Flutter/Sky
 - [ ] Add Navigation support to Sky app
 - [ ] Efficient implementation of Datastore.lookup()
 - [ ] Ledger integration

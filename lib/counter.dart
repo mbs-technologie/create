@@ -9,9 +9,9 @@ import 'views.dart';
 
 class CounterData extends BaseZone {
   // State
-  final Ref<int> counter = new State<int>(68);
+  final Ref<int> counter = new Boxed<int>(68);
 
-  final Ref<int> increaseBy = new State<int>(1);
+  final Ref<int> increaseBy = new Boxed<int>(1);
 
   // Business logic
   Operation get increaseValue => makeOperation(() {
@@ -22,11 +22,11 @@ class CounterData extends BaseZone {
       counter, this, (int counterValue) => 'The counter value is $counterValue');
 }
 
-class CounterApp extends BaseZone implements AppState {
+class CounterApp extends BaseZone implements ApplicationState {
   final CounterData datastore;
   final ReadRef<String> appTitle = new Constant<String>('Create!');
   ReadRef<String> appVersion = new Constant<String>('');
-  final Ref<View> mainView = new State<View>();
+  final Ref<View> mainView = new Boxed<View>();
   final ReadRef<Operation> addOperation = new Constant<Operation>(null);
 
   CounterApp(this.datastore) {

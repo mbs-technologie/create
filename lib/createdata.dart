@@ -2,7 +2,7 @@
 
 library createdata;
 
-import 'package:sky/src/painting/text_style.dart';
+import 'package:flutter/painting.dart';
 
 import 'elements.dart';
 import 'elementsruntime.dart';
@@ -51,9 +51,9 @@ class DataRecord extends Record {
   final Ref<String> state;
 
   DataRecord(this.dataType, this.dataId, String recordName, TypeId typeId, String state):
-      recordName = new State<String>(recordName),
-      typeId = new State<TypeId>(typeId),
-      state = new State<String>(state);
+      recordName = new Boxed<String>(recordName),
+      typeId = new Boxed<TypeId>(typeId),
+      state = new Boxed<String>(state);
 
   void visit(FieldVisitor visitor) {
     visitor.stringField(RECORD_NAME_FIELD, recordName);
@@ -72,9 +72,9 @@ class StyleRecord extends Record implements Style {
   final Ref<NamedColor> color;
 
   StyleRecord(this.dataId, String recordName, double fontSize, NamedColor color):
-      recordName = new State<String>(recordName),
-      fontSize = new State<double>(fontSize),
-      color = new State<NamedColor>(color);
+      recordName = new Boxed<String>(recordName),
+      fontSize = new Boxed<double>(fontSize),
+      color = new Boxed<NamedColor>(color);
 
   CompositeDataType get dataType => STYLE_DATATYPE;
   TextStyle get textStyle =>
@@ -132,44 +132,44 @@ class ViewRecord extends Record {
   final MutableList<ViewRecord> subviews;
 
   ViewRecord(this.dataId, String recordName):
-      recordName = new State<String>(recordName),
-      viewId = new State<ViewId>(LABEL_VIEW),
-      style = new State<Style>(null),
-      content = new State<DataRecord>(null),
-      action = new State<DataRecord>(null),
+      recordName = new Boxed<String>(recordName),
+      viewId = new Boxed<ViewId>(LABEL_VIEW),
+      style = new Boxed<Style>(null),
+      content = new Boxed<DataRecord>(null),
+      action = new Boxed<DataRecord>(null),
       subviews = new MutableList<ViewRecord>();
 
   ViewRecord.Label(this.dataId, String recordName, Style style, DataRecord content):
-      recordName = new State<String>(recordName),
-      viewId = new State<ViewId>(LABEL_VIEW),
-      style = new State<Style>(style),
-      content = new State<DataRecord>(content),
-      action = new State<DataRecord>(null),
+      recordName = new Boxed<String>(recordName),
+      viewId = new Boxed<ViewId>(LABEL_VIEW),
+      style = new Boxed<Style>(style),
+      content = new Boxed<DataRecord>(content),
+      action = new Boxed<DataRecord>(null),
       subviews = new MutableList<ViewRecord>();
 
   ViewRecord.Button(this.dataId, String recordName, Style style, DataRecord content,
           DataRecord action):
-      recordName = new State<String>(recordName),
-      viewId = new State<ViewId>(BUTTON_VIEW),
-      style = new State<Style>(style),
-      content = new State<DataRecord>(content),
-      action = new State<DataRecord>(action),
+      recordName = new Boxed<String>(recordName),
+      viewId = new Boxed<ViewId>(BUTTON_VIEW),
+      style = new Boxed<Style>(style),
+      content = new Boxed<DataRecord>(content),
+      action = new Boxed<DataRecord>(action),
       subviews = new MutableList<ViewRecord>();
 
   ViewRecord.Column(this.dataId, String recordName, Style style, MutableList<ViewRecord> columns):
-      recordName = new State<String>(recordName),
-      viewId = new State<ViewId>(COLUMN_VIEW),
-      style = new State<Style>(style),
-      content = new State<DataRecord>(null),
-      action = new State<DataRecord>(null),
+      recordName = new Boxed<String>(recordName),
+      viewId = new Boxed<ViewId>(COLUMN_VIEW),
+      style = new Boxed<Style>(style),
+      content = new Boxed<DataRecord>(null),
+      action = new Boxed<DataRecord>(null),
       subviews = columns;
 
   ViewRecord.Row(this.dataId, String recordName, Style style, MutableList<ViewRecord> rows):
-      recordName = new State<String>(recordName),
-      viewId = new State<ViewId>(ROW_VIEW),
-      style = new State<Style>(style),
-      content = new State<DataRecord>(null),
-      action = new State<DataRecord>(null),
+      recordName = new Boxed<String>(recordName),
+      viewId = new Boxed<ViewId>(ROW_VIEW),
+      style = new Boxed<Style>(style),
+      content = new Boxed<DataRecord>(null),
+      action = new Boxed<DataRecord>(null),
       subviews = rows;
 
   CompositeDataType get dataType => VIEW_DATATYPE;

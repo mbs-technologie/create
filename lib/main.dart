@@ -15,7 +15,7 @@ const String SYNC_URI = 'http://create-ledger.appspot.com/data?id=$CREATE_VERSIO
 
 void main() {
   AppChoice appChoice = AppChoice.CREATE;  // Change to run the Counter app
-  AppState app;
+  ApplicationState app;
 
   switch (appChoice) {
     case AppChoice.COUNTER:
