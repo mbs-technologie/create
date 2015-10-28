@@ -35,3 +35,4 @@
 - [ ] Optimize unmarshalling of enum types
 - [x] Make StyleRecord observable
 - [x] Unify initialize() and pull()
+- [ ] Add addressbook example
