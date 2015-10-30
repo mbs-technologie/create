@@ -37,3 +37,5 @@
 - [x] Make StyleRecord observable
 - [x] Unify initialize() and pull()
 - [ ] Add addressbook example
+- [x] s/sky/flutter/g
+- [ ] Use native Flutter dropdown component

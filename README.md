@@ -1,6 +1,6 @@
 # Create
 
-A reactive programming framework built with Dart and Sky,
+A reactive programming framework built with Dart and Flutter,
 along with two applcations: a simple counter demo and an app builder.
 
 Generic components:
@@ -16,10 +16,10 @@ Generic components:
   encapsulating presentation attributes
 - [views.dart](https://github.com/domokit/create/blob/master/lib/views.dart):
   abstract widgets: view = (observable) model + (observable) style
-- [skywidgets.dart](https://github.com/domokit/create/blob/master/lib/skywidgets.dart):
-  code to render views using [Sky](https://github.com/domokit/sky_engine)
-- [skyapp.dart](https://github.com/domokit/create/blob/master/lib/skyapp.dart):
-  infrastructure for a Sky application
+- [flutterwidgets.dart](https://github.com/domokit/create/blob/master/lib/flutterwidgets.dart):
+  code to render views using [Flutter](https://flutter.io)
+- [flutterapp.dart](https://github.com/domokit/create/blob/master/lib/flutterapp.dart):
+  infrastructure for a Flutter application
 
 Simple application:
 - [counter.dart](https://github.com/domokit/create/blob/master/lib/counter.dart):

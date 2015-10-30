@@ -1,6 +1,6 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 
-library skywidgets;
+library flutterwidgets;
 
 import 'dart:async';
 
@@ -13,7 +13,7 @@ import 'elementsruntime.dart';
 import 'styles.dart';
 import 'views.dart';
 
-abstract class SkyWidgets {
+abstract class FlutterWidgets {
   void rebuildApp();
   void dismissDrawer();
 
@@ -183,7 +183,7 @@ TextStyle textStyleOf(View view) {
   }
 }
 
-// TODO: Make better use of Sky widgets
+// TODO: Make better use of Flutter widgets
 class TextComponent extends StatefulComponent {
   TextComponent(this.input, this.context);
 
@@ -243,13 +243,13 @@ class TextComponentState extends State<TextComponent> {
   }
 }
 
-// TODO: Use Sky widget once it's implemented
+// TODO: Use Flutter widget once it's implemented
 class SelectionComponent extends StatelessComponent {
 
-  SelectionComponent(this.selection, this.skyWidgets);
+  SelectionComponent(this.selection, this.flutterWidgets);
 
   final SelectionInput selection;
-  final SkyWidgets skyWidgets;
+  final FlutterWidgets flutterWidgets;
 
   TextStyle get textStyle => textStyleOf(selection);
 
@@ -277,7 +277,7 @@ class SelectionComponent extends StatelessComponent {
           value: option
       )));
 
-    skyWidgets.showPopupMenu(context, menuItems, position)
+    flutterWidgets.showPopupMenu(context, menuItems, position)
         .then((value) { if (value != null) _selected(value); });
   }
 

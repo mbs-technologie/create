@@ -1,6 +1,6 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 
-library skyapp;
+library flutterapp;
 
 import 'dart:async' hide Zone;
 
@@ -11,7 +11,7 @@ import 'elements.dart';
 import 'elementsruntime.dart';
 import 'styles.dart';
 import 'views.dart';
-import 'skywidgets.dart';
+import 'flutterwidgets.dart';
 
 ThemeData _APP_THEME = new ThemeData(
   brightness: ThemeBrightness.light,
@@ -19,12 +19,12 @@ ThemeData _APP_THEME = new ThemeData(
 );
 const EdgeDims _MAIN_VIEW_PADDING = const EdgeDims.all(10.0);
 
-class SkyApp extends StatefulComponent {
-  SkyApp(this.appState);
+class FlutterApp extends StatefulComponent {
+  FlutterApp(this.appState);
 
   final ApplicationState appState;
 
-  SkyAppState createState() => new SkyAppState();
+  FlutterAppState createState() => new FlutterAppState();
 
   void run() {
     runApp(new MaterialApp(
@@ -35,10 +35,8 @@ class SkyApp extends StatefulComponent {
   }
 }
 
-class SkyAppState extends State<SkyApp> with SkyWidgets {
+class FlutterAppState extends State<FlutterApp> with FlutterWidgets {
   final Zone viewZone = new BaseZone();
-
-  NavigatorState _navigator;
 
   void initState() {
     super.initState();
@@ -52,7 +50,7 @@ class SkyAppState extends State<SkyApp> with SkyWidgets {
   }
 
   void rebuildApp() {
-    // This is Sky's way of forcing widgets to refresh.
+    // This is Flutter's way of forcing widgets to refresh.
     setState(() { });
   }
 
@@ -61,7 +59,6 @@ class SkyAppState extends State<SkyApp> with SkyWidgets {
   }
 
   Widget _buildScaffold(BuildContext context) {
-    this._navigator = Navigator.of(context);
     return new Scaffold(
       toolBar: _buildToolBar(context),
       body: _buildMainCanvas(),
@@ -112,8 +109,6 @@ class SkyAppState extends State<SkyApp> with SkyWidgets {
   }
 
   void _openDrawer(BuildContext context) {
-    print('Open drawer!');
-    print('Context: $context');
     showDrawer(
       context: context,
       child: renderDrawer(config.appState.makeDrawer(), viewZone)
@@ -121,8 +116,8 @@ class SkyAppState extends State<SkyApp> with SkyWidgets {
   }
 
   void dismissDrawer() {
-    // This is Sky's way of making the drawer go away.
-    _navigator.pop();
+    // This is Flutter's way of making the drawer go away.
+    Navigator.of(context).pop();
   }
 
   void _handleBeginSearch() => null; // TODO

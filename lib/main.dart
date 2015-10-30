@@ -3,7 +3,7 @@
 import 'config.dart';
 import 'datasync.dart';
 import 'views.dart';
-import 'skyapp.dart';
+import 'flutterapp.dart';
 import 'counter.dart';
 import 'createdata.dart';
 import 'createinit.dart';
@@ -29,5 +29,5 @@ void main() {
       break;
   }
 
-  new SkyApp(app).run();
+  new FlutterApp(app).run();
 }
