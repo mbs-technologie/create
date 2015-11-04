@@ -54,7 +54,8 @@ class FlutterAppState extends State<FlutterApp> with FlutterWidgets {
     setState(() { });
   }
 
-  Future showPopupMenu(BuildContext context, List<PopupMenuItem> menuItems, MenuPosition position) {
+  Future showPopupMenu(BuildContext context, List<PopupMenuItem> menuItems,
+      ModalPosition position) {
     return showMenu(context: context, position: position, items: menuItems);
   }
 
@@ -99,7 +100,7 @@ class FlutterAppState extends State<FlutterApp> with FlutterWidgets {
     if (isNotNull(config.appState.addOperation)) {
       Operation addOperation = config.appState.addOperation.value;
       return new FloatingActionButton(
-        child: new Icon(type: ADD_ICON.id, size: 24),
+        child: new Icon(icon: ADD_ICON.id, size: IconSize.s24),
         backgroundColor: Colors.redAccent[200],
         onPressed: () => addOperation.scheduleAction()
       );

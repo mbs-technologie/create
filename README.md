@@ -17,7 +17,7 @@ Generic components:
 - [views.dart](https://github.com/domokit/create/blob/master/lib/views.dart):
   abstract widgets: view = (observable) model + (observable) style
 - [flutterwidgets.dart](https://github.com/domokit/create/blob/master/lib/flutterwidgets.dart):
-  code to render views using [Flutter](https://flutter.io)
+  code to render views using [Flutter](http://flutter.io)
 - [flutterapp.dart](https://github.com/domokit/create/blob/master/lib/flutterapp.dart):
   infrastructure for a Flutter application
 

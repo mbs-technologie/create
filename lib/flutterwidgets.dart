@@ -17,7 +17,7 @@ abstract class FlutterWidgets {
   void rebuildApp();
   void dismissDrawer();
 
-  Future showPopupMenu(BuildContext context, List<PopupMenuItem> menuItems, MenuPosition position);
+  Future showPopupMenu(BuildContext context, List<PopupMenuItem> menuItems, ModalPosition position);
 
   Widget viewToWidget(View view, Context context) {
     _cleanupView(view);
@@ -257,7 +257,7 @@ class SelectionComponent extends StatelessComponent {
     return new FlatButton(
       child: new Row([
         new Text(selection.display(selection.model.value), style: textStyle),
-        new Icon(type: ARROW_DROP_DOWN_ICON.id, size: 24)
+        new Icon(icon: ARROW_DROP_DOWN_ICON.id, size: IconSize.s24)
       ]),
       onPressed: () { _showSelectionMenu(context); }
     );
@@ -265,7 +265,7 @@ class SelectionComponent extends StatelessComponent {
 
   void _showSelectionMenu(BuildContext context) {
     Point dropdownTopLeft = (context.findRenderObject() as RenderBox).localToGlobal(new Point(0.0, 0.0));
-    MenuPosition position = new MenuPosition(left: dropdownTopLeft.x, top: dropdownTopLeft.y);
+    ModalPosition position = new ModalPosition(left: dropdownTopLeft.x, top: dropdownTopLeft.y);
 
     final List<PopupMenuItem> menuItems = new List.from(selection.options.elements.map(
       (option) => new PopupMenuItem(
