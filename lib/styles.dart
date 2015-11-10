@@ -13,7 +13,7 @@ abstract class Style implements Data, Named, Observable {
 }
 
 class ThemedStyleDataType extends EnumDataType {
-  ThemedStyleDataType(): super('themed_style');
+  const ThemedStyleDataType(): super('themed_style');
 
   List<ThemedStyle> get values => [
     TITLE_STYLE,
@@ -24,7 +24,7 @@ class ThemedStyleDataType extends EnumDataType {
   ];
 }
 
-final ThemedStyleDataType THEMED_STYLE_DATATYPE = new ThemedStyleDataType();
+const ThemedStyleDataType THEMED_STYLE_DATATYPE = const ThemedStyleDataType();
 
 class ThemedStyle extends EnumData with BaseImmutable implements Style {
   final TextStyle textStyle;
@@ -41,7 +41,7 @@ final ThemedStyle CAPTION_STYLE = new ThemedStyle("Caption", Typography.black.ca
 final ThemedStyle BUTTON_STYLE = new ThemedStyle("Button", Typography.black.button);
 
 class NamedColorDataType extends EnumDataType {
-  NamedColorDataType(): super('named_color');
+  const NamedColorDataType(): super('named_color');
 
   List<NamedColor> get values => [
     BLACK_COLOR,
@@ -51,11 +51,13 @@ class NamedColorDataType extends EnumDataType {
   ];
 }
 
-final NamedColorDataType NAMED_COLOR_DATATYPE = new NamedColorDataType();
+const NamedColorDataType NAMED_COLOR_DATATYPE = const NamedColorDataType();
 
 class NamedColor extends EnumData {
   final Color colorValue;
+
   NamedColor(String name, this.colorValue): super(name);
+
   EnumDataType get dataType => NAMED_COLOR_DATATYPE;
 }
 

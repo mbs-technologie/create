@@ -26,8 +26,28 @@ class DataSyncer {
   VersionId lastPushed;
   final HttpClient client = new HttpClient();
   final convert.JsonEncoder encoder = const convert.JsonEncoder.withIndent('  ');
+  final Map<String, EnumData> enumMap = new Map<String, EnumData>();
 
-  DataSyncer(this.datastore, this.syncUri);
+  DataSyncer(this.datastore, this.syncUri) {
+    _initEnumMap();
+  }
+
+  void _initEnumMap() {
+    String marshalEnum(EnumData data) =>
+      data.dataType.name + ID_SEPARATOR + data.name;
+
+    datastore.dataTypes.forEach((DataType dataType) =>
+      (dataType is EnumDataType) ?
+        dataType.values.forEach((EnumData data) => enumMap[marshalEnum(data)] = data) : null);
+  }
+
+  DataType lookupType(String name) {
+    return datastore.lookupType(name);
+  }
+
+  Record lookupById(DataId dataId) {
+    return datastore.lookupById(dataId);
+  }
 
   void _scheduleSync() {
     new Timer(SYNC_INTERVAL, sync);
@@ -150,7 +170,7 @@ class DataSyncer {
 
   void unmarshalDatastore(VersionId newVersion, List<Map> jsonRecords) {
     List<_Unmarshaller> rawRecords = new List.from(
-        jsonRecords.map((fields) => new _Unmarshaller(fields, datastore)));
+        jsonRecords.map((fields) => new _Unmarshaller(fields, this)));
 
     Map<DataId, _Unmarshaller> rawRecordsById = new Map<DataId, _Unmarshaller>();
     rawRecords.forEach((unmarshaller) => unmarshaller.addTo(rawRecordsById));
@@ -215,14 +235,14 @@ class _Marshaller implements FieldVisitor {
 
 class _Unmarshaller implements FieldVisitor {
   final Map<String, Object> fieldMap;
-  final Datastore datastore;
+  final DataSyncer datasyncer;
   DataType dataType;
   DataId dataId;
   VersionId version;
   Record record;
 
-  _Unmarshaller(this.fieldMap, this.datastore) {
-    dataType = datastore.lookupType(fieldMap[TYPE_FIELD] as String);
+  _Unmarshaller(this.fieldMap, this.datasyncer) {
+    dataType = datasyncer.lookupType(fieldMap[TYPE_FIELD] as String);
     dataId = unmarshalDataId(fieldMap[ID_FIELD]);
     version = unmarshalVersion(fieldMap[VERSION_FIELD]);
   }
@@ -241,8 +261,9 @@ class _Unmarshaller implements FieldVisitor {
     }
 
     assert (dataType is CompositeDataType);
-    Record oldRecord = datastore.lookupById(dataId);
+    Record oldRecord = datasyncer.lookupById(dataId);
     if (oldRecord == null) {
+      Datastore datastore = datasyncer.datastore;
       record = datastore.newRecord(dataType as CompositeDataType, dataId);
       record.version = version;
       datastore.add(record);
@@ -280,7 +301,7 @@ class _Unmarshaller implements FieldVisitor {
     if (idIndex < 0) {
       return null;
     }
-    DataType dataType = datastore.lookupType(value.substring(0, idIndex));
+    DataType dataType = datasyncer.lookupType(value.substring(0, idIndex));
 
     idIndex += ID_SEPARATOR.length;
     String id;
@@ -292,9 +313,17 @@ class _Unmarshaller implements FieldVisitor {
     }
 
     if (dataType is CompositeDataType) {
-      return datastore.lookupById(unmarshalDataId(id));
+      return datasyncer.lookupById(unmarshalDataId(id));
     } else if (dataType is EnumDataType) {
-      return dataType.lookup(id);
+      EnumData result = datasyncer.enumMap[value];
+      // Fallback to a linear lookup
+      if (result == null) {
+        result = dataType.values.firstWhere((value) => (value.name == id), orElse: () => null);
+      }
+      if (result == null) {
+        print('Unknown enum value for $value');
+      }
+      return result;
     } else {
       print('Unknown type for ' + value);
       return null;

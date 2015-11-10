@@ -32,8 +32,8 @@
 - [x] Support multiple versions on the client
 - [ ] Start implementing code generation
 - [x] Merge in new Sky widgets
-- [ ] Make EnumDataType const
-- [ ] Optimize unmarshalling of enum types
+- [x] Make EnumDataType const
+- [x] Optimize unmarshalling of enum types
 - [x] Make StyleRecord observable
 - [x] Unify initialize() and pull()
 - [ ] Add addressbook example

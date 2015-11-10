@@ -16,10 +16,10 @@ const CompositeDataType SERVICE_DATATYPE = const CompositeDataType('service');
 const CompositeDataType STYLE_DATATYPE = const CompositeDataType('style');
 const CompositeDataType VIEW_DATATYPE = const CompositeDataType('view');
 
-final TypeIdDataType TYPE_ID_DATATYPE = new TypeIdDataType();
+const TypeIdDataType TYPE_ID_DATATYPE = const TypeIdDataType();
 
 class TypeIdDataType extends EnumDataType {
-  TypeIdDataType(): super('type_id');
+  const TypeIdDataType(): super('type_id');
 
   List<TypeId> get values => [
     STRING_TYPE,
@@ -93,10 +93,10 @@ class StyleRecord extends Record implements Style {
   }
 }
 
-final ViewIdDataType VIEW_ID_DATATYPE = new ViewIdDataType();
+const ViewIdDataType VIEW_ID_DATATYPE = const ViewIdDataType();
 
 class ViewIdDataType extends EnumDataType {
-  ViewIdDataType(): super('view_id');
+  const ViewIdDataType(): super('view_id');
 
   List<ViewId> get values => [
     LABEL_VIEW,

@@ -124,6 +124,8 @@ abstract class Datastore<R extends Record> extends BaseZone implements DataIdSou
 
   DataId nextId() => _dataIdSource.nextId();
 
+  Iterable<DataType> get dataTypes => _typesByName.values;
+
   /// Retrieve a record by id
   R lookupById(DataId dataId) {
     return _recordsById[dataId];

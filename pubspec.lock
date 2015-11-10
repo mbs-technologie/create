@@ -72,11 +72,11 @@ packages:
   flutter:
     description: flutter
     source: hosted
-    version: "0.0.16"
+    version: "0.0.18"
   flx:
     description: flx
     source: hosted
-    version: "0.0.5"
+    version: "0.0.10"
   glob:
     description: glob
     source: hosted
@@ -116,23 +116,23 @@ packages:
   mojo:
     description: mojo
     source: hosted
-    version: "0.3.0"
+    version: "0.4.2"
   mojo_apptest:
     description: mojo_apptest
     source: hosted
-    version: "0.2.3"
+    version: "0.2.7"
   mojo_sdk:
     description: mojo_sdk
     source: hosted
-    version: "0.1.0"
+    version: "0.2.1"
   mojo_services:
     description: mojo_services
     source: hosted
-    version: "0.4.0"
+    version: "0.4.4"
   mojom:
     description: mojom
     source: hosted
-    version: "0.2.3"
+    version: "0.2.7"
   mustache4dart:
     description: mustache4dart
     source: hosted
@@ -196,15 +196,15 @@ packages:
   sky_engine:
     description: sky_engine
     source: hosted
-    version: "0.0.46"
+    version: "0.0.49"
   sky_services:
     description: sky_services
     source: hosted
-    version: "0.0.46"
+    version: "0.0.50"
   sky_tools:
     description: sky_tools
     source: hosted
-    version: "0.0.35"
+    version: "0.0.37"
   source_map_stack_trace:
     description: source_map_stack_trace
     source: hosted
