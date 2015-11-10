@@ -12,6 +12,7 @@ import 'elements.dart';
 import 'elementsruntime.dart';
 import 'styles.dart';
 import 'views.dart';
+import 'flutterstyles.dart';
 
 abstract class FlutterWidgets {
   void rebuildApp();
@@ -177,7 +178,18 @@ abstract class FlutterWidgets {
 
 TextStyle textStyleOf(View view) {
   if (isNotNull(view.style)) {
-    return view.style.value.textStyle;
+    Style style = view.style.value;
+    if (style is ThemedStyle) {
+      TextStyle result = themedStyleMap[style];
+      assert (result != null);
+      return result;
+    } else if (style is FontColorStyle) {
+      Color colorValue = namedColorMap[style.styleColor];
+      assert (colorValue != null);
+      return new TextStyle(fontSize: style.styleFontSize, color: colorValue);
+    } else {
+      throw 'Unrecognized style';
+    }
   } else {
     return null;
   }

@@ -2,16 +2,18 @@
 
 library styles;
 
-import 'dart:ui' show Color;
-import 'package:flutter/painting.dart';
-import 'package:flutter/material.dart';
 import 'elements.dart';
 import 'elementsruntime.dart';
 
 abstract class Style implements Data, Named, Observable {
-  TextStyle get textStyle;
 }
 
+abstract class FontColorStyle implements Style {
+  double get styleFontSize;
+  NamedColor get styleColor;
+}
+
+// If you add elements here, you need yo update flutterstyles
 class ThemedStyleDataType extends EnumDataType {
   const ThemedStyleDataType(): super('themed_style');
 
@@ -27,19 +29,18 @@ class ThemedStyleDataType extends EnumDataType {
 const ThemedStyleDataType THEMED_STYLE_DATATYPE = const ThemedStyleDataType();
 
 class ThemedStyle extends EnumData with BaseImmutable implements Style {
-  final TextStyle textStyle;
-
-  ThemedStyle(String name, this.textStyle): super(name);
+  ThemedStyle(String name): super(name);
 
   EnumDataType get dataType => THEMED_STYLE_DATATYPE;
 }
 
-final ThemedStyle TITLE_STYLE = new ThemedStyle("Title", Typography.black.title);
-final ThemedStyle SUBHEAD_STYLE = new ThemedStyle("Subhead", Typography.black.subhead);
-final ThemedStyle BODY_STYLE = new ThemedStyle("Body", Typography.black.body1);
-final ThemedStyle CAPTION_STYLE = new ThemedStyle("Caption", Typography.black.caption);
-final ThemedStyle BUTTON_STYLE = new ThemedStyle("Button", Typography.black.button);
+final ThemedStyle TITLE_STYLE = new ThemedStyle("Title");
+final ThemedStyle SUBHEAD_STYLE = new ThemedStyle("Subhead");
+final ThemedStyle BODY_STYLE = new ThemedStyle("Body");
+final ThemedStyle CAPTION_STYLE = new ThemedStyle("Caption");
+final ThemedStyle BUTTON_STYLE = new ThemedStyle("Button");
 
+// If you add elements here, you need yo update flutterstyles
 class NamedColorDataType extends EnumDataType {
   const NamedColorDataType(): super('named_color');
 
@@ -54,17 +55,15 @@ class NamedColorDataType extends EnumDataType {
 const NamedColorDataType NAMED_COLOR_DATATYPE = const NamedColorDataType();
 
 class NamedColor extends EnumData {
-  final Color colorValue;
-
-  NamedColor(String name, this.colorValue): super(name);
+  NamedColor(String name): super(name);
 
   EnumDataType get dataType => NAMED_COLOR_DATATYPE;
 }
 
-final NamedColor BLACK_COLOR = new NamedColor("Black", Colors.black);
-final NamedColor RED_COLOR = new NamedColor("Red", Colors.red[500]);
-final NamedColor GREEN_COLOR = new NamedColor("Green", Colors.green[500]);
-final NamedColor BLUE_COLOR = new NamedColor("Blue", Colors.blue[500]);
+final NamedColor BLACK_COLOR = new NamedColor("Black");
+final NamedColor RED_COLOR = new NamedColor("Red");
+final NamedColor GREEN_COLOR = new NamedColor("Green");
+final NamedColor BLUE_COLOR = new NamedColor("Blue");
 
 // Icons from the Material Design library
 class IconId {

@@ -2,8 +2,6 @@
 
 library createdata;
 
-import 'package:flutter/painting.dart';
-
 import 'elements.dart';
 import 'elementsruntime.dart';
 import 'datastore.dart';
@@ -65,7 +63,7 @@ class DataRecord extends Record {
 const String FONT_SIZE_FIELD = 'font_size';
 const String COLOR_FIELD = 'color';
 
-class StyleRecord extends Record implements Style {
+class StyleRecord extends Record implements FontColorStyle {
   final DataId dataId;
   final Ref<String> recordName;
   final Ref<double> fontSize;
@@ -77,8 +75,9 @@ class StyleRecord extends Record implements Style {
       color = new Boxed<NamedColor>(color);
 
   CompositeDataType get dataType => STYLE_DATATYPE;
-  TextStyle get textStyle =>
-      new TextStyle(fontSize: fontSize.value, color: color.value.colorValue);
+
+  double get styleFontSize => fontSize.value;
+  NamedColor get styleColor => color.value;
 
   void visit(FieldVisitor visitor) {
     visitor.stringField(RECORD_NAME_FIELD, recordName);

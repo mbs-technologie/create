@@ -27,7 +27,7 @@
 - [x] Implement JoinedList
 - [ ] Scheduler for actions and observers
 - [ ] Parametrized operations
-- [ ] Factor out skystyles
+- [x] Factor out flutterstyles
 - [x] Support multiple datastores on the server
 - [x] Support multiple versions on the client
 - [ ] Start implementing code generation
