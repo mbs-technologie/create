@@ -132,13 +132,16 @@ abstract class EnumDataType extends DataType {
 }
 
 /// Enum values are immutable data objects that are of the specified type.
-abstract class EnumData extends Named implements Data, DataId {
+abstract class EnumData extends Named implements Data, DataId, Observable {
   const EnumData(String name): super(name);
 
   /// Enum data value is its own dataId
   DataId get dataId => this;
 
   EnumDataType get dataType;
+
+  /// Enum data values are immutable, hence observe() is a noop
+  void observe(Operation observer, Lifespan lifespan) => null;
 }
 
 /// Data types for composite objects (regular classes, not enums.)

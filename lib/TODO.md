@@ -18,6 +18,9 @@
 - [ ] Use native Flutter dropdown component
 - [ ] Separate network code from syncer code
 - [ ] Simplify FieldVisitor interface
+- [ ] Implement CompositeDataType.newInstance(dataId)
+- [ ] Retire CreateData, rename creatadata.dart to createdchema
+- [ ] Use lowercase names when serializing enum values
 
 ----------------
 

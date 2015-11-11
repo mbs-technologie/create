@@ -3,7 +3,6 @@
 library styles;
 
 import 'elements.dart';
-import 'elementsruntime.dart';
 
 abstract class Style implements Data, Named, Observable {
 }
@@ -28,17 +27,17 @@ class ThemedStyleDataType extends EnumDataType {
 
 const ThemedStyleDataType THEMED_STYLE_DATATYPE = const ThemedStyleDataType();
 
-class ThemedStyle extends EnumData with BaseImmutable implements Style {
-  ThemedStyle(String name): super(name);
+class ThemedStyle extends EnumData implements Style {
+  const ThemedStyle(String name): super(name);
 
   EnumDataType get dataType => THEMED_STYLE_DATATYPE;
 }
 
-final ThemedStyle TITLE_STYLE = new ThemedStyle("Title");
-final ThemedStyle SUBHEAD_STYLE = new ThemedStyle("Subhead");
-final ThemedStyle BODY_STYLE = new ThemedStyle("Body");
-final ThemedStyle CAPTION_STYLE = new ThemedStyle("Caption");
-final ThemedStyle BUTTON_STYLE = new ThemedStyle("Button");
+const ThemedStyle TITLE_STYLE = const ThemedStyle("Title");
+const ThemedStyle SUBHEAD_STYLE = const ThemedStyle("Subhead");
+const ThemedStyle BODY_STYLE = const ThemedStyle("Body");
+const ThemedStyle CAPTION_STYLE = const ThemedStyle("Caption");
+const ThemedStyle BUTTON_STYLE = const ThemedStyle("Button");
 
 // If you add elements here, you need yo update flutterstyles
 class NamedColorDataType extends EnumDataType {
@@ -55,15 +54,15 @@ class NamedColorDataType extends EnumDataType {
 const NamedColorDataType NAMED_COLOR_DATATYPE = const NamedColorDataType();
 
 class NamedColor extends EnumData {
-  NamedColor(String name): super(name);
+  const NamedColor(String name): super(name);
 
   EnumDataType get dataType => NAMED_COLOR_DATATYPE;
 }
 
-final NamedColor BLACK_COLOR = new NamedColor("Black");
-final NamedColor RED_COLOR = new NamedColor("Red");
-final NamedColor GREEN_COLOR = new NamedColor("Green");
-final NamedColor BLUE_COLOR = new NamedColor("Blue");
+const NamedColor BLACK_COLOR = const NamedColor("Black");
+const NamedColor RED_COLOR = const NamedColor("Red");
+const NamedColor GREEN_COLOR = const NamedColor("Green");
+const NamedColor BLUE_COLOR = const NamedColor("Blue");
 
 // Icons from the Material Design library
 class IconId {
