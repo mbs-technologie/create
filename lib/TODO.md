@@ -1,41 +1,42 @@
 # Tasks
 
+- [ ] Improve TextInput widget; support for keyboard types
+- [ ] More primitives supported in the code
+- [ ] Add Navigation support to Sky app
+- [ ] Efficient implementation of Datastore.lookup()
+- [ ] Ledger integration
+- [ ] Bootstrapping Create
+- [ ] Live syntax check
+- [ ] Prohibit recursive view declarations
+- [ ] Implement ReactiveBuild that autocreates subcontexts
+- [ ] Make styles computable
+- [ ] Implement FilteredList
+- [ ] Scheduler for actions and observers
+- [ ] Parametrized operations
+- [ ] Start implementing code generation
+- [ ] Add addressbook example
+- [ ] Use native Flutter dropdown component
+----------------
 - [x] Color selection in styles mode
 - [x] UI for non-Label views
 - [x] Row views
 - [x] Parse templates and evaluate them
 - [x] Parse code and evaluate it
 - [x] IconButton view
-- [ ] Improve TextInput widget; support for keyboard types
-- [ ] More primitives supported in the code
 - [x] Use standard Sky widget for the PopupMenu
 - [x] Do not require dev branch of Sky
 - [x] Make the app work with the latest version of Flutter/Sky
-- [ ] Add Navigation support to Sky app
-- [ ] Efficient implementation of Datastore.lookup()
-- [ ] Ledger integration
 - [x] Datastore initialization from JSON
 - [x] Datastore persistence
-- [ ] Bootstrapping Create
-- [ ] Live syntax check
 - [x] Standalone Android app
-- [ ] Prohibit recursive view declarations
-- [ ] Implement ReactiveBuild that autocreates subcontexts
-- [ ] Make styles computable
 - [x] Factor out Named interface
-- [ ] Implement FilteredList
 - [x] Implement JoinedList
-- [ ] Scheduler for actions and observers
-- [ ] Parametrized operations
 - [x] Factor out flutterstyles
 - [x] Support multiple datastores on the server
 - [x] Support multiple versions on the client
-- [ ] Start implementing code generation
 - [x] Merge in new Sky widgets
 - [x] Make EnumDataType const
 - [x] Optimize unmarshalling of enum types
 - [x] Make StyleRecord observable
 - [x] Unify initialize() and pull()
-- [ ] Add addressbook example
 - [x] s/sky/flutter/g
-- [ ] Use native Flutter dropdown component

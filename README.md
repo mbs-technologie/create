@@ -16,6 +16,8 @@ Generic components:
   encapsulating presentation attributes
 - [views.dart](https://github.com/domokit/create/blob/master/lib/views.dart):
   abstract widgets: view = (observable) model + (observable) style
+- [flutterstyles.dart](https://github.com/domokit/create/blob/master/lib/flutterstyles.dart):
+  mapping of abstract presentation attributes to Flutter styles
 - [flutterwidgets.dart](https://github.com/domokit/create/blob/master/lib/flutterwidgets.dart):
   code to render views using [Flutter](http://flutter.io)
 - [flutterapp.dart](https://github.com/domokit/create/blob/master/lib/flutterapp.dart):
