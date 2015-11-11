@@ -11,7 +11,7 @@ abstract class View<M extends Observable> {
   final ReadRef<Style> style;
 
   // Fields for internal use by the toolkit implementation
-  Context cachedSubContext;
+  Lifespan cachedSubSpan;
 
   View(this.model, this.style);
 }

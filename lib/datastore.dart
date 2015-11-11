@@ -139,16 +139,16 @@ abstract class Datastore<R extends Record> extends BaseZone implements DataIdSou
   }
 
   /// Run a query and get a list of matching results back.
-  /// If context is not null, then the query is 'live' and result list gets updated
-  /// to reflect new records added to the datastore.  When the context is disposed,
+  /// If lifespan is not null, then the query is 'live' and result list gets updated
+  /// to reflect new records added to the datastore.  When the lifespan is disposed,
   /// updates stop.
-  /// If the context is null, a "snapshot" of the results is returned as an immutable list.
-  ReadList<R> runQuery(bool query(R), Context context) {
+  /// If the lifespan is null, a "snapshot" of the results is returned as an immutable list.
+  ReadList<R> runQuery(bool query(R), Lifespan lifespan) {
     List<R> results = new List<R>.from(_records.where(query));
 
-    if (context != null) {
+    if (lifespan != null) {
       final _LiveQuery<R> liveQuery = new _LiveQuery<R>(query, this, results);
-      context.addResource(liveQuery);
+      lifespan.addResource(liveQuery);
       _liveQueries.add(liveQuery);
       print('Datastore: query added; ${_liveQueries.length} active queries.');
       return liveQuery._result;

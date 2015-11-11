@@ -2,7 +2,7 @@
 
 - [ ] Improve TextInput widget; support for keyboard types
 - [ ] More primitives supported in the code
-- [ ] Add Navigation support to Sky app
+- [ ] Add Navigation support to Flutter app
 - [ ] Efficient implementation of Datastore.lookup()
 - [ ] Ledger integration
 - [ ] Bootstrapping Create
@@ -16,6 +16,8 @@
 - [ ] Start implementing code generation
 - [ ] Add addressbook example
 - [ ] Use native Flutter dropdown component
+- [ ] Separate network code from syncer code
+- [ ] Simplify FieldVisitor interface
 
 ----------------
 
@@ -42,3 +44,4 @@
 - [x] Make StyleRecord observable
 - [x] Unify initialize() and pull()
 - [x] s/sky/flutter/g
+- [x] Rename Context to Lifespan

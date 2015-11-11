@@ -15,8 +15,8 @@ class DisposeProcedure implements Disposable {
   }
 }
 
-/// A mixin that implements resourece management part of context.
-abstract class _ResourceManager implements Context {
+/// A mixin that implements resourece management part of lifespan.
+abstract class _ResourceManager implements Lifespan {
   final Set<Disposable> _resources = new Set<Disposable>();
 
   void addResource(Disposable resource) {
@@ -29,18 +29,18 @@ abstract class _ResourceManager implements Context {
   }
 }
 
-/// An implementation of a hierarchical context.
-class BaseContext extends Context with _ResourceManager {
-  final Context parent;
+/// An implementation of a hierarchical lifespan.
+class BaseLifespan extends Lifespan with _ResourceManager {
+  final Lifespan parent;
   final Zone zone;
 
-  BaseContext(this.parent, this.zone) {
+  BaseLifespan(this.parent, this.zone) {
     if (parent != null) {
       parent.addResource(this);
     }
   }
 
-  @override Context makeSubContext() => new BaseContext(this, zone);
+  @override Lifespan makeSubSpan() => new BaseLifespan(this, zone);
 }
 
 /// An implementation of a zone.
@@ -54,7 +54,7 @@ class BaseZone extends Zone with _ResourceManager {
     }
   }
 
-  @override Context makeSubContext() => new BaseContext(this, this);
+  @override Lifespan makeSubSpan() => new BaseLifespan(this, this);
 
   @override Operation makeOperation(Procedure procedure) => new _BaseOperation(procedure, this);
 }
@@ -62,7 +62,7 @@ class BaseZone extends Zone with _ResourceManager {
 /// A mixin for immutable state.  Adding observer is an noop since state never changes.
 /// A constant is a reference whose value never changes.
 abstract class BaseImmutable implements Observable {
-  @override void observe(Operation observer, Context context) => null;
+  @override void observe(Operation observer, Lifespan lifespan) => null;
 }
 
 class Constant<T> extends ReadRef<T> with BaseImmutable {
@@ -75,10 +75,10 @@ class Constant<T> extends ReadRef<T> with BaseImmutable {
 abstract class _ObserverManager implements Observable {
   Set<Operation> _observers = new Set<Operation>();
 
-  @override void observe(Operation observer, Context context) {
+  @override void observe(Operation observer, Lifespan lifespan) {
     _observers.add(observer);
     // TODO: make this work correctly if the same observer is registered multiple times
-    context.addResource(new DisposeProcedure(() => _observers.remove(observer)));
+    lifespan.addResource(new DisposeProcedure(() => _observers.remove(observer)));
   }
 
   /// Trigger observers--to be used by the subclasses of ObserverManager.
@@ -135,11 +135,11 @@ class _BaseOperation implements Operation {
 /// A reactive function that converts a value of type S into a value of type T.
 class ReactiveFunction<S, T> extends _BaseState<T> {
   final ReadRef<S> _source;
-  final Context _context;
+  final Lifespan _lifespan;
   final Function _function;
 
-  ReactiveFunction(this._source, this._context, T function(S source)): _function = function {
-    _source.observe(_context.zone.makeOperation(_recompute), _context);
+  ReactiveFunction(this._source, this._lifespan, T function(S source)): _function = function {
+    _source.observe(_lifespan.zone.makeOperation(_recompute), _lifespan);
     // TODO: we should lazily compute the value when the priority increases.
     _recompute();
   }
@@ -153,14 +153,14 @@ class ReactiveFunction<S, T> extends _BaseState<T> {
 class ReactiveFunction2<S1, S2, T> extends _BaseState<T> {
   final ReadRef<S1> _source1;
   final ReadRef<S2> _source2;
-  final Context _context;
+  final Lifespan _lifespan;
   final Function _function;
 
-  ReactiveFunction2(this._source1, this._source2, this._context, T function(S1 s1, S2 s2)):
+  ReactiveFunction2(this._source1, this._source2, this._lifespan, T function(S1 s1, S2 s2)):
     _function = function {
-      Operation recomputeOp = _context.zone.makeOperation(_recompute);
-      _source1.observe(recomputeOp, _context);
-      _source2.observe(recomputeOp, _context);
+      Operation recomputeOp = _lifespan.zone.makeOperation(_recompute);
+      _source1.observe(recomputeOp, _lifespan);
+      _source2.observe(recomputeOp, _lifespan);
       // TODO: we should lazily compute the value when the priority increases.
       _recompute();
     }
@@ -186,8 +186,8 @@ class MappedList<S, T> extends ReadList<T> with _ObserverManager {
   final Function _function;
   List<T> _cachedElements;
 
-  MappedList(this._source, T function(S source), Context context): _function = function {
-    _source.observe(context.zone.makeOperation(_sourceChanged), context);
+  MappedList(this._source, T function(S source), Lifespan lifespan): _function = function {
+    _source.observe(lifespan.zone.makeOperation(_sourceChanged), lifespan);
   }
 
   void _sourceChanged() {
@@ -211,9 +211,9 @@ class JoinedList<E> extends ReadList<E> with _ObserverManager {
   List<E> elements;
   Ref<int> size = new Boxed<int>(null);
 
-  JoinedList(this._source, Context context) {
-    Operation update = context.zone.makeOperation(_update);
-    _source.forEach((ReadList<E> sublist) => sublist.observe(update, context));
+  JoinedList(this._source, Lifespan lifespan) {
+    Operation update = lifespan.zone.makeOperation(_update);
+    _source.forEach((ReadList<E> sublist) => sublist.observe(update, lifespan));
     _update();
   }
 
@@ -290,7 +290,7 @@ class _ListCell<E> implements Ref<E> {
   }
 
   // TODO: precise observer.
-  void observe(Operation observer, Context context) => list.observe(observer, context);
+  void observe(Operation observer, Lifespan lifespan) => list.observe(observer, lifespan);
 }
 
 /// Check whether a reference is not null and holds a non-null value.

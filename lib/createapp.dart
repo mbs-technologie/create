@@ -74,7 +74,7 @@ class CreateApp extends BaseZone implements ApplicationState {
   ReadRef<String> appVersion = new Constant<String>(CREATE_VERSION);
   ReadRef<View> mainView;
   ReadRef<Operation> addOperation;
-  Context viewContext;
+  Lifespan viewLifespan;
 
   CreateApp(this.datastore) {
     ReadRef<String> titleString = new Constant<String>('Demo App');
@@ -97,31 +97,31 @@ class CreateApp extends BaseZone implements ApplicationState {
   }
 
   View makeMainView(AppMode mode) {
-    if (viewContext != null) {
-      viewContext.dispose();
+    if (viewLifespan != null) {
+      viewLifespan.dispose();
     }
-    viewContext = makeSubContext();
+    viewLifespan = makeSubSpan();
 
     if (mode == INITIALIZING_MODE) {
       return initializingView();
     } else if (mode == MODULES_MODE) {
-      return modulesView(viewContext);
+      return modulesView(viewLifespan);
     } else if (mode == SCHEMA_MODE) {
-      return schemaView(viewContext);
+      return schemaView(viewLifespan);
     } else if (mode == PARAMETERS_MODE) {
-      return parametersView(viewContext);
+      return parametersView(viewLifespan);
     } else if (mode == OPERATIONS_MODE) {
-      return operationsView(viewContext);
+      return operationsView(viewLifespan);
     } else if (mode == SERVICES_MODE) {
-      return servicesView(viewContext);
+      return servicesView(viewLifespan);
     } else if (mode == STYLES_MODE) {
-      return stylesView(viewContext);
+      return stylesView(viewLifespan);
     } else if (mode == VIEWS_MODE) {
-      return viewsView(viewContext);
+      return viewsView(viewLifespan);
     } else if (mode == DATA_MODE) {
-      return dataView(viewContext);
+      return dataView(viewLifespan);
     } else if (mode == LAUNCH_MODE) {
-      return launchView(viewContext);
+      return launchView(viewLifespan);
     } else {
       return _showError('Unknown mode: $mode.');
     }
@@ -162,7 +162,7 @@ class CreateApp extends BaseZone implements ApplicationState {
         new Constant<String>("Initial sync in progress..."), new Constant<Style>(TITLE_STYLE));
   }
 
-  View modulesView(Context context) {
+  View modulesView(Lifespan lifespan) {
     return new ColumnView(new ImmutableList<View>([
       modulesRowView('Dart Core'),
       modulesRowView('Modular'),
@@ -182,9 +182,9 @@ class CreateApp extends BaseZone implements ApplicationState {
     ]));
   }
 
-  View schemaView(Context context) {
+  View schemaView(Lifespan lifespan) {
     return new ColumnView(
-      new MappedList<DataRecord, View>(datastore.getData(context), schemaRowView, context)
+      new MappedList<DataRecord, View>(datastore.getData(lifespan), schemaRowView, lifespan)
     );
   }
 
@@ -207,10 +207,10 @@ class CreateApp extends BaseZone implements ApplicationState {
     ]));
   }
 
-  View parametersView(Context context) {
+  View parametersView(Lifespan lifespan) {
     return new ColumnView(
-        new MappedList<DataRecord, View>(datastore.getParameters(context), parametersRowView,
-            context)
+        new MappedList<DataRecord, View>(datastore.getParameters(lifespan), parametersRowView,
+            lifespan)
     );
   }
 
@@ -225,10 +225,10 @@ class CreateApp extends BaseZone implements ApplicationState {
     ]));
   }
 
-  View operationsView(Context context) {
+  View operationsView(Lifespan lifespan) {
     return new ColumnView(
-        new MappedList<DataRecord, View>(datastore.getOperations(context), operationsRowView,
-            context)
+        new MappedList<DataRecord, View>(datastore.getOperations(lifespan), operationsRowView,
+            lifespan)
     );
   }
 
@@ -247,9 +247,9 @@ class CreateApp extends BaseZone implements ApplicationState {
     ]));
   }
 
-  View servicesView(Context context) {
+  View servicesView(Lifespan lifespan) {
     return new ColumnView(
-      new MappedList<DataRecord, View>(datastore.getServices(context), servicesRowView, context)
+      new MappedList<DataRecord, View>(datastore.getServices(lifespan), servicesRowView, lifespan)
     );
   }
 
@@ -271,9 +271,9 @@ class CreateApp extends BaseZone implements ApplicationState {
     ]));
   }
 
-  View stylesView(Context context) {
+  View stylesView(Lifespan lifespan) {
     return new ColumnView(
-      new MappedList<StyleRecord, View>(datastore.getStyles(context), stylesRowView, context)
+      new MappedList<StyleRecord, View>(datastore.getStyles(lifespan), stylesRowView, lifespan)
     );
   }
 
@@ -297,14 +297,14 @@ class CreateApp extends BaseZone implements ApplicationState {
     ]));
   }
 
-  View viewsView(Context context) {
+  View viewsView(Lifespan lifespan) {
     return new ColumnView(
-      new MappedList<ViewRecord, View>(datastore.getViews(context),
-          (view) => viewsRowView(view, context), context)
+      new MappedList<ViewRecord, View>(datastore.getViews(lifespan),
+          (view) => viewsRowView(view, lifespan), lifespan)
     );
   }
 
-  View makeStyleInput(Ref<Style> style, Context context) {
+  View makeStyleInput(Ref<Style> style, Lifespan lifespan) {
     // TODO: add generic displayer with a specified null string
     String displayStyle(Style s) => s != null ? s.name : '<no style>';
     List<Style> styleOptions = [ null ];
@@ -313,22 +313,22 @@ class CreateApp extends BaseZone implements ApplicationState {
     return new SelectionInput<Style>(style, new ImmutableList<Style>(styleOptions), displayStyle);
   }
 
-  View makeContentInput(Ref<DataRecord> content, Context context) {
+  View makeContentInput(Ref<DataRecord> content, Lifespan lifespan) {
     return new SelectionInput<DataRecord>(content, datastore.getContentOptions(null),
         displayToString);
   }
 
-  View makeActionInput(Ref<DataRecord> action, Context context) {
+  View makeActionInput(Ref<DataRecord> action, Lifespan lifespan) {
     return new SelectionInput<DataRecord>(action, datastore.getActionOptions(null),
         displayToString);
   }
 
-  View makeViewIdInput(Ref<ViewId> viewId, Context context) {
+  View makeViewIdInput(Ref<ViewId> viewId, Lifespan lifespan) {
     return new SelectionInput<ViewId>(viewId, new ImmutableList<ViewId>(VIEW_ID_DATATYPE.values),
         displayName);
   }
 
-  View makeViewInput(Ref<ViewRecord> view, ViewRecord currentView, Context context) {
+  View makeViewInput(Ref<ViewRecord> view, ViewRecord currentView, Lifespan lifespan) {
     List<ViewRecord> viewOptions = [ null ];
     // We filter out attempts to create recursive views
     viewOptions.addAll(datastore.getViews(null).elements.where((v) => v != currentView));
@@ -337,11 +337,11 @@ class CreateApp extends BaseZone implements ApplicationState {
         viewToString);
   }
 
-  void populateSubviewInput(MutableList<View> result, ViewRecord record, Context context) {
+  void populateSubviewInput(MutableList<View> result, ViewRecord record, Lifespan lifespan) {
     int size = record.subviews.size.value;
     // TODO: use MappedList here.
     for (int i = 0; i < size; ++i) {
-      result.add(makeViewInput(record.subviews.at(i), record, context));
+      result.add(makeViewInput(record.subviews.at(i), record, lifespan));
     }
     result.add(new IconButtonView(new Constant<IconId>(ADD_CIRCLE_ICON), null,
         new Constant<Operation>(makeOperation(() => record.subviews.add(null)))));
@@ -352,63 +352,63 @@ class CreateApp extends BaseZone implements ApplicationState {
     }
   }
 
-  ReadList<View> makeSubviewInput(ViewRecord record, Context context) {
+  ReadList<View> makeSubviewInput(ViewRecord record, Lifespan lifespan) {
     MutableList<View> result = new MutableList<View>();
-    populateSubviewInput(result, record, context);
+    populateSubviewInput(result, record, lifespan);
     void updateResult() {
       result.clear();
-      populateSubviewInput(result, record, context);
+      populateSubviewInput(result, record, lifespan);
     }
-    record.subviews.observe(makeOperation(updateResult), context);
+    record.subviews.observe(makeOperation(updateResult), lifespan);
     return result;
   }
 
-  View viewsRowExtra(ViewRecord record, Context context) {
+  View viewsRowExtra(ViewRecord record, Lifespan lifespan) {
     if (record.viewId.value == BUTTON_VIEW) {
       return new RowView(new ImmutableList<View>([
-        makeContentInput(record.content, context),
-        makeActionInput(record.action, context)
+        makeContentInput(record.content, lifespan),
+        makeActionInput(record.action, lifespan)
       ]));
     } else if (record.viewId.value == COLUMN_VIEW || record.viewId.value == ROW_VIEW) {
-      return new RowView(makeSubviewInput(record, context));
+      return new RowView(makeSubviewInput(record, lifespan));
     } else {
-      return makeContentInput(record.content, context);
+      return makeContentInput(record.content, lifespan);
     }
   }
 
-  View viewsRowView(ViewRecord record, Context context) {
+  View viewsRowView(ViewRecord record, Lifespan lifespan) {
     MutableList<View> rowElements = new MutableList<View>();
-    populateRowView(rowElements, record, context);
+    populateRowView(rowElements, record, lifespan);
     void updateRowView() {
       rowElements.clear();
-      populateRowView(rowElements, record, context);
+      populateRowView(rowElements, record, lifespan);
     }
-    record.viewId.observe(makeOperation(updateRowView), context);
+    record.viewId.observe(makeOperation(updateRowView), lifespan);
     return new RowView(rowElements);
   }
 
   bool renderInRow(ViewId viewId) => viewId != COLUMN_VIEW && viewId != ROW_VIEW;
 
-  void populateRowView(MutableList<View> rowElements, ViewRecord record, Context context) {
+  void populateRowView(MutableList<View> rowElements, ViewRecord record, Lifespan lifespan) {
     rowElements.add(nameInput(record.recordName));
     if (renderInRow(record.viewId.value)) {
-      rowElements.add(makeViewIdInput(record.viewId, context));
-      rowElements.add(makeStyleInput(record.style, context));
-      rowElements.add(viewsRowExtra(record, context));
+      rowElements.add(makeViewIdInput(record.viewId, lifespan));
+      rowElements.add(makeStyleInput(record.style, lifespan));
+      rowElements.add(viewsRowExtra(record, lifespan));
     } else {
       rowElements.add(new ColumnView(new ImmutableList<View>([
         new RowView(new ImmutableList<View>([
-          makeViewIdInput(record.viewId, context),
-          makeStyleInput(record.style, context)
+          makeViewIdInput(record.viewId, lifespan),
+          makeStyleInput(record.style, lifespan)
         ])),
-        viewsRowExtra(record, context)
+        viewsRowExtra(record, lifespan)
       ])));
     }
   }
 
-  View dataView(Context context) {
+  View dataView(Lifespan lifespan) {
     return new ColumnView(
-      new MappedList<DataRecord, View>(datastore.getData(context), dataRowView, context)
+      new MappedList<DataRecord, View>(datastore.getData(lifespan), dataRowView, lifespan)
     );
   }
 
@@ -431,71 +431,71 @@ class CreateApp extends BaseZone implements ApplicationState {
     return new LabelView(new Constant<String>(message), new Constant<Style>(TITLE_STYLE));
   }
 
-  View launchView(Context context) {
+  View launchView(Lifespan lifespan) {
     Record mainRecord = datastore.lookupByName(MAIN_NAME);
     if (mainRecord == null || !(mainRecord is ViewRecord)) {
       return _showError('Main view not found.');
     }
-    return showViewRecord(mainRecord as ViewRecord, context);
+    return showViewRecord(mainRecord as ViewRecord, lifespan);
   }
 
-  View showViewRecord(ViewRecord viewRecord, Context context) {
+  View showViewRecord(ViewRecord viewRecord, Lifespan lifespan) {
     if (viewRecord == null) {
       return new LabelView(new Constant<String>("[null view]"), null);
     }
 
     if (viewRecord.viewId.value == LABEL_VIEW) {
-      return showLabelViewRecord(viewRecord, context);
+      return showLabelViewRecord(viewRecord, lifespan);
     } else if (viewRecord.viewId.value == BUTTON_VIEW) {
-      return showButtonViewRecord(viewRecord, context);
+      return showButtonViewRecord(viewRecord, lifespan);
     } else if (viewRecord.viewId.value == COLUMN_VIEW) {
-      return showColumnViewRecord(viewRecord, context);
+      return showColumnViewRecord(viewRecord, lifespan);
     } else if (viewRecord.viewId.value == ROW_VIEW) {
-      return showRowViewRecord(viewRecord, context);
+      return showRowViewRecord(viewRecord, lifespan);
     }
 
     return _showError('Unknown viewId: ${viewRecord.viewId.value}.');
   }
 
-  ReadRef<String> evaluateRecord(DataRecord record, Context context) {
+  ReadRef<String> evaluateRecord(DataRecord record, Lifespan lifespan) {
     if (record.dataType == OPERATION_DATATYPE && record.typeId.value == TEMPLATE_TYPE) {
       // TODO: make a reactive function which updates if template changes
-      return evaluateTemplate(record.state.value, context);
+      return evaluateTemplate(record.state.value, lifespan);
     }
 
     return record.state;
   }
 
-  ReadRef<String> evaluateTemplate(String template, Context context) {
+  ReadRef<String> evaluateTemplate(String template, Lifespan lifespan) {
     Construct code = parseTemplate(template);
     Ref<String> result = new Boxed<String>(code.evaluate(datastore));
     Operation reevaluate = makeOperation(() => result.value = code.evaluate(datastore));
-    code.observe(datastore, reevaluate, context);
+    code.observe(datastore, reevaluate, lifespan);
     return result;
   }
 
-  View showLabelViewRecord(ViewRecord viewRecord, Context context) {
-    return new LabelView(evaluateRecord(viewRecord.content.value, context), viewRecord.style);
+  View showLabelViewRecord(ViewRecord viewRecord, Lifespan lifespan) {
+    return new LabelView(evaluateRecord(viewRecord.content.value, lifespan), viewRecord.style);
   }
 
-  View showButtonViewRecord(ViewRecord viewRecord, Context context) {
+  View showButtonViewRecord(ViewRecord viewRecord, Lifespan lifespan) {
     Operation action = makeOperation(() => _executeAction(viewRecord.action.value));
 
-    return new ButtonView(evaluateRecord(viewRecord.content.value, context), viewRecord.style,
+    return new ButtonView(evaluateRecord(viewRecord.content.value, lifespan), viewRecord.style,
         new Constant<Operation>(action));
   }
 
-  ReadList<View> showSubViews(ViewRecord viewRecord, Context context) {
+  ReadList<View> showSubViews(ViewRecord viewRecord, Lifespan lifespan) {
     return new MappedList<ViewRecord, View>(viewRecord.subviews,
-        (ViewRecord record) => showViewRecord(record, context), context);
+        (ViewRecord record) => showViewRecord(record, lifespan), lifespan);
   }
 
-  View showColumnViewRecord(ViewRecord viewRecord, Context context) {
-    return new ColumnView(showSubViews(viewRecord, context), viewRecord.style);
+  View showColumnViewRecord(ViewRecord viewRecord, Lifespan lifespan) {
+    return new ColumnView(showSubViews(viewRecord, lifespan), viewRecord.style);
   }
 
-  View showRowViewRecord(ViewRecord viewRecord, Context context) {
-    return new RowView(showSubViews(viewRecord, context), viewRecord.style);
+  View showRowViewRecord(ViewRecord viewRecord, Lifespan lifespan) {
+    return new RowView(showSubViews(viewRecord, lifespan), viewRecord.style);
   }
 
   void _executeAction(DataRecord action) {

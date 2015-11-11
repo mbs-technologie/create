@@ -85,10 +85,10 @@ class StyleRecord extends Record implements FontColorStyle {
     visitor.dataField(COLOR_FIELD, color);
   }
 
-  void observe(Operation observer, Context context) {
-    recordName.observe(observer, context);
-    fontSize.observe(observer, context);
-    color.observe(observer, context);
+  void observe(Operation observer, Lifespan lifespan) {
+    recordName.observe(observer, lifespan);
+    fontSize.observe(observer, lifespan);
+    color.observe(observer, lifespan);
   }
 }
 
@@ -221,33 +221,33 @@ class CreateData extends Datastore {
     }
   }
 
-  ReadList<DataRecord> getDataRecords(CompositeDataType dataType, Context context) =>
-    runQuery((record) => record.dataType == dataType, context);
+  ReadList<DataRecord> getDataRecords(CompositeDataType dataType, Lifespan lifespan) =>
+    runQuery((record) => record.dataType == dataType, lifespan);
 
-  ReadList<DataRecord> getData(Context context) =>
-    getDataRecords(DATA_DATATYPE, context);
+  ReadList<DataRecord> getData(Lifespan lifespan) =>
+    getDataRecords(DATA_DATATYPE, lifespan);
 
-  ReadList<DataRecord> getParameters(Context context) =>
-    getDataRecords(PARAMETER_DATATYPE, context);
+  ReadList<DataRecord> getParameters(Lifespan lifespan) =>
+    getDataRecords(PARAMETER_DATATYPE, lifespan);
 
-  ReadList<DataRecord> getOperations(Context context) =>
-    getDataRecords(OPERATION_DATATYPE, context);
+  ReadList<DataRecord> getOperations(Lifespan lifespan) =>
+    getDataRecords(OPERATION_DATATYPE, lifespan);
 
-  ReadList<DataRecord> getServices(Context context) =>
-    getDataRecords(SERVICE_DATATYPE, context);
+  ReadList<DataRecord> getServices(Lifespan lifespan) =>
+    getDataRecords(SERVICE_DATATYPE, lifespan);
 
-  ReadList<StyleRecord> getStyles(Context context) =>
-    runQuery((record) => record is StyleRecord, context);
+  ReadList<StyleRecord> getStyles(Lifespan lifespan) =>
+    runQuery((record) => record is StyleRecord, lifespan);
 
-  ReadList<ViewRecord> getViews(Context context) =>
-    runQuery((record) => record is ViewRecord, context);
+  ReadList<ViewRecord> getViews(Lifespan lifespan) =>
+    runQuery((record) => record is ViewRecord, lifespan);
 
-  ReadList<DataRecord> getContentOptions(Context context) =>
+  ReadList<DataRecord> getContentOptions(Lifespan lifespan) =>
     runQuery((record) => record is DataRecord &&
-        (record.typeId.value == STRING_TYPE || record.typeId.value == TEMPLATE_TYPE), context);
+        (record.typeId.value == STRING_TYPE || record.typeId.value == TEMPLATE_TYPE), lifespan);
 
-  ReadList<DataRecord> getActionOptions(Context context) =>
-    runQuery((record) => record is DataRecord && record.typeId.value == CODE_TYPE, context);
+  ReadList<DataRecord> getActionOptions(Lifespan lifespan) =>
+    runQuery((record) => record is DataRecord && record.typeId.value == CODE_TYPE, lifespan);
 
   String newRecordName(String prefix) {
     int index = 0;

@@ -13,36 +13,36 @@ abstract class Disposable {
   void dispose();
 }
 
-/// A Context is an object that manages a collection of disposable resources.
-/// When a context is disposed, all its children are disposed as well.
+/// A Lifespan is an object that manages a collection of disposable resources.
+/// When a lifespan is disposed, all its children are disposed as well.
 ///
-/// Contexts are hierarchical; all contexts have at most one parent context,
-/// and there are no cycles in the context graph.
-/// Context hierarchy can correspond to the UI widget hierarchy,
+/// Lifespans are hierarchical; all lifespans have at most one parent lifespan,
+/// and there are no cycles in the lifespan graph.
+/// Lifespan hierarchy can correspond to the UI widget hierarchy,
 /// data structure hierarchy and so on.
-abstract class Context implements Disposable {
+abstract class Lifespan implements Disposable {
 
-  /// Parent of this context.
-  Context get parent;
+  /// Parent of this lifespan.
+  Lifespan get parent;
 
-  /// Zone that this context belongs to.
+  /// Zone that this lifespan belongs to.
   Zone get zone;
 
-  /// Add a resource to this context's resource collection.
+  /// Add a resource to this lifespan's resource collection.
   void addResource(Disposable resource);
 
-  /// Create a subcontext with this context as a parent.
-  Context makeSubContext();
+  /// Create a sublifespan with this lifespan as a parent.
+  Lifespan makeSubSpan();
 }
 
-/// A zone is a context that has control flow associated with it
-abstract class Zone implements Context {
+/// A zone is a lifespan that has control flow associated with it
+abstract class Zone implements Lifespan {
 
   /// Create an operator that executes in this zone
   Operation makeOperation(Procedure procedure);
 }
 
-/// An operation (a.k.a. procedure or callback) associated with a specific context
+/// An operation (a.k.a. procedure or callback) associated with a specific zone
 abstract class Operation {
   /// Zone in which this operation will run
   Zone get zone;
@@ -57,12 +57,12 @@ abstract class Operation {
 
 /// Interface for an observable object
 abstract class Observable {
-  /// Register an observer for this value and associate the registration with the context.
+  /// Register an observer for this value and associate the registration with the lifespan.
   /// When the observable value changes so that new state is distinct
   /// from the old state, the observer is run.
-  /// When the context is disposed, the observer is unregistered.
+  /// When the lifespan is disposed, the observer is unregistered.
   /// TODO: add priority.
-  void observe(Operation observer, Context context);
+  void observe(Operation observer, Lifespan lifespan);
 }
 
 /// Strongly typed observable reference with readonly access.

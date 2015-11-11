@@ -2,7 +2,6 @@ name: Create
 author: Misha Dynin <dynin@google.com>
 dependencies:
   flutter: any
-  sky_tools: any
 dependency_overrides:
 #  material_design_icons:
 #    path: ../../sky/packages/material_design_icons

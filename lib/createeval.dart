@@ -67,7 +67,7 @@ Construct _parseAssignment(String lhs, String rhs, AssignmentType type) {
 }
 
 abstract class Construct {
-  void observe(CreateData datastore, Operation operation, Context context);
+  void observe(CreateData datastore, Operation operation, Lifespan lifespan);
   String evaluate(CreateData datastore);
 }
 
@@ -76,7 +76,7 @@ class ConstantConstruct implements Construct {
 
   ConstantConstruct(this.value);
 
-  void observe(CreateData datastore, Operation operation, Context context) => null;
+  void observe(CreateData datastore, Operation operation, Lifespan lifespan) => null;
   String evaluate(CreateData datastore) => value;
 }
 
@@ -87,11 +87,11 @@ class IdentifierConstruct implements Construct {
 
   IdentifierConstruct(this.identifier);
 
-  void observe(CreateData datastore, Operation operation, Context context) {
+  void observe(CreateData datastore, Operation operation, Lifespan lifespan) {
     Record record = datastore.lookupByName(identifier);
     // TODO: handle non-DataRecord records
     if (record != null && record is DataRecord) {
-      record.state.observe(operation, context);
+      record.state.observe(operation, lifespan);
     }
   }
 
@@ -122,8 +122,8 @@ class ConcatenateConstruct implements Construct {
 
   ConcatenateConstruct(this.parameters);
 
-  void observe(CreateData datastore, Operation operation, Context context) {
-    parameters.forEach((c) => c.observe(datastore, operation, context));
+  void observe(CreateData datastore, Operation operation, Lifespan lifespan) {
+    parameters.forEach((c) => c.observe(datastore, operation, lifespan));
   }
 
   String evaluate(CreateData datastore) {
@@ -142,9 +142,9 @@ class AssignmentConstruct implements Construct {
 
   AssignmentConstruct(this.lhs, this.rhs, this.type);
 
-  void observe(CreateData datastore, Operation operation, Context context) {
-    lhs.observe(datastore, operation, context);
-    rhs.observe(datastore, operation, context);
+  void observe(CreateData datastore, Operation operation, Lifespan lifespan) {
+    lhs.observe(datastore, operation, lifespan);
+    rhs.observe(datastore, operation, lifespan);
   }
 
   String evaluate(CreateData datastore) {

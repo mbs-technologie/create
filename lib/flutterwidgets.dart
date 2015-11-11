@@ -20,22 +20,22 @@ abstract class FlutterWidgets {
 
   Future showPopupMenu(BuildContext context, List<PopupMenuItem> menuItems, ModalPosition position);
 
-  Widget viewToWidget(View view, Context context) {
+  Widget viewToWidget(View view, Lifespan lifespan) {
     _cleanupView(view);
-    view.cachedSubContext = context.makeSubContext();
-    Operation forceRefreshOp = context.zone.makeOperation(() => forceRefresh(view));
+    view.cachedSubSpan = lifespan.makeSubSpan();
+    Operation forceRefreshOp = lifespan.zone.makeOperation(() => forceRefresh(view));
 
-    Widget result = renderView(view, context);
+    Widget result = renderView(view, lifespan);
 
     // TextComponent knows what it's doing, and handles updates itself.
     if (!(result is TextComponent)) {
       if (view.model != null) {
-        view.model.observe(forceRefreshOp, view.cachedSubContext);
+        view.model.observe(forceRefreshOp, view.cachedSubSpan);
       }
       if (view.style != null) {
-        view.style.observe(forceRefreshOp, view.cachedSubContext);
+        view.style.observe(forceRefreshOp, view.cachedSubSpan);
         if (view.style.value != null) {
-          view.style.value.observe(forceRefreshOp, view.cachedSubContext);
+          view.style.value.observe(forceRefreshOp, view.cachedSubSpan);
         }
       }
       // TODO: observe icon for ItemView, etc.
@@ -46,9 +46,9 @@ abstract class FlutterWidgets {
 
   // Dispose of cached widget and associated resources
   void _cleanupView(View view) {
-    if (view.cachedSubContext != null) {
-      view.cachedSubContext.dispose();
-      view.cachedSubContext = null;
+    if (view.cachedSubSpan != null) {
+      view.cachedSubSpan.dispose();
+      view.cachedSubSpan = null;
     }
   }
 
@@ -59,14 +59,14 @@ abstract class FlutterWidgets {
     rebuildApp();
   }
 
-  Widget renderView(View view, Context context) {
+  Widget renderView(View view, Lifespan lifespan) {
     // TODO: use the visitor pattern here?
     if (view is LabelView) {
       return renderLabel(view);
     } else if (view is CheckboxInput) {
-      return renderCheckboxInput(view, context);
+      return renderCheckboxInput(view, lifespan);
     } else if (view is TextInput) {
-      return renderTextInput(view, context);
+      return renderTextInput(view, lifespan);
     } else if (view is ButtonView) {
       return renderButton(view);
     } else if (view is IconButtonView) {
@@ -80,11 +80,11 @@ abstract class FlutterWidgets {
     } else if (view is DividerView) {
       return renderDivider(view);
     } else if (view is RowView) {
-      return renderRow(view, context);
+      return renderRow(view, lifespan);
     } else if (view is ColumnView) {
-      return renderColumn(view, context);
+      return renderColumn(view, lifespan);
     } else if (view is DrawerView) {
-      return renderDrawer(view, context);
+      return renderDrawer(view, lifespan);
     }
 
     throw new UnimplementedError('Unknown view: ${view.runtimeType}');
@@ -97,7 +97,7 @@ abstract class FlutterWidgets {
     );
   }
 
-  Widget renderCheckboxInput(CheckboxInput input, Context context) {
+  Widget renderCheckboxInput(CheckboxInput input, Lifespan lifespan) {
     // TODO: two-way binding
     return new Container(
       child: new Checkbox(value: input.model.value, onChanged: (ignored) => null),
@@ -105,8 +105,8 @@ abstract class FlutterWidgets {
     );
   }
 
-  Widget renderTextInput(TextInput input, Context context) {
-    return new TextComponent(input, context);
+  Widget renderTextInput(TextInput input, Lifespan lifespan) {
+    return new TextComponent(input, lifespan);
   }
 
   Widget renderSelection(SelectionInput selection) {
@@ -149,19 +149,19 @@ abstract class FlutterWidgets {
     return new DrawerDivider();
   }
 
-  Row renderRow(RowView row, Context context) {
-    return new Row(_buildWidgetList(row.model, context));
+  Row renderRow(RowView row, Lifespan lifespan) {
+    return new Row(_buildWidgetList(row.model, lifespan));
   }
 
-  Column renderColumn(ColumnView column, Context context) {
+  Column renderColumn(ColumnView column, Lifespan lifespan) {
     return new Column(
-      _buildWidgetList(column.model, context),
+      _buildWidgetList(column.model, lifespan),
       alignItems: FlexAlignItems.start
     );
   }
 
-  Widget renderDrawer(DrawerView drawer, Context context) {
-    return new Block(_buildWidgetList(drawer.model, context));
+  Widget renderDrawer(DrawerView drawer, Lifespan lifespan) {
+    return new Block(_buildWidgetList(drawer.model, lifespan));
   }
 
   Function _scheduleAction(ReadRef<Operation> action) => () {
@@ -170,9 +170,9 @@ abstract class FlutterWidgets {
     }
   };
 
-  List<Widget> _buildWidgetList(ReadList<View> views, Context context) {
+  List<Widget> _buildWidgetList(ReadList<View> views, Lifespan lifespan) {
     return new MappedList<View, Widget>(views,
-        (view) => viewToWidget(view, context), context).elements;
+        (view) => viewToWidget(view, lifespan), lifespan).elements;
   }
 }
 
@@ -197,10 +197,10 @@ TextStyle textStyleOf(View view) {
 
 // TODO: Make better use of Flutter widgets
 class TextComponent extends StatefulComponent {
-  TextComponent(this.input, this.context);
-
   final TextInput input;
-  final Context context;
+  final Lifespan lifespan;
+
+  TextComponent(this.input, this.lifespan);
 
   TextComponentState createState() => new TextComponentState();
 }
@@ -232,7 +232,7 @@ class TextComponentState extends State<TextComponent> {
 
   void registerOberverIfNeeded() {
     if (!observing) {
-      config.input.model.observe(config.context.zone.makeOperation(modelChanged), config.context);
+      config.input.model.observe(config.lifespan.zone.makeOperation(modelChanged), config.lifespan);
       observing = true;
     }
   }
