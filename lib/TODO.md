@@ -16,7 +16,9 @@
 - [ ] Start implementing code generation
 - [ ] Add addressbook example
 - [ ] Use native Flutter dropdown component
+
 ----------------
+
 - [x] Color selection in styles mode
 - [x] UI for non-Label views
 - [x] Row views
