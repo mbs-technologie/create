@@ -69,6 +69,7 @@ String displayToString(object) => object != null ? object.toString() : '<default
 
 class CreateApp extends BaseZone implements ApplicationState {
   final CreateData datastore;
+  final DataIdSource idSource = new RandomIdSource(CREATE_NAMESPACE);
   final Ref<AppMode> appMode = new Boxed<AppMode>(INITIALIZING_MODE);
   ReadRef<String> appTitle;
   ReadRef<String> appVersion = new Constant<String>(CREATE_VERSION);
@@ -130,27 +131,27 @@ class CreateApp extends BaseZone implements ApplicationState {
   Operation makeAddOperation(AppMode mode) {
     if (mode == SCHEMA_MODE) {
       return makeOperation(() {
-        datastore.add(new DataRecord(DATA_DATATYPE, datastore.nextId(),
+        datastore.add(new DataRecord(DATA_DATATYPE, idSource.nextId(),
             datastore.newRecordName('data'), STRING_TYPE, '?'));
       });
     } else if (mode == PARAMETERS_MODE) {
       return makeOperation(() {
-        datastore.add(new DataRecord(PARAMETER_DATATYPE, datastore.nextId(),
+        datastore.add(new DataRecord(PARAMETER_DATATYPE, idSource.nextId(),
             datastore.newRecordName('param'), STRING_TYPE, '?'));
       });
     } else if (mode == OPERATIONS_MODE) {
       return makeOperation(() {
-        datastore.add(new DataRecord(OPERATION_DATATYPE, datastore.nextId(),
+        datastore.add(new DataRecord(OPERATION_DATATYPE, idSource.nextId(),
             datastore.newRecordName('op'), TEMPLATE_TYPE, 'foo'));
       });
     } else if (mode == STYLES_MODE) {
       return makeOperation(() {
-        datastore.add(new StyleRecord(datastore.nextId(),
+        datastore.add(new StyleRecord(idSource.nextId(),
             datastore.newRecordName('style'), null, BLACK_COLOR));
       });
     } else if (mode == VIEWS_MODE) {
       return makeOperation(() {
-        datastore.add(new ViewRecord(datastore.nextId(), datastore.newRecordName('view')));
+        datastore.add(new ViewRecord(idSource.nextId(), datastore.newRecordName('view')));
       });
     } else {
       return null;

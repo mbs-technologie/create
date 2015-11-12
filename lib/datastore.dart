@@ -108,21 +108,16 @@ typedef bool QueryType(Record);
 
 enum SyncStatus { INITIALIZING, ONLINE }
 
-abstract class Datastore<R extends Record> extends BaseZone implements DataIdSource {
+abstract class Datastore<R extends Record> extends BaseZone {
   final Set<DataType> dataTypes;
   final List<R> _records = new List<R>();
   final Map<DataId, R> _recordsById = new HashMap<DataId, R>();
   final Set<_LiveQuery> _liveQueries = new Set<_LiveQuery>();
-  DataIdSource _dataIdSource;
   VersionId version = VERSION_ZERO;
   Ref<SyncStatus> syncStatus = new Boxed<SyncStatus>(SyncStatus.INITIALIZING);
   bool _bulkUpdateInProgress = false;
 
-  Datastore(Namespace namespace, this.dataTypes) {
-    _dataIdSource = new RandomIdSource(namespace);
-  }
-
-  DataId nextId() => _dataIdSource.nextId();
+  Datastore(this.dataTypes);
 
   /// Retrieve a record by id
   R lookupById(DataId dataId) {

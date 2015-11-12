@@ -202,7 +202,7 @@ List<DataType> ALL_CREATE_TYPES = [
 String MAIN_NAME = 'main';
 
 class CreateData extends Datastore {
-  CreateData(): super(CREATE_NAMESPACE, ALL_CREATE_TYPES.toSet());
+  CreateData(): super(ALL_CREATE_TYPES.toSet());
 
   Record newRecord(CompositeDataType dataType, DataId dataId) {
     if (dataType == STYLE_DATATYPE) {
