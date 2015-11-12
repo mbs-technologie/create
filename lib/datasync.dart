@@ -27,6 +27,20 @@ String _marshalType(DataType dataType) =>
 String _marshalEnum(EnumData data) =>
   _marshalType(data.dataType) + ID_SEPARATOR + data.enumId;
 
+String _marshalDataId(DataId dataId) =>
+  (dataId as TaggedDataId).tag;
+
+// TODO: error handling
+DataId _unmarshalDataId(Object object) =>
+  new TaggedDataId.deserialize(object as String);
+
+Object _marshalVersion(VersionId versionId) =>
+  (versionId as Timestamp).milliseconds;
+
+// TODO: error handling
+VersionId _unmarshalVersion(Object object) =>
+  new Timestamp(object as int);
+
 class DataSyncer {
   final Datastore datastore;
   final String syncUri;
@@ -73,7 +87,7 @@ class DataSyncer {
     print('Pushing datastore: ${datastore.describe}');
     List jsonRecords = new List.from(_allRecords.map(_recordToJson));
     lastPushed = datastore.version;
-    Map datastoreJson = { VERSION_FIELD: lastPushed.marshal(), RECORDS_FIELD: jsonRecords };
+    Map datastoreJson = { VERSION_FIELD: _marshalVersion(lastPushed), RECORDS_FIELD: jsonRecords };
 
     client.putUrl(Uri.parse(syncUri))
       .then((HttpClientRequest request) {
@@ -146,7 +160,7 @@ class DataSyncer {
         print('Decoded content is null');
         return false;
       }
-      VersionId newVersion = unmarshalVersion(datastoreJson[VERSION_FIELD]);
+      VersionId newVersion = _unmarshalVersion(datastoreJson[VERSION_FIELD]);
       List<Map> jsonRecords = datastoreJson[RECORDS_FIELD];
       if (newVersion == null || jsonRecords == null) {
         print('JSON fields missing');
@@ -167,7 +181,7 @@ class DataSyncer {
 
   void initFallback(String fallbackDatastoreState) {
     Map<String, Object> datastoreJson = convert.JSON.decode(fallbackDatastoreState);
-    VersionId newVersion = unmarshalVersion(datastoreJson[VERSION_FIELD]);
+    VersionId newVersion = _unmarshalVersion(datastoreJson[VERSION_FIELD]);
     List<Map> jsonRecords = datastoreJson[RECORDS_FIELD];
     print('Initializing fallback with ${jsonRecords.length} records.');
     unmarshalDatastore(newVersion, jsonRecords);
@@ -197,8 +211,8 @@ class _Marshaller implements FieldVisitor {
 
   _Marshaller(Record record) {
     fieldMap[TYPE_FIELD] = _marshalType(record.dataType);
-    fieldMap[ID_FIELD] = record.dataId.toString();
-    fieldMap[VERSION_FIELD] = record.version.marshal();
+    fieldMap[ID_FIELD] = _marshalDataId(record.dataId);
+    fieldMap[VERSION_FIELD] = _marshalVersion(record.version);
   }
 
   void stringField(String fieldName, Ref<String> field) {
@@ -214,17 +228,17 @@ class _Marshaller implements FieldVisitor {
       return null;
     }
 
+    if (data is EnumData) {
+      return _marshalEnum(data);
+    }
+
     StringBuffer result = new StringBuffer(_marshalType(data.dataType));
     result.write(ID_SEPARATOR);
+    result.write(_marshalDataId(data.dataId));
 
-    if (data is EnumData) {
-      result.write(data.enumId);
-    } else {
-      result.write(data.dataId.toString());
-      if (data is Named) {
-        result.write(NAME_SEPARATOR);
-        result.write((data as Named).name);
-      }
+    if (data is Named) {
+      result.write(NAME_SEPARATOR);
+      result.write((data as Named).name);
     }
 
     return result.toString();
@@ -249,8 +263,8 @@ class _Unmarshaller implements FieldVisitor {
 
   _Unmarshaller(this.fieldMap, this.datasyncer) {
     dataType = datasyncer.lookupType(fieldMap[TYPE_FIELD] as String);
-    dataId = unmarshalDataId(fieldMap[ID_FIELD]);
-    version = unmarshalVersion(fieldMap[VERSION_FIELD]);
+    dataId = _unmarshalDataId(fieldMap[ID_FIELD]);
+    version = _unmarshalVersion(fieldMap[VERSION_FIELD]);
   }
 
   bool get isValid => (dataType != null && dataId != null && version != null);
@@ -319,7 +333,7 @@ class _Unmarshaller implements FieldVisitor {
     }
 
     if (dataType is CompositeDataType) {
-      return datasyncer.lookupById(unmarshalDataId(id));
+      return datasyncer.lookupById(_unmarshalDataId(id));
     } else if (dataType is EnumDataType) {
       EnumData result = datasyncer._enumMap[value];
       // Fallback to a linear lookup

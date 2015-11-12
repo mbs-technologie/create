@@ -10,45 +10,33 @@ import 'elementsruntime.dart';
 abstract class VersionId {
   VersionId nextVersion();
   bool isAfter(VersionId other);
-  Object marshal();
 }
 
 VersionId VERSION_ZERO = new Timestamp(0);
 
 class Timestamp implements VersionId {
-  final int _timestamp;
+  final int milliseconds;
 
-  const Timestamp(this._timestamp);
+  const Timestamp(this.milliseconds);
 
   VersionId nextVersion() => new Timestamp(new DateTime.now().millisecondsSinceEpoch);
-  bool isAfter(VersionId other) => _timestamp > ((other as Timestamp)._timestamp);
-  Object marshal() => _timestamp;
+  bool isAfter(VersionId other) => milliseconds > ((other as Timestamp).milliseconds);
 
-  String toString() => _timestamp.toString();
-  bool operator ==(o) => o is Timestamp && _timestamp == o._timestamp;
-  int get hashCode => _timestamp.hashCode;
-}
-
-VersionId unmarshalVersion(Object object) {
-  // TODO: error handling
-  return new Timestamp(object as int);
+  String toString() => milliseconds.toString();
+  bool operator ==(o) => o is Timestamp && milliseconds == o.milliseconds;
+  int get hashCode => milliseconds.hashCode;
 }
 
 class TaggedDataId implements DataId {
   // TODO(dynin): switch to using UUIDs.
-  final String _tag;
+  final String tag;
 
-  TaggedDataId(Namespace namespace, int id): _tag = namespace.id + ':' + id.toString();
-  TaggedDataId.deserialize(this._tag);
+  TaggedDataId(Namespace namespace, int id): tag = namespace.id + ':' + id.toString();
+  TaggedDataId.deserialize(this.tag);
 
-  String toString() => _tag;
-  bool operator ==(o) => o is DataId && _tag == o._tag;
-  int get hashCode => _tag.hashCode;
-}
-
-DataId unmarshalDataId(Object object) {
-  // TODO: error handling
-  return new TaggedDataId.deserialize(object as String);
+  String toString() => tag;
+  bool operator ==(o) => o is DataId && tag == o.tag;
+  int get hashCode => tag.hashCode;
 }
 
 abstract class DataIdSource {
