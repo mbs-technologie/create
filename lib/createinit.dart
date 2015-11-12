@@ -51,7 +51,7 @@ r'''{
   "records": [
     {
       "#type": "parameter",
-      "#id": "cr:5",
+      "#id": "create:5",
       "#version": 0,
       "record_name": "hello",
       "type_id": "type_id:String",
@@ -59,7 +59,7 @@ r'''{
     },
     {
       "#type": "data",
-      "#id": "cr:6",
+      "#id": "create:6",
       "#version": 0,
       "record_name": "counter",
       "type_id": "type_id:Integer",
@@ -67,7 +67,7 @@ r'''{
     },
     {
       "#type": "parameter",
-      "#id": "cr:0",
+      "#id": "create:0",
       "#version": 0,
       "record_name": "buttontext",
       "type_id": "type_id:String",
@@ -75,7 +75,7 @@ r'''{
     },
     {
       "#type": "parameter",
-      "#id": "cr:7",
+      "#id": "create:7",
       "#version": 0,
       "record_name": "increaseby",
       "type_id": "type_id:Integer",
@@ -83,15 +83,15 @@ r'''{
     },
     {
       "#type": "service",
-      "#id": "cr:8",
+      "#id": "create:8",
       "#version": 0,
       "record_name": "today",
       "type_id": "type_id:String",
-      "state": "10/2/2015"
+      "state": "11/11/2015"
     },
     {
       "#type": "operation",
-      "#id": "cr:1",
+      "#id": "create:1",
       "#version": 0,
       "record_name": "describestate",
       "type_id": "type_id:Template",
@@ -99,7 +99,7 @@ r'''{
     },
     {
       "#type": "operation",
-      "#id": "cr:2",
+      "#id": "create:2",
       "#version": 0,
       "record_name": "increase",
       "type_id": "type_id:Code",
@@ -107,7 +107,7 @@ r'''{
     },
     {
       "#type": "style",
-      "#id": "cr:9",
+      "#id": "create:9",
       "#version": 0,
       "record_name": "Largefont",
       "font_size": 24.0,
@@ -115,7 +115,7 @@ r'''{
     },
     {
       "#type": "style",
-      "#id": "cr:10",
+      "#id": "create:10",
       "#version": 0,
       "record_name": "Bigred",
       "font_size": 32.0,
@@ -123,29 +123,29 @@ r'''{
     },
     {
       "#type": "view",
-      "#id": "cr:3",
+      "#id": "create:3",
       "#version": 0,
       "record_name": "counterlabel",
       "view_id": "view_id:Label",
       "style": "themed_style:Body",
-      "content": "operation:cr:1//describestate",
+      "content": "operation:create:1//describestate",
       "action": null,
       "subviews": []
     },
     {
       "#type": "view",
-      "#id": "cr:4",
+      "#id": "create:4",
       "#version": 0,
       "record_name": "counterbutton",
       "view_id": "view_id:Button",
       "style": "themed_style:Button",
-      "content": "parameter:cr:0//buttontext",
-      "action": "operation:cr:2//increase",
+      "content": "parameter:create:0//buttontext",
+      "action": "operation:create:2//increase",
       "subviews": []
     },
     {
       "#type": "view",
-      "#id": "cr:11",
+      "#id": "create:11",
       "#version": 0,
       "record_name": "main",
       "view_id": "view_id:Column",
@@ -153,8 +153,8 @@ r'''{
       "content": null,
       "action": null,
       "subviews": [
-        "view:cr:3//counterlabel",
-        "view:cr:4//counterbutton"
+        "view:create:3//counterlabel",
+        "view:create:4//counterbutton"
       ]
     }
   ]

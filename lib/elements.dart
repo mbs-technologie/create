@@ -97,18 +97,27 @@ abstract class ReadList<E> implements Observable {
 /// An alias for procedure with no arguments.
 typedef void Procedure();
 
-/// Type for values each of which has a unique name.
-/// Used for enum-like types.
+/// Type for values each of which has a name.
+/// The name is mostly used for debugging.
 abstract class Named {
   final String name;
   const Named(this.name);
   String toString() => name;
 }
 
+/// Identify namespace/module that type or value is associated with.
+/// 'name' is a human-readable name, 'id' is an unique id for serialization.
+class Namespace extends Named {
+  final String id;
+  const Namespace(String name, this.id): super(name);
+}
+
+const Namespace ELEMENTS_NAMESPACE = const Namespace('Elements', 'elements');
+
 /// Data types identify runtime type of Data objects.
 abstract class DataType extends Named {
-  // TODO(dynin): eventually we'll have namespaces in addition to names.
-  const DataType(String name): super(name);
+  final Namespace namespace;
+  const DataType(this.namespace, String name): super(name);
 }
 
 /// Data IDs uniquely identify instances of Data objects.
@@ -126,7 +135,7 @@ abstract class Data {
 
 /// Data types for EnumData objects.
 abstract class EnumDataType extends DataType {
-  const EnumDataType(String name): super(name);
+  const EnumDataType(Namespace namespace, String name): super(namespace, name);
 
   List<EnumData> get values;
 }
@@ -146,5 +155,5 @@ abstract class EnumData extends Named implements Data, DataId, Observable {
 
 /// Data types for composite objects (regular classes, not enums.)
 class CompositeDataType extends DataType {
-  const CompositeDataType(String name): super(name);
+  const CompositeDataType(Namespace namespace, String name): super(namespace, name);
 }

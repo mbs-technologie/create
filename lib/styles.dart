@@ -4,6 +4,8 @@ library styles;
 
 import 'elements.dart';
 
+const Namespace STYLES_NAMESPACE = const Namespace('Styles', 'styles');
+
 abstract class Style implements Data, Named, Observable {
 }
 
@@ -14,7 +16,7 @@ abstract class FontColorStyle implements Style {
 
 // If you add elements here, you need yo update flutterstyles
 class ThemedStyleDataType extends EnumDataType {
-  const ThemedStyleDataType(): super('themed_style');
+  const ThemedStyleDataType(): super(STYLES_NAMESPACE, 'themed_style');
 
   List<ThemedStyle> get values => [
     TITLE_STYLE,
@@ -41,7 +43,7 @@ const ThemedStyle BUTTON_STYLE = const ThemedStyle("Button");
 
 // If you add elements here, you need yo update flutterstyles
 class NamedColorDataType extends EnumDataType {
-  const NamedColorDataType(): super('named_color');
+  const NamedColorDataType(): super(STYLES_NAMESPACE, 'named_color');
 
   List<NamedColor> get values => [
     BLACK_COLOR,

@@ -48,3 +48,4 @@
 - [x] Unify initialize() and pull()
 - [x] s/sky/flutter/g
 - [x] Rename Context to Lifespan
+- [x] Introduce Namespace class

@@ -38,7 +38,8 @@ class TaggedDataId implements DataId {
   // TODO(dynin): switch to using UUIDs.
   final String _tag;
 
-  const TaggedDataId(this._tag);
+  TaggedDataId(Namespace namespace, int id): _tag = namespace.id + ':' + id.toString();
+  TaggedDataId.deserialize(this._tag);
 
   String toString() => _tag;
   bool operator ==(o) => o is DataId && _tag == o._tag;
@@ -47,7 +48,7 @@ class TaggedDataId implements DataId {
 
 DataId unmarshalDataId(Object object) {
   // TODO: error handling
-  return new TaggedDataId(object as String);
+  return new TaggedDataId.deserialize(object as String);
 }
 
 abstract class DataIdSource {
@@ -55,20 +56,20 @@ abstract class DataIdSource {
 }
 
 class SequentialIdSource extends DataIdSource {
-  String namespace;
+  Namespace namespace;
   int _nextNumber = 0;
 
   SequentialIdSource(this.namespace);
 
-  DataId nextId() => new TaggedDataId(namespace + (_nextNumber++).toString());
+  DataId nextId() => new TaggedDataId(namespace, _nextNumber++);
 }
 
 class RandomIdSource extends DataIdSource {
-  String namespace;
+  Namespace namespace;
   math.Random _random = new math.Random();
 
   RandomIdSource(this.namespace);
-  DataId nextId() => new TaggedDataId(namespace + _random.nextInt(math.pow(2, 31)).toString());
+  DataId nextId() => new TaggedDataId(namespace, _random.nextInt(math.pow(2, 31)));
 }
 
 abstract class Record implements Data, Named {
@@ -117,7 +118,7 @@ abstract class Datastore<R extends Record> extends BaseZone implements DataIdSou
   Ref<SyncStatus> syncStatus = new Boxed<SyncStatus>(SyncStatus.INITIALIZING);
   bool _bulkUpdateInProgress = false;
 
-  Datastore(String namespace, List<DataType> types) {
+  Datastore(Namespace namespace, List<DataType> types) {
     _dataIdSource = new RandomIdSource(namespace);
     types.forEach((DataType type) => _typesByName[type.name] = type);
   }

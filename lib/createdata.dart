@@ -7,17 +7,19 @@ import 'elementsruntime.dart';
 import 'datastore.dart';
 import 'styles.dart';
 
-const CompositeDataType DATA_DATATYPE = const CompositeDataType('data');
-const CompositeDataType PARAMETER_DATATYPE = const CompositeDataType('parameter');
-const CompositeDataType OPERATION_DATATYPE = const CompositeDataType('operation');
-const CompositeDataType SERVICE_DATATYPE = const CompositeDataType('service');
-const CompositeDataType STYLE_DATATYPE = const CompositeDataType('style');
-const CompositeDataType VIEW_DATATYPE = const CompositeDataType('view');
+const Namespace CREATE_NAMESPACE = const Namespace('Create', 'create');
+
+const CompositeDataType DATA_DATATYPE = const CompositeDataType(CREATE_NAMESPACE, 'data');
+const CompositeDataType PARAMETER_DATATYPE = const CompositeDataType(CREATE_NAMESPACE, 'parameter');
+const CompositeDataType OPERATION_DATATYPE = const CompositeDataType(CREATE_NAMESPACE, 'operation');
+const CompositeDataType SERVICE_DATATYPE = const CompositeDataType(CREATE_NAMESPACE, 'service');
+const CompositeDataType STYLE_DATATYPE = const CompositeDataType(CREATE_NAMESPACE, 'style');
+const CompositeDataType VIEW_DATATYPE = const CompositeDataType(CREATE_NAMESPACE, 'view');
 
 const TypeIdDataType TYPE_ID_DATATYPE = const TypeIdDataType();
 
 class TypeIdDataType extends EnumDataType {
-  const TypeIdDataType(): super('type_id');
+  const TypeIdDataType(): super(CREATE_NAMESPACE, 'type_id');
 
   List<TypeId> get values => [
     STRING_TYPE,
@@ -95,7 +97,7 @@ class StyleRecord extends Record implements FontColorStyle {
 const ViewIdDataType VIEW_ID_DATATYPE = const ViewIdDataType();
 
 class ViewIdDataType extends EnumDataType {
-  const ViewIdDataType(): super('view_id');
+  const ViewIdDataType(): super(CREATE_NAMESPACE, 'view_id');
 
   List<ViewId> get values => [
     LABEL_VIEW,
@@ -195,9 +197,6 @@ List<DataType> ALL_CREATE_TYPES = [
   THEMED_STYLE_DATATYPE,
   NAMED_COLOR_DATATYPE
 ];
-
-/// Prefix for ids
-String CREATE_NAMESPACE = 'cr:';
 
 /// Name of the view that Launch mode will display
 String MAIN_NAME = 'main';

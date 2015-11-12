@@ -35,4 +35,3 @@ TextStyle toTextStyle(Style style) {
     throw 'Unrecognized style';
   }
 }
-
