@@ -159,3 +159,14 @@ abstract class EnumData extends Named implements Data, DataId, Observable {
 class CompositeDataType extends DataType {
   const CompositeDataType(Namespace namespace, String name): super(namespace, name);
 }
+
+/// Version identifiers.
+abstract class VersionId {
+  VersionId nextVersion();
+  bool isAfter(VersionId other);
+}
+
+/// Generator for DataIds.
+abstract class DataIdSource {
+  DataId nextId();
+}

@@ -3,62 +3,8 @@
 library datastore;
 
 import 'dart:collection';
-import 'dart:math' as math;
 import 'elements.dart';
 import 'elementsruntime.dart';
-
-abstract class VersionId {
-  VersionId nextVersion();
-  bool isAfter(VersionId other);
-}
-
-VersionId VERSION_ZERO = new Timestamp(0);
-
-class Timestamp implements VersionId {
-  final int milliseconds;
-
-  const Timestamp(this.milliseconds);
-
-  VersionId nextVersion() => new Timestamp(new DateTime.now().millisecondsSinceEpoch);
-  bool isAfter(VersionId other) => milliseconds > ((other as Timestamp).milliseconds);
-
-  String toString() => milliseconds.toString();
-  bool operator ==(o) => o is Timestamp && milliseconds == o.milliseconds;
-  int get hashCode => milliseconds.hashCode;
-}
-
-class TaggedDataId implements DataId {
-  // TODO(dynin): switch to using UUIDs.
-  final String tag;
-
-  TaggedDataId(Namespace namespace, int id): tag = namespace.id + ':' + id.toString();
-  TaggedDataId.deserialize(this.tag);
-
-  String toString() => tag;
-  bool operator ==(o) => o is DataId && tag == o.tag;
-  int get hashCode => tag.hashCode;
-}
-
-abstract class DataIdSource {
-  DataId nextId();
-}
-
-class SequentialIdSource extends DataIdSource {
-  Namespace namespace;
-  int _nextNumber = 0;
-
-  SequentialIdSource(this.namespace);
-
-  DataId nextId() => new TaggedDataId(namespace, _nextNumber++);
-}
-
-class RandomIdSource extends DataIdSource {
-  Namespace namespace;
-  math.Random _random = new math.Random();
-
-  RandomIdSource(this.namespace);
-  DataId nextId() => new TaggedDataId(namespace, _random.nextInt(math.pow(2, 31)));
-}
 
 abstract class Record implements Data, Named {
   CompositeDataType get dataType;
