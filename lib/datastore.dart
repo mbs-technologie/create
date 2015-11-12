@@ -109,7 +109,7 @@ typedef bool QueryType(Record);
 enum SyncStatus { INITIALIZING, ONLINE }
 
 abstract class Datastore<R extends Record> extends BaseZone implements DataIdSource {
-  final Map<String, DataType> _typesByName = new Map<String, DataType>();
+  final Set<DataType> dataTypes;
   final List<R> _records = new List<R>();
   final Map<DataId, R> _recordsById = new HashMap<DataId, R>();
   final Set<_LiveQuery> _liveQueries = new Set<_LiveQuery>();
@@ -118,14 +118,11 @@ abstract class Datastore<R extends Record> extends BaseZone implements DataIdSou
   Ref<SyncStatus> syncStatus = new Boxed<SyncStatus>(SyncStatus.INITIALIZING);
   bool _bulkUpdateInProgress = false;
 
-  Datastore(Namespace namespace, List<DataType> types) {
+  Datastore(Namespace namespace, this.dataTypes) {
     _dataIdSource = new RandomIdSource(namespace);
-    types.forEach((DataType type) => _typesByName[type.name] = type);
   }
 
   DataId nextId() => _dataIdSource.nextId();
-
-  Iterable<DataType> get dataTypes => _typesByName.values;
 
   /// Retrieve a record by id
   R lookupById(DataId dataId) {
@@ -159,7 +156,7 @@ abstract class Datastore<R extends Record> extends BaseZone implements DataIdSou
   }
 
   bool _isKnownType(DataType type) {
-    return _typesByName[type.name] == type;
+    return dataTypes.contains(type);
   }
 
   void startBulkUpdate(VersionId version) {
@@ -201,10 +198,6 @@ abstract class Datastore<R extends Record> extends BaseZone implements DataIdSou
   void _unregister(_LiveQuery liveQuery) {
     _liveQueries.remove(liveQuery);
     print('Datastore: query removed; ${_liveQueries.length} active queries.');
-  }
-
-  DataType lookupType(String name) {
-    return _typesByName[name];
   }
 
   String get describe => 'Version $version, ${_records.length} records';

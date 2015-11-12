@@ -149,6 +149,8 @@ abstract class EnumData extends Named implements Data, DataId, Observable {
 
   EnumDataType get dataType;
 
+  String get enumId => name.toLowerCase();
+
   /// Enum data values are immutable, hence observe() is a noop
   void observe(Operation observer, Lifespan lifespan) => null;
 }

@@ -50,111 +50,111 @@ r'''{
   "#version": 0,
   "records": [
     {
-      "#type": "parameter",
+      "#type": "create.parameter",
       "#id": "create:5",
       "#version": 0,
       "record_name": "hello",
-      "type_id": "type_id:String",
+      "type_id": "create.type_id:string",
       "state": "Hello, world!"
     },
     {
-      "#type": "data",
+      "#type": "create.data",
       "#id": "create:6",
       "#version": 0,
       "record_name": "counter",
-      "type_id": "type_id:Integer",
+      "type_id": "create.type_id:integer",
       "state": "68"
     },
     {
-      "#type": "parameter",
+      "#type": "create.parameter",
       "#id": "create:0",
       "#version": 0,
       "record_name": "buttontext",
-      "type_id": "type_id:String",
+      "type_id": "create.type_id:string",
       "state": "Increase the counter value"
     },
     {
-      "#type": "parameter",
+      "#type": "create.parameter",
       "#id": "create:7",
       "#version": 0,
       "record_name": "increaseby",
-      "type_id": "type_id:Integer",
+      "type_id": "create.type_id:integer",
       "state": "1"
     },
     {
-      "#type": "service",
+      "#type": "create.service",
       "#id": "create:8",
       "#version": 0,
       "record_name": "today",
-      "type_id": "type_id:String",
+      "type_id": "create.type_id:string",
       "state": "11/11/2015"
     },
     {
-      "#type": "operation",
+      "#type": "create.operation",
       "#id": "create:1",
       "#version": 0,
       "record_name": "describestate",
-      "type_id": "type_id:Template",
+      "type_id": "create.type_id:template",
       "state": "The counter value is $counter"
     },
     {
-      "#type": "operation",
+      "#type": "create.operation",
       "#id": "create:2",
       "#version": 0,
       "record_name": "increase",
-      "type_id": "type_id:Code",
+      "type_id": "create.type_id:code",
       "state": "counter += increaseby"
     },
     {
-      "#type": "style",
+      "#type": "create.style",
       "#id": "create:9",
       "#version": 0,
       "record_name": "Largefont",
       "font_size": 24.0,
-      "color": "named_color:Black"
+      "color": "styles.named_color:black"
     },
     {
-      "#type": "style",
+      "#type": "create.style",
       "#id": "create:10",
       "#version": 0,
       "record_name": "Bigred",
       "font_size": 32.0,
-      "color": "named_color:Red"
+      "color": "styles.named_color:red"
     },
     {
-      "#type": "view",
+      "#type": "create.view",
       "#id": "create:3",
       "#version": 0,
       "record_name": "counterlabel",
-      "view_id": "view_id:Label",
-      "style": "themed_style:Body",
-      "content": "operation:create:1//describestate",
+      "view_id": "create.view_id:label",
+      "style": "styles.themed_style:body",
+      "content": "create.operation:create:1//describestate",
       "action": null,
       "subviews": []
     },
     {
-      "#type": "view",
+      "#type": "create.view",
       "#id": "create:4",
       "#version": 0,
       "record_name": "counterbutton",
-      "view_id": "view_id:Button",
-      "style": "themed_style:Button",
-      "content": "parameter:create:0//buttontext",
-      "action": "operation:create:2//increase",
+      "view_id": "create.view_id:button",
+      "style": "styles.themed_style:button",
+      "content": "create.parameter:create:0//buttontext",
+      "action": "create.operation:create:2//increase",
       "subviews": []
     },
     {
-      "#type": "view",
+      "#type": "create.view",
       "#id": "create:11",
       "#version": 0,
       "record_name": "main",
-      "view_id": "view_id:Column",
+      "view_id": "create.view_id:column",
       "style": null,
       "content": null,
       "action": null,
       "subviews": [
-        "view:create:3//counterlabel",
-        "view:create:4//counterbutton"
+        "create.view:create:3//counterlabel",
+        "create.view:create:4//counterbutton"
       ]
     }
   ]

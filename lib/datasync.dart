@@ -10,6 +10,7 @@ import 'elements.dart';
 import 'elementsruntime.dart';
 import 'datastore.dart';
 
+const String NAMESPACE_SEPARATOR = '.';
 const String ID_SEPARATOR = ':';
 const String NAME_SEPARATOR = '//';
 
@@ -20,29 +21,34 @@ const String TYPE_FIELD = '#type';
 const String ID_FIELD = '#id';
 const String VERSION_FIELD = '#version';
 
+String _marshalType(DataType dataType) =>
+  dataType.namespace.id + NAMESPACE_SEPARATOR + dataType.name;
+
+String _marshalEnum(EnumData data) =>
+  _marshalType(data.dataType) + ID_SEPARATOR + data.enumId;
+
 class DataSyncer {
   final Datastore datastore;
   final String syncUri;
-  VersionId lastPushed;
+  final Map<String, DataType> _typesByName = new Map<String, DataType>();
+  final Map<String, EnumData> _enumMap = new Map<String, EnumData>();
   final HttpClient client = new HttpClient();
   final convert.JsonEncoder encoder = const convert.JsonEncoder.withIndent('  ');
-  final Map<String, EnumData> enumMap = new Map<String, EnumData>();
+  VersionId lastPushed;
 
   DataSyncer(this.datastore, this.syncUri) {
-    _initEnumMap();
+    datastore.dataTypes.forEach(_initType);
   }
 
-  void _initEnumMap() {
-    String marshalEnum(EnumData data) =>
-      data.dataType.name + ID_SEPARATOR + data.name;
-
-    datastore.dataTypes.forEach((DataType dataType) =>
-      (dataType is EnumDataType) ?
-        dataType.values.forEach((EnumData data) => enumMap[marshalEnum(data)] = data) : null);
+  void _initType(DataType dataType) {
+    _typesByName[_marshalType(dataType)] = dataType;
+    if (dataType is EnumDataType) {
+      dataType.values.forEach((EnumData data) => _enumMap[_marshalEnum(data)] = data);
+    }
   }
 
   DataType lookupType(String name) {
-    return datastore.lookupType(name);
+    return _typesByName[name];
   }
 
   Record lookupById(DataId dataId) {
@@ -190,7 +196,7 @@ class _Marshaller implements FieldVisitor {
   Map<String, Object> fieldMap = new LinkedHashMap<String, Object>();
 
   _Marshaller(Record record) {
-    fieldMap[TYPE_FIELD] = record.dataType.name;
+    fieldMap[TYPE_FIELD] = _marshalType(record.dataType);
     fieldMap[ID_FIELD] = record.dataId.toString();
     fieldMap[VERSION_FIELD] = record.version.marshal();
   }
@@ -208,11 +214,11 @@ class _Marshaller implements FieldVisitor {
       return null;
     }
 
-    StringBuffer result = new StringBuffer(data.dataType.name);
+    StringBuffer result = new StringBuffer(_marshalType(data.dataType));
     result.write(ID_SEPARATOR);
 
     if (data is EnumData) {
-      result.write(data.name);
+      result.write(data.enumId);
     } else {
       result.write(data.dataId.toString());
       if (data is Named) {
@@ -315,10 +321,10 @@ class _Unmarshaller implements FieldVisitor {
     if (dataType is CompositeDataType) {
       return datasyncer.lookupById(unmarshalDataId(id));
     } else if (dataType is EnumDataType) {
-      EnumData result = datasyncer.enumMap[value];
+      EnumData result = datasyncer._enumMap[value];
       // Fallback to a linear lookup
       if (result == null) {
-        result = dataType.values.firstWhere((value) => (value.name == id), orElse: () => null);
+        result = dataType.values.firstWhere((value) => (value.enumId == id), orElse: () => null);
       }
       if (result == null) {
         print('Unknown enum value for $value');
