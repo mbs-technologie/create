@@ -7,6 +7,13 @@ import 'elementsruntime.dart';
 import 'datastore.dart';
 import 'styles.dart';
 
+abstract class NamedRecord extends Record implements Named {
+  ReadRef<String> get recordName;
+
+  String get name => recordName.value;
+  String toString() => name;
+}
+
 const Namespace CREATE_NAMESPACE = const Namespace('Create', 'create');
 
 const CompositeDataType DATA_DATATYPE = const CompositeDataType(CREATE_NAMESPACE, 'data');
@@ -43,7 +50,7 @@ const String RECORD_NAME_FIELD = 'record_name';
 const String TYPE_ID_FIELD = 'type_id';
 const String STATE_FIELD = 'state';
 
-class DataRecord extends Record {
+class DataRecord extends NamedRecord {
   final CompositeDataType dataType;
   final DataId dataId;
   final Ref<String> recordName;
@@ -65,7 +72,7 @@ class DataRecord extends Record {
 const String FONT_SIZE_FIELD = 'font_size';
 const String COLOR_FIELD = 'color';
 
-class StyleRecord extends Record implements FontColorStyle {
+class StyleRecord extends NamedRecord implements FontColorStyle {
   final DataId dataId;
   final Ref<String> recordName;
   final Ref<double> fontSize;
@@ -85,12 +92,6 @@ class StyleRecord extends Record implements FontColorStyle {
     visitor.stringField(RECORD_NAME_FIELD, recordName);
     visitor.doubleField(FONT_SIZE_FIELD, fontSize);
     visitor.dataField(COLOR_FIELD, color);
-  }
-
-  void observe(Operation observer, Lifespan lifespan) {
-    recordName.observe(observer, lifespan);
-    fontSize.observe(observer, lifespan);
-    color.observe(observer, lifespan);
   }
 }
 
@@ -123,7 +124,7 @@ const String CONTENT_FIELD = 'content';
 const String ACTION_FIELD = 'action';
 const String SUBVIEWS_FIELD = 'subviews';
 
-class ViewRecord extends Record {
+class ViewRecord extends NamedRecord {
   final DataId dataId;
   final Ref<String> recordName;
   final Ref<ViewId> viewId;

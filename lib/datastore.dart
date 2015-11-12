@@ -6,16 +6,17 @@ import 'dart:collection';
 import 'elements.dart';
 import 'elementsruntime.dart';
 
-abstract class Record implements Data, Named {
+abstract class Record implements Data, Observable {
   CompositeDataType get dataType;
   // TODO: version should be an observable Ref
   VersionId version = VERSION_ZERO;
-  ReadRef<String> get recordName;
-
-  String get name => recordName.value;
-  String toString() => name;
 
   void visit(FieldVisitor visitor);
+
+  void observe(Operation observer, Lifespan lifespan) {
+    void register(Observable observable) => observable.observe(observer, lifespan);
+    visit(new ObserveFields(register));
+  }
 }
 
 abstract class FieldVisitor {
@@ -62,7 +63,8 @@ abstract class Datastore<R extends Record> extends BaseZone {
   R lookupByName(String name) {
     // TODO: we should use an index here if we care about scaling,
     // but that would be somewhat complicated because names can be updated.
-    return _records.firstWhere((element) => (element.name == name), orElse: () => null);
+    return _records.firstWhere((element) =>
+        (element is Named && element.name == name), orElse: () => null);
   }
 
   /// Run a query and get a list of matching results back.
@@ -111,8 +113,7 @@ abstract class Datastore<R extends Record> extends BaseZone {
     record.version = advanceVersion();
     // We advance the version on both the record and the datastore
     Operation bumpVersion = makeOperation(() => record.version = advanceVersion());
-    void register(Observable observable) => observable.observe(bumpVersion, this);
-    record.visit(new ObserveFields(register));
+    record.observe(bumpVersion, this);
     _records.add(record);
     _recordsById[record.dataId] = record;
     _liveQueries.forEach((q) => q.newRecordAdded(record));
