@@ -141,39 +141,6 @@ class ViewRecord extends NamedRecord {
       action = new Boxed<DataRecord>(null),
       subviews = new BaseMutableList<ViewRecord>();
 
-  ViewRecord.Label(this.dataId, String recordName, Style style, DataRecord content):
-      recordName = new Boxed<String>(recordName),
-      viewId = new Boxed<ViewId>(LABEL_VIEW),
-      style = new Boxed<Style>(style),
-      content = new Boxed<DataRecord>(content),
-      action = new Boxed<DataRecord>(null),
-      subviews = new BaseMutableList<ViewRecord>();
-
-  ViewRecord.Button(this.dataId, String recordName, Style style, DataRecord content,
-          DataRecord action):
-      recordName = new Boxed<String>(recordName),
-      viewId = new Boxed<ViewId>(BUTTON_VIEW),
-      style = new Boxed<Style>(style),
-      content = new Boxed<DataRecord>(content),
-      action = new Boxed<DataRecord>(action),
-      subviews = new BaseMutableList<ViewRecord>();
-
-  ViewRecord.Column(this.dataId, String recordName, Style style, MutableList<ViewRecord> columns):
-      recordName = new Boxed<String>(recordName),
-      viewId = new Boxed<ViewId>(COLUMN_VIEW),
-      style = new Boxed<Style>(style),
-      content = new Boxed<DataRecord>(null),
-      action = new Boxed<DataRecord>(null),
-      subviews = columns;
-
-  ViewRecord.Row(this.dataId, String recordName, Style style, MutableList<ViewRecord> rows):
-      recordName = new Boxed<String>(recordName),
-      viewId = new Boxed<ViewId>(ROW_VIEW),
-      style = new Boxed<Style>(style),
-      content = new Boxed<DataRecord>(null),
-      action = new Boxed<DataRecord>(null),
-      subviews = rows;
-
   CompositeDataType get dataType => VIEW_DATATYPE;
 
   void visit(FieldVisitor visitor) {
