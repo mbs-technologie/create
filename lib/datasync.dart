@@ -81,11 +81,9 @@ class DataSyncer {
     }
   }
 
-  List<CompositeData> get _allRecords => datastore.runQuery((x) => true, null).elements;
-
   void push() {
     print('Pushing datastore: ${datastore.describe}');
-    List jsonRecords = new List.from(_allRecords.map(_recordToJson));
+    List jsonRecords = new List.from(datastore.entireDatastoreState.map(_recordToJson));
     lastPushed = datastore.version;
     Map datastoreJson = { VERSION_FIELD: _marshalVersion(lastPushed), RECORDS_FIELD: jsonRecords };
 
@@ -194,7 +192,7 @@ class DataSyncer {
 
     Map<DataId, _Unmarshaller> rawRecordsById = new Map<DataId, _Unmarshaller>();
     rawRecords.forEach((unmarshaller) => unmarshaller.addTo(rawRecordsById));
-    bool hasLocalChanges = _allRecords.any((CompositeData record) =>
+    bool hasLocalChanges = datastore.entireDatastoreState.any((CompositeData record) =>
         !rawRecordsById.containsKey(record.dataId) ||
         record.version.isAfter(rawRecordsById[record.dataId].version));
 

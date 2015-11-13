@@ -26,14 +26,6 @@ abstract class Datastore<R extends CompositeData> extends BaseZone {
     return _recordsById[dataId];
   }
 
-  /// Retrieve a record by name
-  R lookupByName(String name) {
-    // TODO: we should use an index here if we care about scaling,
-    // but that would be somewhat complicated because names can be updated.
-    return _records.firstWhere((element) =>
-        (element is Named && element.name == name), orElse: () => null);
-  }
-
   /// Run a query and get a list of matching results back.
   /// If lifespan is not null, then the query is 'live' and result list gets updated
   /// to reflect new records added to the datastore.  When the lifespan is disposed,
@@ -57,6 +49,10 @@ abstract class Datastore<R extends CompositeData> extends BaseZone {
     return dataTypes.contains(type);
   }
 
+  /// For use by clients that know what they are doing.
+  /// Must not mutate the result object, and must process it right away.
+  Iterable<R> get entireDatastoreState => _records;
+
   void startBulkUpdate(VersionId version) {
     assert (!_bulkUpdateInProgress);
     this.version = version;
@@ -77,8 +73,10 @@ abstract class Datastore<R extends CompositeData> extends BaseZone {
 
   void add(R record) {
     assert (_isKnownType(record.dataType));
+    assert (!_recordsById.containsKey(record.dataId));
+
     record.version = advanceVersion();
-    // We advance the version on both the record and the datastore
+    // On state change, we advance the version on both the record and the datastore
     Operation bumpVersion = makeOperation(() => record.version = advanceVersion());
     record.observe(bumpVersion, this);
     _records.add(record);

@@ -221,6 +221,14 @@ class CreateData extends Datastore {
     }
   }
 
+  /// Retrieve a record by name
+  CompositeData lookupByName(String name) {
+    // TODO: we should use an index here if we care about scaling,
+    // but that would be somewhat complicated because names can be updated.
+    return entireDatastoreState.firstWhere((element) =>
+        (element is Named && element.name == name), orElse: () => null);
+  }
+
   ReadList<DataRecord> getDataRecords(CompositeDataType dataType, Lifespan lifespan) =>
     runQuery((record) => record.dataType == dataType, lifespan);
 
