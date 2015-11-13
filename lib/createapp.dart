@@ -354,7 +354,7 @@ class CreateApp extends BaseZone implements ApplicationState {
   }
 
   ReadList<View> makeSubviewInput(ViewRecord record, Lifespan lifespan) {
-    MutableList<View> result = new MutableList<View>();
+    MutableList<View> result = new BaseMutableList<View>();
     populateSubviewInput(result, record, lifespan);
     void updateResult() {
       result.clear();
@@ -378,7 +378,7 @@ class CreateApp extends BaseZone implements ApplicationState {
   }
 
   View viewsRowView(ViewRecord record, Lifespan lifespan) {
-    MutableList<View> rowElements = new MutableList<View>();
+    MutableList<View> rowElements = new BaseMutableList<View>();
     populateRowView(rowElements, record, lifespan);
     void updateRowView() {
       rowElements.clear();
@@ -433,7 +433,7 @@ class CreateApp extends BaseZone implements ApplicationState {
   }
 
   View launchView(Lifespan lifespan) {
-    Record mainRecord = datastore.lookupByName(MAIN_NAME);
+    CompositeData mainRecord = datastore.lookupByName(MAIN_NAME);
     if (mainRecord == null || !(mainRecord is ViewRecord)) {
       return _showError('Main view not found.');
     }

@@ -94,6 +94,16 @@ abstract class ReadList<E> implements Observable {
   List<E> get elements;
 }
 
+/// A list that can change state.
+abstract class MutableList<E> implements ReadList<E> {
+  Ref<E> at(int index);
+  void clear();
+  void add(E element);
+  void addAll(List<E> moreElements);
+  void replaceWith(List<E> newElements);
+  void removeAt(int index);
+}
+
 /// An alias for procedure with no arguments.
 typedef void Procedure();
 
@@ -169,4 +179,22 @@ abstract class VersionId {
 /// Generator for DataIds.
 abstract class DataIdSource {
   DataId nextId();
+}
+
+/// Declaration of composite data value that's stored in the Datastore.
+abstract class CompositeData implements Data, Observable {
+  CompositeDataType get dataType;
+  VersionId version;
+
+  CompositeData(this.version);
+
+  void visit(FieldVisitor visitor);
+}
+
+/// Field visitor is used for reflection on the composite data values.
+abstract class FieldVisitor {
+  void stringField(String fieldName, Ref<String> field);
+  void doubleField(String fieldName, Ref<double> field);
+  void dataField(String fieldName, Ref<Data> field);
+  void listField(String fieldName, MutableList<Data> field);
 }

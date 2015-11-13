@@ -6,44 +6,11 @@ import 'dart:collection';
 import 'elements.dart';
 import 'elementsruntime.dart';
 
-abstract class Record implements Data, Observable {
-  CompositeDataType get dataType;
-  // TODO: version should be an observable Ref
-  VersionId version = VERSION_ZERO;
-
-  void visit(FieldVisitor visitor);
-
-  void observe(Operation observer, Lifespan lifespan) {
-    void register(Observable observable) => observable.observe(observer, lifespan);
-    visit(new ObserveFields(register));
-  }
-}
-
-abstract class FieldVisitor {
-  void stringField(String fieldName, Ref<String> field);
-  void doubleField(String fieldName, Ref<double> field);
-  void dataField(String fieldName, Ref<Data> field);
-  void listField(String fieldName, MutableList<Data> field);
-}
-
-typedef void ObserveProcedure(Observable);
-
-class ObserveFields implements FieldVisitor {
-  ObserveProcedure visitor;
-
-  ObserveFields(this.visitor);
-
-  void stringField(String fieldName, Ref<String> field) => visitor(field);
-  void doubleField(String fieldName, Ref<double> field) => visitor(field);
-  void dataField(String fieldName, Ref<Data> field) => visitor(field);
-  void listField(String fieldName, MutableList<Data> field) => visitor(field);
-}
-
-typedef bool QueryType(Record);
+typedef bool QueryType(CompositeData);
 
 enum SyncStatus { INITIALIZING, ONLINE }
 
-abstract class Datastore<R extends Record> extends BaseZone {
+abstract class Datastore<R extends CompositeData> extends BaseZone {
   final Set<DataType> dataTypes;
   final List<R> _records = new List<R>();
   final Map<DataId, R> _recordsById = new HashMap<DataId, R>();
@@ -132,16 +99,16 @@ abstract class Datastore<R extends Record> extends BaseZone {
 
   String get describe => 'Version $version, ${_records.length} records';
 
-  Record newRecord(CompositeDataType dataType, DataId dataId);
+  CompositeData newRecord(CompositeDataType dataType, DataId dataId);
 }
 
-class _LiveQuery<R extends Record> implements Disposable {
+class _LiveQuery<R extends CompositeData> implements Disposable {
   MutableList<R> _result;
   final QueryType _query;
   final Datastore<R> _datastore;
 
   _LiveQuery(this._query, this._datastore, List<R> firstResults) {
-    _result = new MutableList<R>(firstResults);
+    _result = new BaseMutableList<R>(firstResults);
   }
 
   void newRecordAdded(R record) {

@@ -4,11 +4,10 @@ library createinit;
 
 import 'elements.dart';
 import 'elementsruntime.dart';
-import 'datastore.dart';
 import 'styles.dart';
 import 'createdata.dart';
 
-List<Record> buildInitialCreateData() {
+List<CompositeData> buildInitialCreateData() {
   DataIdSource ids = new SequentialIdSource(CREATE_NAMESPACE);
 
   DataRecord buttontext = new DataRecord(PARAMETER_DATATYPE, ids.nextId(),
@@ -37,7 +36,7 @@ List<Record> buildInitialCreateData() {
     counterlabel,
     counterbutton,
     new ViewRecord.Column(ids.nextId(), MAIN_NAME, null,
-        new MutableList<ViewRecord>([counterlabel, counterbutton]))
+        new BaseMutableList<ViewRecord>([counterlabel, counterbutton]))
   ];
 }
 

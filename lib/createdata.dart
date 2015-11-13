@@ -7,7 +7,7 @@ import 'elementsruntime.dart';
 import 'datastore.dart';
 import 'styles.dart';
 
-abstract class NamedRecord extends Record implements Named {
+abstract class NamedRecord extends BaseCompositeData implements Named {
   ReadRef<String> get recordName;
 
   String get name => recordName.value;
@@ -139,7 +139,7 @@ class ViewRecord extends NamedRecord {
       style = new Boxed<Style>(null),
       content = new Boxed<DataRecord>(null),
       action = new Boxed<DataRecord>(null),
-      subviews = new MutableList<ViewRecord>();
+      subviews = new BaseMutableList<ViewRecord>();
 
   ViewRecord.Label(this.dataId, String recordName, Style style, DataRecord content):
       recordName = new Boxed<String>(recordName),
@@ -147,7 +147,7 @@ class ViewRecord extends NamedRecord {
       style = new Boxed<Style>(style),
       content = new Boxed<DataRecord>(content),
       action = new Boxed<DataRecord>(null),
-      subviews = new MutableList<ViewRecord>();
+      subviews = new BaseMutableList<ViewRecord>();
 
   ViewRecord.Button(this.dataId, String recordName, Style style, DataRecord content,
           DataRecord action):
@@ -156,7 +156,7 @@ class ViewRecord extends NamedRecord {
       style = new Boxed<Style>(style),
       content = new Boxed<DataRecord>(content),
       action = new Boxed<DataRecord>(action),
-      subviews = new MutableList<ViewRecord>();
+      subviews = new BaseMutableList<ViewRecord>();
 
   ViewRecord.Column(this.dataId, String recordName, Style style, MutableList<ViewRecord> columns):
       recordName = new Boxed<String>(recordName),
@@ -205,7 +205,7 @@ String MAIN_NAME = 'main';
 class CreateData extends Datastore {
   CreateData(): super(ALL_CREATE_TYPES.toSet());
 
-  Record newRecord(CompositeDataType dataType, DataId dataId) {
+  CompositeData newRecord(CompositeDataType dataType, DataId dataId) {
     if (dataType == STYLE_DATATYPE) {
       return new StyleRecord(dataId, null, null, null);
     } else if (dataType == VIEW_DATATYPE) {

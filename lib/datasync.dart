@@ -65,7 +65,7 @@ class DataSyncer {
     return _typesByName[name];
   }
 
-  Record lookupById(DataId dataId) {
+  CompositeData lookupById(DataId dataId) {
     return datastore.lookupById(dataId);
   }
 
@@ -81,7 +81,7 @@ class DataSyncer {
     }
   }
 
-  List<Record> get _allRecords => datastore.runQuery((x) => true, null).elements;
+  List<CompositeData> get _allRecords => datastore.runQuery((x) => true, null).elements;
 
   void push() {
     print('Pushing datastore: ${datastore.describe}');
@@ -105,7 +105,7 @@ class DataSyncer {
       .whenComplete(_scheduleSync);
   }
 
-  Map<String, Object> _recordToJson(Record record) {
+  Map<String, Object> _recordToJson(CompositeData record) {
     _Marshaller marshaller = new _Marshaller(record);
     record.visit(marshaller);
     return marshaller.fieldMap;
@@ -194,7 +194,7 @@ class DataSyncer {
 
     Map<DataId, _Unmarshaller> rawRecordsById = new Map<DataId, _Unmarshaller>();
     rawRecords.forEach((unmarshaller) => unmarshaller.addTo(rawRecordsById));
-    bool hasLocalChanges = _allRecords.any((Record record) =>
+    bool hasLocalChanges = _allRecords.any((CompositeData record) =>
         !rawRecordsById.containsKey(record.dataId) ||
         record.version.isAfter(rawRecordsById[record.dataId].version));
 
@@ -209,7 +209,7 @@ class DataSyncer {
 class _Marshaller implements FieldVisitor {
   Map<String, Object> fieldMap = new LinkedHashMap<String, Object>();
 
-  _Marshaller(Record record) {
+  _Marshaller(CompositeData record) {
     fieldMap[TYPE_FIELD] = _marshalType(record.dataType);
     fieldMap[ID_FIELD] = _marshalDataId(record.dataId);
     fieldMap[VERSION_FIELD] = _marshalVersion(record.version);
@@ -259,7 +259,7 @@ class _Unmarshaller implements FieldVisitor {
   DataType dataType;
   DataId dataId;
   VersionId version;
-  Record record;
+  CompositeData record;
 
   _Unmarshaller(this.fieldMap, this.datasyncer) {
     dataType = datasyncer.lookupType(fieldMap[TYPE_FIELD] as String);
@@ -281,7 +281,7 @@ class _Unmarshaller implements FieldVisitor {
     }
 
     assert (dataType is CompositeDataType);
-    Record oldRecord = datasyncer.lookupById(dataId);
+    CompositeData oldRecord = datasyncer.lookupById(dataId);
     if (oldRecord == null) {
       Datastore datastore = datasyncer.datastore;
       record = datastore.newRecord(dataType as CompositeDataType, dataId);

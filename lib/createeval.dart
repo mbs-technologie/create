@@ -4,7 +4,6 @@ library createeval;
 
 import 'elements.dart';
 import 'elementsruntime.dart';
-import 'datastore.dart';
 import 'createdata.dart';
 
 Construct parseTemplate(String template) {
@@ -88,7 +87,7 @@ class IdentifierConstruct implements Construct {
   IdentifierConstruct(this.identifier);
 
   void observe(CreateData datastore, Operation operation, Lifespan lifespan) {
-    Record record = datastore.lookupByName(identifier);
+    CompositeData record = datastore.lookupByName(identifier);
     // TODO: handle non-DataRecord records
     if (record != null && record is DataRecord) {
       record.state.observe(operation, lifespan);
@@ -96,7 +95,7 @@ class IdentifierConstruct implements Construct {
   }
 
   String evaluate(CreateData datastore) {
-    Record record = datastore.lookupByName(identifier);
+    CompositeData record = datastore.lookupByName(identifier);
     // TODO: handle non-DataRecord records
     if (record != null && record is DataRecord) {
       return record.state.value;
@@ -106,7 +105,7 @@ class IdentifierConstruct implements Construct {
   }
 
   Ref<String> getRef(CreateData datastore) {
-    Record record = datastore.lookupByName(identifier);
+    CompositeData record = datastore.lookupByName(identifier);
     if (record != null && record is DataRecord) {
       return record.state;
     } else {

@@ -227,11 +227,11 @@ class JoinedList<E> extends ReadList<E> with _ObserverManager {
 }
 
 /// A list that can change state.
-class MutableList<E> extends ReadList<E> with _ObserverManager {
+class BaseMutableList<E> extends MutableList<E> with _ObserverManager {
   final List<E> elements;
   Ref<int> size;
 
-  MutableList([List<E> initialState]): elements = (initialState != null ? initialState : []) {
+  BaseMutableList([List<E> initialState]): elements = (initialState != null ? initialState : []) {
     size = new Boxed<int>(elements.length);
   }
 
@@ -278,7 +278,7 @@ class MutableList<E> extends ReadList<E> with _ObserverManager {
 }
 
 class _ListCell<E> implements Ref<E> {
-  final MutableList<E> list;
+  final BaseMutableList<E> list;
   final int index;
 
   _ListCell(this.list, this.index);
@@ -342,6 +342,32 @@ class RandomIdSource extends DataIdSource {
 
   RandomIdSource(this.namespace);
   DataId nextId() => new TaggedDataId(namespace, _random.nextInt(math.pow(2, 31)));
+}
+
+/// Base class for composite data types.
+abstract class BaseCompositeData extends CompositeData {
+  BaseCompositeData(): super(VERSION_ZERO);
+
+  void observe(Operation observer, Lifespan lifespan) {
+    visit(new _ObserveFields(observer, lifespan));
+  }
+}
+
+/// A helper class that registers and observer on all fields of a composite data type.
+class _ObserveFields implements FieldVisitor {
+  final Operation observer;
+  final Lifespan lifespan;
+
+  _ObserveFields(this.observer, this.lifespan);
+
+  void stringField(String fieldName, Ref<String> field) => process(field);
+  void doubleField(String fieldName, Ref<double> field) => process(field);
+  void dataField(String fieldName, Ref<Data> field) => process(field);
+  void listField(String fieldName, MutableList<Data> field) => process(field);
+
+  void process(Observable observable) {
+    observable.observe(observer, lifespan);
+  }
 }
 
 /// Check whether a reference is not null and holds a non-null value.
