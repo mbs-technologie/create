@@ -166,8 +166,10 @@ abstract class EnumData extends Named implements Data, DataId, Observable {
 }
 
 /// Data types for composite objects (regular classes, not enums.)
-class CompositeDataType extends DataType {
+abstract class CompositeDataType extends DataType {
   const CompositeDataType(Namespace namespace, String name): super(namespace, name);
+
+  CompositeData newInstance(DataId dataId);
 }
 
 /// Version identifiers.

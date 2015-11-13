@@ -16,12 +16,17 @@ abstract class NamedRecord extends BaseCompositeData implements Named {
 
 const Namespace CREATE_NAMESPACE = const Namespace('Create', 'create');
 
-const CompositeDataType DATA_DATATYPE = const CompositeDataType(CREATE_NAMESPACE, 'data');
-const CompositeDataType PARAMETER_DATATYPE = const CompositeDataType(CREATE_NAMESPACE, 'parameter');
-const CompositeDataType OPERATION_DATATYPE = const CompositeDataType(CREATE_NAMESPACE, 'operation');
-const CompositeDataType SERVICE_DATATYPE = const CompositeDataType(CREATE_NAMESPACE, 'service');
-const CompositeDataType STYLE_DATATYPE = const CompositeDataType(CREATE_NAMESPACE, 'style');
-const CompositeDataType VIEW_DATATYPE = const CompositeDataType(CREATE_NAMESPACE, 'view');
+class DataRecordType extends CompositeDataType {
+  const DataRecordType(String name): super(CREATE_NAMESPACE, name);
+
+  DataRecord newInstance(DataId dataId) =>
+      new DataRecord(this, dataId, null, null, null);
+}
+
+const DataRecordType DATA_DATATYPE = const DataRecordType('data');
+const DataRecordType PARAMETER_DATATYPE = const DataRecordType('parameter');
+const DataRecordType OPERATION_DATATYPE = const DataRecordType('operation');
+const DataRecordType SERVICE_DATATYPE = const DataRecordType('service');
 
 const TypeIdDataType TYPE_ID_DATATYPE = const TypeIdDataType();
 
@@ -72,6 +77,14 @@ class DataRecord extends NamedRecord {
 const String FONT_SIZE_FIELD = 'font_size';
 const String COLOR_FIELD = 'color';
 
+class StyleRecordType extends CompositeDataType {
+  const StyleRecordType(String name): super(CREATE_NAMESPACE, 'style');
+
+  StyleRecord newInstance(DataId dataId) => new StyleRecord(dataId, null, null, null);
+}
+
+const StyleRecordType STYLE_DATATYPE = const StyleRecordType('style');
+
 class StyleRecord extends NamedRecord implements FontColorStyle {
   final DataId dataId;
   final Ref<String> recordName;
@@ -83,7 +96,7 @@ class StyleRecord extends NamedRecord implements FontColorStyle {
       fontSize = new Boxed<double>(fontSize),
       color = new Boxed<NamedColor>(color);
 
-  CompositeDataType get dataType => STYLE_DATATYPE;
+  StyleRecordType get dataType => STYLE_DATATYPE;
 
   double get styleFontSize => fontSize.value;
   NamedColor get styleColor => color.value;
@@ -124,6 +137,14 @@ const String CONTENT_FIELD = 'content';
 const String ACTION_FIELD = 'action';
 const String SUBVIEWS_FIELD = 'subviews';
 
+class ViewRecordType extends CompositeDataType {
+  const ViewRecordType(String name): super(CREATE_NAMESPACE, 'view');
+
+  ViewRecord newInstance(DataId dataId) => new ViewRecord(dataId, null);
+}
+
+const ViewRecordType VIEW_DATATYPE = const ViewRecordType('view');
+
 class ViewRecord extends NamedRecord {
   final DataId dataId;
   final Ref<String> recordName;
@@ -141,7 +162,7 @@ class ViewRecord extends NamedRecord {
       action = new Boxed<DataRecord>(null),
       subviews = new BaseMutableList<ViewRecord>();
 
-  CompositeDataType get dataType => VIEW_DATATYPE;
+  ViewRecordType get dataType => VIEW_DATATYPE;
 
   void visit(FieldVisitor visitor) {
     visitor.stringField(RECORD_NAME_FIELD, recordName);
@@ -171,22 +192,6 @@ String MAIN_NAME = 'main';
 
 class CreateData extends Datastore {
   CreateData(): super(ALL_CREATE_TYPES.toSet());
-
-  CompositeData newRecord(CompositeDataType dataType, DataId dataId) {
-    if (dataType == STYLE_DATATYPE) {
-      return new StyleRecord(dataId, null, null, null);
-    } else if (dataType == VIEW_DATATYPE) {
-      return new ViewRecord(dataId, null);
-    } else {
-      assert(dataType == DATA_DATATYPE ||
-             dataType == PARAMETER_DATATYPE ||
-             dataType == OPERATION_DATATYPE ||
-             dataType == SERVICE_DATATYPE ||
-             dataType == TYPE_ID_DATATYPE ||
-             dataType == VIEW_ID_DATATYPE);
-      return new DataRecord(dataType, dataId, null, null, null);
-    }
-  }
 
   /// Retrieve a record by name
   CompositeData lookupByName(String name) {

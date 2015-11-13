@@ -10,7 +10,7 @@ typedef bool QueryType(CompositeData);
 
 enum SyncStatus { INITIALIZING, ONLINE }
 
-abstract class Datastore<R extends CompositeData> extends BaseZone {
+class Datastore<R extends CompositeData> extends BaseZone {
   final Set<DataType> dataTypes;
   final List<R> _records = new List<R>();
   final Map<DataId, R> _recordsById = new HashMap<DataId, R>();
@@ -96,8 +96,6 @@ abstract class Datastore<R extends CompositeData> extends BaseZone {
   }
 
   String get describe => 'Version $version, ${_records.length} records';
-
-  CompositeData newRecord(CompositeDataType dataType, DataId dataId);
 }
 
 class _LiveQuery<R extends CompositeData> implements Disposable {

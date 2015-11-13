@@ -282,7 +282,7 @@ class _Unmarshaller implements FieldVisitor {
     CompositeData oldRecord = datasyncer.lookupById(dataId);
     if (oldRecord == null) {
       Datastore datastore = datasyncer.datastore;
-      record = datastore.newRecord(dataType as CompositeDataType, dataId);
+      record = (dataType as CompositeDataType).newInstance(dataId);
       record.version = version;
       datastore.add(record);
     } else {
