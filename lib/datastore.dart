@@ -13,8 +13,7 @@ class Datastore<R extends CompositeData> extends BaseZone {
   final List<R> _records = new List<R>();
   final Map<DataId, R> _recordsById = new HashMap<DataId, R>();
   final Set<_LiveQuery> _liveQueries = new Set<_LiveQuery>();
-  // TODO(dynin): make readonly.
-  VersionId version = VERSION_ZERO;
+  VersionId _version = VERSION_ZERO;
   bool _bulkUpdateInProgress = false;
 
   Datastore(this.dataTypes);
@@ -43,6 +42,8 @@ class Datastore<R extends CompositeData> extends BaseZone {
     }
   }
 
+  VersionId get version => _version;
+
   bool _isKnownType(DataType type) {
     return dataTypes.contains(type);
   }
@@ -53,15 +54,15 @@ class Datastore<R extends CompositeData> extends BaseZone {
 
   void startBulkUpdate(VersionId version) {
     assert (!_bulkUpdateInProgress);
-    this.version = version;
+    _version = version;
     _bulkUpdateInProgress = true;
   }
 
   VersionId advanceVersion() {
     if (!_bulkUpdateInProgress) {
-      version = version.nextVersion();
+      _version = _version.nextVersion();
     }
-    return version;
+    return _version;
   }
 
   void stopBulkUpdate() {
@@ -93,7 +94,7 @@ class Datastore<R extends CompositeData> extends BaseZone {
     print('Datastore: query removed; ${_liveQueries.length} active queries.');
   }
 
-  String get describe => 'Version $version, ${_records.length} records';
+  String get describe => 'Version $_version, ${_records.length} records';
 }
 
 class _LiveQuery<R extends CompositeData> implements Disposable {

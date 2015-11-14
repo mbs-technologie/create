@@ -7,6 +7,7 @@ import 'elementsruntime.dart';
 import 'datastore.dart';
 import 'styles.dart';
 
+// TODO: move to elementsruntime.
 abstract class NamedRecord extends BaseCompositeData implements Named {
   ReadRef<String> get recordName;
 
@@ -187,6 +188,7 @@ Set<DataType> ALL_CREATE_TYPES = [
   NAMED_COLOR_DATATYPE
 ].toSet();
 
+// TODO: move to CreateApp
 class CreateData extends Datastore {
   CreateData(): super(ALL_CREATE_TYPES);
 
