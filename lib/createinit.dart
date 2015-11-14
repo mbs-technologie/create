@@ -56,7 +56,7 @@ r'''{
       "#version": 0,
       "record_name": "today",
       "type_id": "create.type_id:string",
-      "state": "11/11/2015"
+      "state": "Nov 13, 2015"
     },
     {
       "#type": "create.operation",

@@ -4,7 +4,6 @@ library createapp;
 
 import 'elements.dart';
 import 'elementsruntime.dart';
-import 'datastore.dart';
 import 'config.dart';
 import 'createdata.dart';
 import 'createeval.dart';
@@ -74,6 +73,7 @@ String displayToString(object) => object != null ? object.toString() : '<default
 
 class CreateApp extends BaseZone implements ApplicationState {
   final CreateData datastore;
+  final ReadRef<bool> dataReady;
   final DataIdSource idSource = new RandomIdSource(DEMOAPP_NAMESPACE);
   final Ref<AppMode> appMode = new Boxed<AppMode>(INITIALIZING_MODE);
   ReadRef<String> appTitle;
@@ -82,22 +82,22 @@ class CreateApp extends BaseZone implements ApplicationState {
   ReadRef<Operation> addOperation;
   Lifespan viewLifespan;
 
-  CreateApp(this.datastore) {
+  CreateApp(this.datastore, this.dataReady) {
     ReadRef<String> titleString = new Constant<String>(DEMOAPP_NAMESPACE.name);
     appTitle = new ReactiveFunction2<String, AppMode, String>(
         titleString, appMode, this,
         (String title, AppMode mode) => '$title \u{2022} ${mode.name}');
     mainView = new ReactiveFunction<AppMode, View>(appMode, this, makeMainView);
     addOperation = new ReactiveFunction<AppMode, Operation>(appMode, this, makeAddOperation);
-    if (datastore.syncStatus.value == SyncStatus.INITIALIZING) {
-      datastore.syncStatus.observe(makeOperation(_checkInitDone), this);
-    } else {
+    if (dataReady.value) {
       appMode.value = STARTUP_MODE;
+    } else {
+      dataReady.observe(makeOperation(_checkInitDone), this);
     }
   }
 
   void _checkInitDone() {
-    if (appMode.value == INITIALIZING_MODE && datastore.syncStatus.value == SyncStatus.ONLINE) {
+    if (appMode.value == INITIALIZING_MODE && dataReady.value) {
       appMode.value = STARTUP_MODE;
     }
   }

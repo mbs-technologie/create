@@ -114,8 +114,9 @@ class DataSyncer {
     doGet(datastore.version, null, null);
   }
 
-  void initialize(String fallbackDatastoreState) {
-    doGet(null, _initCompleted, () => initFallback(fallbackDatastoreState));
+  void initialize(WriteRef<bool> dataReady, String fallbackDatastoreState) {
+    void initCompleted() { dataReady.value = true; }
+    doGet(null, initCompleted, (() { initFallback(fallbackDatastoreState); initCompleted(); }));
   }
 
   void doGet(VersionId currentVersion, Procedure onSuccess, Procedure onFailure) {
@@ -144,10 +145,6 @@ class DataSyncer {
         }
       })
       .whenComplete(_scheduleSync);
-  }
-
-  void _initCompleted() {
-    datastore.syncStatus.value = SyncStatus.ONLINE;
   }
 
   bool tryUmarshalling(String responseBody, VersionId currentVersion) {
@@ -183,7 +180,6 @@ class DataSyncer {
     List<Map> jsonRecords = datastoreJson[RECORDS_FIELD];
     print('Initializing fallback with ${jsonRecords.length} records.');
     unmarshalDatastore(newVersion, jsonRecords);
-    _initCompleted();
   }
 
   void unmarshalDatastore(VersionId newVersion, List<Map> jsonRecords) {

@@ -8,8 +8,6 @@ import 'elementsruntime.dart';
 
 typedef bool QueryType(CompositeData);
 
-enum SyncStatus { INITIALIZING, ONLINE }
-
 class Datastore<R extends CompositeData> extends BaseZone {
   final Set<DataType> dataTypes;
   final List<R> _records = new List<R>();
@@ -17,8 +15,6 @@ class Datastore<R extends CompositeData> extends BaseZone {
   final Set<_LiveQuery> _liveQueries = new Set<_LiveQuery>();
   // TODO(dynin): make readonly.
   VersionId version = VERSION_ZERO;
-  // TODO(dynin): move to DataSyncer.
-  Ref<SyncStatus> syncStatus = new Boxed<SyncStatus>(SyncStatus.INITIALIZING);
   bool _bulkUpdateInProgress = false;
 
   Datastore(this.dataTypes);

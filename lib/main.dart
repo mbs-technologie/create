@@ -1,5 +1,7 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 
+import 'elements.dart';
+import 'elementsruntime.dart';
 import 'config.dart';
 import 'datasync.dart';
 import 'views.dart';
@@ -24,13 +26,15 @@ void main() {
       break;
     case AppChoice.CREATE:
       CreateData datastore = new CreateData();
+      Ref<bool> dataReady = new Boxed<bool>(false);
       if (!RESET_DATASTORE) {
-        new DataSyncer(datastore, SYNC_URI).initialize(INITIAL_STATE);
+        new DataSyncer(datastore, SYNC_URI).initialize(dataReady, INITIAL_STATE);
       } else {
         datastore.addAll(buildInitialCreateData(DEMOAPP_NAMESPACE), datastore.version);
+        dataReady.value = true;
         new DataSyncer(datastore, SYNC_URI).push();
       }
-      app = new CreateApp(datastore);
+      app = new CreateApp(datastore, dataReady);
       break;
   }
 
