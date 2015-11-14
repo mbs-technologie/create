@@ -14,13 +14,14 @@
 - [ ] Scheduler for actions and observers
 - [ ] Parametrized operations
 - [ ] Start implementing code generation
+- [ ] Generate enum declarations for styles
 - [ ] Add addressbook example
 - [ ] Use native Flutter dropdown component
 - [ ] Separate network code from syncer code
 - [ ] Simplify FieldVisitor interface
-- [ ] Implement CompositeDataType.newInstance(dataId)
 - [ ] Retire CreateData, rename creatadata.dart to createdchema
-- [ ] Use lowercase names when serializing enum values
+- [ ] Polymer widget bindings
+- [ ] Browser-hosted deployment
 
 ----------------
 
@@ -49,3 +50,5 @@
 - [x] s/sky/flutter/g
 - [x] Rename Context to Lifespan
 - [x] Introduce Namespace class
+- [x] Implement CompositeDataType.newInstance(dataId)
+- [x] Use lowercase names when serializing enum values
