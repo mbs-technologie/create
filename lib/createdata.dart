@@ -174,7 +174,7 @@ class ViewRecord extends NamedRecord {
   }
 }
 
-List<DataType> ALL_CREATE_TYPES = [
+Set<DataType> ALL_CREATE_TYPES = [
   DATA_DATATYPE,
   PARAMETER_DATATYPE,
   OPERATION_DATATYPE,
@@ -185,13 +185,10 @@ List<DataType> ALL_CREATE_TYPES = [
   VIEW_ID_DATATYPE,
   THEMED_STYLE_DATATYPE,
   NAMED_COLOR_DATATYPE
-];
-
-/// Name of the view that Launch mode will display
-String MAIN_NAME = 'main';
+].toSet();
 
 class CreateData extends Datastore {
-  CreateData(): super(ALL_CREATE_TYPES.toSet());
+  CreateData(): super(ALL_CREATE_TYPES);
 
   /// Retrieve a record by name
   CompositeData lookupByName(String name) {

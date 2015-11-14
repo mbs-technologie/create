@@ -27,7 +27,7 @@ void main() {
       if (!RESET_DATASTORE) {
         new DataSyncer(datastore, SYNC_URI).initialize(INITIAL_STATE);
       } else {
-        datastore.addAll(buildInitialCreateData(), datastore.version);
+        datastore.addAll(buildInitialCreateData(DEMOAPP_NAMESPACE), datastore.version);
         new DataSyncer(datastore, SYNC_URI).push();
       }
       app = new CreateApp(datastore);

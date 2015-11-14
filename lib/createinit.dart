@@ -6,8 +6,8 @@ import 'elements.dart';
 import 'elementsruntime.dart';
 import 'createdata.dart';
 
-List<CompositeData> buildInitialCreateData() {
-  DataIdSource ids = new SequentialIdSource(CREATE_NAMESPACE);
+List<CompositeData> buildInitialCreateData(Namespace namespace) {
+  DataIdSource ids = new SequentialIdSource(namespace);
 
   return [
     new DataRecord(PARAMETER_DATATYPE, ids.nextId(), 'hello', STRING_TYPE, 'Hello, world!'),
@@ -20,7 +20,7 @@ r'''{
   "records": [
     {
       "#type": "create.parameter",
-      "#id": "create:5",
+      "#id": "demoapp:5",
       "#version": 0,
       "record_name": "hello",
       "type_id": "create.type_id:string",
@@ -28,7 +28,7 @@ r'''{
     },
     {
       "#type": "create.data",
-      "#id": "create:6",
+      "#id": "demoapp:6",
       "#version": 0,
       "record_name": "counter",
       "type_id": "create.type_id:integer",
@@ -36,7 +36,7 @@ r'''{
     },
     {
       "#type": "create.parameter",
-      "#id": "create:0",
+      "#id": "demoapp:0",
       "#version": 0,
       "record_name": "buttontext",
       "type_id": "create.type_id:string",
@@ -44,7 +44,7 @@ r'''{
     },
     {
       "#type": "create.parameter",
-      "#id": "create:7",
+      "#id": "demoapp:7",
       "#version": 0,
       "record_name": "increaseby",
       "type_id": "create.type_id:integer",
@@ -52,7 +52,7 @@ r'''{
     },
     {
       "#type": "create.service",
-      "#id": "create:8",
+      "#id": "demoapp:8",
       "#version": 0,
       "record_name": "today",
       "type_id": "create.type_id:string",
@@ -60,7 +60,7 @@ r'''{
     },
     {
       "#type": "create.operation",
-      "#id": "create:1",
+      "#id": "demoapp:1",
       "#version": 0,
       "record_name": "describestate",
       "type_id": "create.type_id:template",
@@ -68,7 +68,7 @@ r'''{
     },
     {
       "#type": "create.operation",
-      "#id": "create:2",
+      "#id": "demoapp:2",
       "#version": 0,
       "record_name": "increase",
       "type_id": "create.type_id:code",
@@ -76,7 +76,7 @@ r'''{
     },
     {
       "#type": "create.style",
-      "#id": "create:9",
+      "#id": "demoapp:9",
       "#version": 0,
       "record_name": "Largefont",
       "font_size": 24.0,
@@ -84,7 +84,7 @@ r'''{
     },
     {
       "#type": "create.style",
-      "#id": "create:10",
+      "#id": "demoapp:10",
       "#version": 0,
       "record_name": "Bigred",
       "font_size": 32.0,
@@ -92,29 +92,29 @@ r'''{
     },
     {
       "#type": "create.view",
-      "#id": "create:3",
+      "#id": "demoapp:3",
       "#version": 0,
       "record_name": "counterlabel",
       "view_id": "create.view_id:label",
       "style": "styles.themed_style:body",
-      "content": "create.operation:create:1//describestate",
+      "content": "create.operation:demoapp:1//describestate",
       "action": null,
       "subviews": []
     },
     {
       "#type": "create.view",
-      "#id": "create:4",
+      "#id": "demoapp:4",
       "#version": 0,
       "record_name": "counterbutton",
       "view_id": "create.view_id:button",
       "style": "styles.themed_style:button",
-      "content": "create.parameter:create:0//buttontext",
-      "action": "create.operation:create:2//increase",
+      "content": "create.parameter:demoapp:0//buttontext",
+      "action": "create.operation:demoapp:2//increase",
       "subviews": []
     },
     {
       "#type": "create.view",
-      "#id": "create:11",
+      "#id": "demoapp:11",
       "#version": 0,
       "record_name": "main",
       "view_id": "create.view_id:column",
@@ -122,8 +122,8 @@ r'''{
       "content": null,
       "action": null,
       "subviews": [
-        "create.view:create:3//counterlabel",
-        "create.view:create:4//counterbutton"
+        "create.view:demoapp:3//counterlabel",
+        "create.view:demoapp:4//counterbutton"
       ]
     }
   ]

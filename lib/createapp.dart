@@ -11,6 +11,8 @@ import 'createeval.dart';
 import 'styles.dart';
 import 'views.dart';
 
+const Namespace DEMOAPP_NAMESPACE = const Namespace('Demo App', 'demoapp');
+
 class AppMode extends Named {
   final IconId icon;
   const AppMode(String name, this.icon): super(name);
@@ -65,11 +67,14 @@ List<double> FONT_SIZES = [
   112.0,
 ];
 
+/// Name of the view that Launch mode will display
+String MAIN_NAME = 'main';
+
 String displayToString(object) => object != null ? object.toString() : '<default>';
 
 class CreateApp extends BaseZone implements ApplicationState {
   final CreateData datastore;
-  final DataIdSource idSource = new RandomIdSource(CREATE_NAMESPACE);
+  final DataIdSource idSource = new RandomIdSource(DEMOAPP_NAMESPACE);
   final Ref<AppMode> appMode = new Boxed<AppMode>(INITIALIZING_MODE);
   ReadRef<String> appTitle;
   ReadRef<String> appVersion = new Constant<String>(CREATE_VERSION);
@@ -78,7 +83,7 @@ class CreateApp extends BaseZone implements ApplicationState {
   Lifespan viewLifespan;
 
   CreateApp(this.datastore) {
-    ReadRef<String> titleString = new Constant<String>('Demo App');
+    ReadRef<String> titleString = new Constant<String>(DEMOAPP_NAMESPACE.name);
     appTitle = new ReactiveFunction2<String, AppMode, String>(
         titleString, appMode, this,
         (String title, AppMode mode) => '$title \u{2022} ${mode.name}');

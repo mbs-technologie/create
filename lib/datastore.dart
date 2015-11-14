@@ -15,7 +15,9 @@ class Datastore<R extends CompositeData> extends BaseZone {
   final List<R> _records = new List<R>();
   final Map<DataId, R> _recordsById = new HashMap<DataId, R>();
   final Set<_LiveQuery> _liveQueries = new Set<_LiveQuery>();
+  // TODO(dynin): make readonly.
   VersionId version = VERSION_ZERO;
+  // TODO(dynin): move to DataSyncer.
   Ref<SyncStatus> syncStatus = new Boxed<SyncStatus>(SyncStatus.INITIALIZING);
   bool _bulkUpdateInProgress = false;
 
