@@ -63,7 +63,6 @@ class FlutterAppState extends State<FlutterApp> with FlutterWidgets {
     return new Scaffold(
       toolBar: _buildToolBar(context),
       body: _buildMainCanvas(),
-      snackBar: null,
       floatingActionButton: _buildFloatingActionButton()
     );
   }
