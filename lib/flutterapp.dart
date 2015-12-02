@@ -117,7 +117,7 @@ class FlutterAppState extends State<FlutterApp> with FlutterWidgets {
 
   void dismissDrawer() {
     // This is Flutter's way of making the drawer go away.
-    Navigator.of(context).pop();
+    Navigator.pop(context);
   }
 
   void _handleBeginSearch() => null; // TODO
