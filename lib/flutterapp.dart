@@ -63,6 +63,7 @@ class FlutterAppState extends State<FlutterApp> with FlutterWidgets {
     return new Scaffold(
       toolBar: _buildToolBar(context),
       body: _buildMainCanvas(),
+      drawer: _buildDrawer(context),
       floatingActionButton: _buildFloatingActionButton()
     );
   }
@@ -79,9 +80,6 @@ class FlutterAppState extends State<FlutterApp> with FlutterWidgets {
 
   Widget _buildToolBar(BuildContext context) {
     return new ToolBar(
-        left: new IconButton(
-          icon: MENU_ICON.id,
-          onPressed: () => _openDrawer(context)),
         center: new Text(config.appState.appTitle.value),
         right: [
           new Text(config.appState.appVersion.value),
@@ -108,11 +106,8 @@ class FlutterAppState extends State<FlutterApp> with FlutterWidgets {
     }
   }
 
-  void _openDrawer(BuildContext context) {
-    showDrawer(
-      context: context,
-      child: renderDrawer(config.appState.makeDrawer(), viewZone)
-    );
+  Widget _buildDrawer(BuildContext context) {
+    return renderDrawer(config.appState.makeDrawer(), viewZone);
   }
 
   void dismissDrawer() {

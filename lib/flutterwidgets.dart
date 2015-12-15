@@ -160,8 +160,8 @@ abstract class FlutterWidgets {
     );
   }
 
-  Widget renderDrawer(DrawerView drawer, Lifespan lifespan) {
-    return new Block(_buildWidgetList(drawer.model, lifespan));
+  Drawer renderDrawer(DrawerView drawer, Lifespan lifespan) {
+    return new Drawer(child: new Block(_buildWidgetList(drawer.model, lifespan)));
   }
 
   Function _scheduleAction(ReadRef<Operation> action) => () {

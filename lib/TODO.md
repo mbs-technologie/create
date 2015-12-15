@@ -19,7 +19,7 @@
 - [ ] Use native Flutter dropdown component
 - [ ] Separate network code from syncer code
 - [ ] Simplify FieldVisitor interface
-- [ ] Retire CreateData, rename creatadata.dart to createdchema
+- [ ] Retire CreateData, rename creatadata.dart to createschema
 - [ ] Polymer widget bindings
 - [ ] Browser-hosted deployment
 
@@ -52,3 +52,4 @@
 - [x] Introduce Namespace class
 - [x] Implement CompositeDataType.newInstance(dataId)
 - [x] Use lowercase names when serializing enum values
+- [x] Update to Flutter 2015-12-11.
