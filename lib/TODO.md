@@ -24,6 +24,8 @@
 - [ ] Browser-hosted deployment
 - [ ] Create an updated apk release
 - [ ] Reformat the code
+- [ ] Make the repository public
+- [ ] Separate browser from composer modes
 
 ----------------
 

@@ -14,7 +14,7 @@ abstract class FontColorStyle implements Style {
   NamedColor get styleColor;
 }
 
-// If you add elements here, you need yo update flutterstyles
+// If you add elements here, you need to update flutterstyles
 class ThemedStyleDataType extends EnumDataType {
   const ThemedStyleDataType(): super(STYLES_NAMESPACE, 'themed_style');
 
@@ -41,7 +41,7 @@ const ThemedStyle BODY_STYLE = const ThemedStyle("Body");
 const ThemedStyle CAPTION_STYLE = const ThemedStyle("Caption");
 const ThemedStyle BUTTON_STYLE = const ThemedStyle("Button");
 
-// If you add elements here, you need yo update flutterstyles
+// If you add elements here, you need to update flutterstyles
 class NamedColorDataType extends EnumDataType {
   const NamedColorDataType(): super(STYLES_NAMESPACE, 'named_color');
 

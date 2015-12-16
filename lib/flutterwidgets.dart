@@ -14,6 +14,7 @@ import 'styles.dart';
 import 'views.dart';
 import 'flutterstyles.dart';
 
+const bool _USE_FLUTTER_INPUT = false;
 const bool _USE_FLUTTER_DROPDOWN = true;
 
 abstract class FlutterWidgets {
@@ -214,7 +215,7 @@ class TextComponentState extends State<TextComponent> {
       child: new Row([
         new IconButton(icon: MODE_EDIT_ICON.id, onPressed: _editPressed),
         new Flexible(
-          child: editing
+          child: editing || _USE_FLUTTER_INPUT
             ? new Input(key: inputKey, initialValue: config.input.model.value,
                         onChanged: widgetChanged)
             : new Text(config.input.model.value, style: textStyle)
