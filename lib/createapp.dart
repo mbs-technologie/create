@@ -198,7 +198,7 @@ class CreateApp extends BaseZone implements ApplicationState {
     return new SelectionInput<TypeId>(
       typeId,
       new ImmutableList<TypeId>(PRIMITIVE_TYPES),
-      displayName
+      displayName('<no primitive type>')
     );
   }
 
@@ -244,7 +244,7 @@ class CreateApp extends BaseZone implements ApplicationState {
       new SelectionInput<TypeId>(
         record.typeId,
         new ImmutableList<TypeId>(OPERATION_TYPES),
-        displayName
+        displayName('<no operation type>')
       ),
       new TextInput(
         record.state,
@@ -331,7 +331,7 @@ class CreateApp extends BaseZone implements ApplicationState {
 
   View makeViewIdInput(Ref<ViewId> viewId, Lifespan lifespan) {
     return new SelectionInput<ViewId>(viewId, new ImmutableList<ViewId>(VIEW_ID_DATATYPE.values),
-        displayName);
+        displayName('<no view id>'));
   }
 
   View makeViewInput(Ref<ViewRecord> view, ViewRecord currentView, Lifespan lifespan) {
@@ -464,6 +464,10 @@ class CreateApp extends BaseZone implements ApplicationState {
   }
 
   ReadRef<String> evaluateRecord(DataRecord record, Lifespan lifespan) {
+    if (record == null) {
+      return new Constant<String>('<null record>');
+    }
+
     if (record.dataType == OPERATION_DATATYPE && record.typeId.value == TEMPLATE_TYPE) {
       // TODO: make a reactive function which updates if template changes
       return evaluateTemplate(record.state.value, lifespan);

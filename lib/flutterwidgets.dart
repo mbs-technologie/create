@@ -14,11 +14,11 @@ import 'styles.dart';
 import 'views.dart';
 import 'flutterstyles.dart';
 
+const bool _USE_FLUTTER_DROPDOWN = true;
+
 abstract class FlutterWidgets {
   void rebuildApp();
   void dismissDrawer();
-
-  Future showPopupMenu(BuildContext context, List<PopupMenuItem> menuItems, ModalPosition position);
 
   Widget viewToWidget(View view, Lifespan lifespan) {
     _cleanupView(view);
@@ -110,7 +110,11 @@ abstract class FlutterWidgets {
   }
 
   Widget renderSelection(SelectionInput selection) {
-    return new SelectionComponent(selection, this);
+    if (_USE_FLUTTER_DROPDOWN) {
+      return new _FlutterDropDownButton(selection).build();
+    } else {
+      return new _EmulatedDropDownButton(selection);
+    }
   }
 
   MaterialButton renderButton(ButtonView button) {
@@ -244,13 +248,52 @@ class TextComponentState extends State<TextComponent> {
   }
 }
 
-// TODO: Use Flutter widget once it's implemented
-class SelectionComponent extends StatelessComponent {
+class _FlutterDropDownButton<T> {
+  _FlutterDropDownButton(this.selection);
 
-  SelectionComponent(this.selection, this.flutterWidgets);
+  final SelectionInput<T> selection;
 
-  final SelectionInput selection;
-  final FlutterWidgets flutterWidgets;
+  TextStyle get textStyle => textStyleOf(selection);
+
+  DropDownMenuItem<T> makeMenuItem(T option) {
+    return new DropDownMenuItem<T>(
+        child: new Text(selection.display(option), style: textStyle),
+        value: option);
+  }
+
+  DropDownButton<T> build() {
+    List<T> options = selection.options.elements;
+    T value = selection.model.value;
+
+    // See https://github.com/flutter/flutter/issues/948
+    if (!options.contains(value)) {
+      // Flutter generates a runtime error if value is missing from options.
+      List<T> newOptions = new List<T>();
+      newOptions.add(value);
+      newOptions.addAll(options);
+      options = newOptions;
+    }
+
+    return new DropDownButton<T>(items:
+        new List.from(options.map(makeMenuItem)),
+        value: value,
+        onChanged: selected);
+  }
+
+  void selected(T option) {
+    // Working around DropDownButton issue.
+    // See https://github.com/flutter/flutter/issues/948
+    if (selection.options.elements.contains(option)) {
+      selection.model.value = option;
+    }
+  }
+}
+
+// TODO: this code should be retired once we commit to using Flutter dropdown buttons
+class _EmulatedDropDownButton<T> extends StatelessComponent {
+  _EmulatedDropDownButton(this.selection);
+
+  final SelectionInput<T> selection;
 
   TextStyle get textStyle => textStyleOf(selection);
 
@@ -260,16 +303,16 @@ class SelectionComponent extends StatelessComponent {
         new Text(selection.display(selection.model.value), style: textStyle),
         new Icon(icon: ARROW_DROP_DOWN_ICON.id, size: IconSize.s24)
       ]),
-      onPressed: () { _showSelectionMenu(context); }
+      onPressed: () { showSelectionMenu(context); }
     );
   }
 
-  void _showSelectionMenu(BuildContext context) {
+  void showSelectionMenu(BuildContext context) {
     Point dropdownTopLeft = (context.findRenderObject() as RenderBox).localToGlobal(new Point(0.0, 0.0));
     ModalPosition position = new ModalPosition(left: dropdownTopLeft.x, top: dropdownTopLeft.y);
 
     final List<PopupMenuItem> menuItems = new List.from(selection.options.elements.map(
-      (option) => new PopupMenuItem(
+      (T option) => new PopupMenuItem(
           child: new Row([
             new IconButton(icon: (option == selection.model.value
                 ? RADIO_BUTTON_CHECKED_ICON
@@ -278,11 +321,16 @@ class SelectionComponent extends StatelessComponent {
           value: option
       )));
 
-    flutterWidgets.showPopupMenu(context, menuItems, position)
-        .then((value) { if (value != null) _selected(value); });
+    showPopupMenu(context, menuItems, position)
+        .then((value) { if (value != null) selected(value); });
   }
 
-  void _selected(option) {
+  void selected(T option) {
     selection.model.value = option;
+  }
+
+  Future showPopupMenu(BuildContext context, List<PopupMenuItem> menuItems,
+      ModalPosition position) {
+    return showMenu(context: context, position: position, items: menuItems);
   }
 }

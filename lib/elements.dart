@@ -115,6 +115,9 @@ abstract class Named {
   String toString() => name;
 }
 
+/// The display function is used to render a human-readable name of an object.
+typedef String DisplayFunction(Object);
+
 /// Identify namespace/module that type or value is associated with.
 /// 'name' is a human-readable name, 'id' is an unique id for serialization.
 class Namespace extends Named {

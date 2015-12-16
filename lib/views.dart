@@ -49,10 +49,10 @@ class IconButtonView extends View<ReadRef<IconId>> {
 /// A selection view (a.k.a. dropdown buttons)
 class SelectionInput<T> extends View<Ref<T>> {
   final ReadList<T> options;
-  final Function display;
+  final DisplayFunction display;
 
-  SelectionInput(Ref<T> current, this.options, String _display(T value),
-    [ReadRef<Style> style]): super(current, style), display = _display;
+  SelectionInput(Ref<T> current, this.options, this.display, [ReadRef<Style> style]):
+      super(current, style);
 }
 
 /// A container view has subviews

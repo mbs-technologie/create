@@ -16,12 +16,14 @@
 - [ ] Start implementing code generation
 - [ ] Generate enum declarations for styles
 - [ ] Add addressbook example
-- [ ] Use native Flutter dropdown component
+- [ ] Use native Flutter dropdown component [IN PROGRESS]
 - [ ] Separate network code from syncer code
 - [ ] Simplify FieldVisitor interface
 - [ ] Retire CreateData, rename creatadata.dart to createschema
 - [ ] Polymer widget bindings
 - [ ] Browser-hosted deployment
+- [ ] Create an updated apk release
+- [ ] Reformat the code
 
 ----------------
 

@@ -391,4 +391,5 @@ bool isLetterOrDigit(int c) {
 }
 
 /// A function that returns a name for displaying to the user.
-String displayName(Named named) => named.name;
+DisplayFunction displayName(String nullName) =>
+  (value) => (value is Named ? value.name : nullName);

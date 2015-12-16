@@ -2,8 +2,6 @@
 
 library flutterapp;
 
-import 'dart:async' hide Zone;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -52,11 +50,6 @@ class FlutterAppState extends State<FlutterApp> with FlutterWidgets {
   void rebuildApp() {
     // This is Flutter's way of forcing widgets to refresh.
     setState(() { });
-  }
-
-  Future showPopupMenu(BuildContext context, List<PopupMenuItem> menuItems,
-      ModalPosition position) {
-    return showMenu(context: context, position: position, items: menuItems);
   }
 
   Widget _buildScaffold(BuildContext context) {
