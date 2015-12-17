@@ -4,7 +4,7 @@ library meta;
 
 import 'dart:io';
 
-//import 'elements.dart';
+import 'elements.dart';
 
 /// Identifier consisting of one or more segments.
 // TODO: cache different representations.
@@ -82,15 +82,19 @@ class ConstructList extends Construct {
   void write(Output output) => constructs.forEach((c) => c.write(output));
 }
 
-class EnumDeclarationConstruct extends Construct {
-  final Identifier name;
-  final Identifier namespace;
+class EnumDeclarationConstruct extends Construct implements EnumDataType {
+  final Identifier identifier;
+  final Namespace namespace;
   final Identifier valueSuffix;
   final List<EnumValueConstruct> values;
 
-  EnumDeclarationConstruct(this.name, this.namespace, this.valueSuffix, this.values);
+  EnumDeclarationConstruct(this.identifier, this.namespace, this.valueSuffix, this.values);
 
-  Identifier get enumDataTypeIdentifier => name.append(DATA_TYPE_IDENTIFIER);
+  String get name => identifier.underscoreLower;
+
+  Identifier get namespaceIdentifier => new Identifier([namespace.id, 'namespace']);
+
+  Identifier get enumDataTypeIdentifier => identifier.append(DATA_TYPE_IDENTIFIER);
 
   @override void process() {
     values.forEach((value) => value.declaration = this);
@@ -106,9 +110,9 @@ class EnumDeclarationConstruct extends Construct {
         'extends ${ENUM_DATA_TYPE_IDENTIFIER.camelCaseUpper} {');
     Output typeBody = output.indented;
     typeBody.writeLine('const ${enumDataTypeIdentifier.camelCaseUpper}(): ' +
-        'super(${namespace.underscoreUpper}, \'${name.underscoreLower}\');');
+        'super(${namespaceIdentifier.underscoreUpper}, \'${name}\');');
     typeBody.blankLine();
-    typeBody.writeLine('List<${name.camelCaseUpper}> get values => [');
+    typeBody.writeLine('List<${identifier.camelCaseUpper}> get values => [');
     Output valuesList = typeBody.indented;
     for (int i = 0; i < values.length; ++i) {
       var comma = (i < values.length - 1) ? ',' : '';
@@ -127,9 +131,9 @@ class EnumDeclarationConstruct extends Construct {
 
   void _writeType(Output output) {
     output.writeLine(
-        'class ${name.camelCaseUpper} ' + 'extends ${ENUM_DATA_IDENTIFIER.camelCaseUpper} {');
+        'class ${identifier.camelCaseUpper} ' + 'extends ${ENUM_DATA_IDENTIFIER.camelCaseUpper} {');
     Output typeBody = output.indented;
-    typeBody.writeLine('const ${name.camelCaseUpper}(String name): super(name);');
+    typeBody.writeLine('const ${identifier.camelCaseUpper}(String name): super(name);');
     typeBody.blankLine();
     typeBody.writeLine('${ENUM_DATA_TYPE_IDENTIFIER.camelCaseUpper} get ' +
         '${DATA_TYPE_IDENTIFIER.camelCaseLower} => ' +
@@ -141,7 +145,7 @@ class EnumDeclarationConstruct extends Construct {
   }
 }
 
-class EnumValueConstruct extends Construct {
+class EnumValueConstruct extends Construct implements EnumData {
   final String shortName;
   EnumDeclarationConstruct declaration;
 
@@ -149,9 +153,24 @@ class EnumValueConstruct extends Construct {
 
   Identifier get identifier => new Identifier([shortName]).append(declaration.valueSuffix);
 
+  String get name => shortName;
+
+  // TODO: share the code with EnumData
+  String get enumId => name.toLowerCase();
+
+  DataId get dataId => this;
+
+  EnumDataType get dataType {
+    assert(declaration != null);
+    return declaration;
+  }
+
+  void observe(Operation observer, Lifespan lifespan) => null;
+
   @override void write(Output output) {
-    output.writeLine('const ${declaration.name.camelCaseUpper} ${identifier.underscoreUpper} = ' +
-        'const ${declaration.name.camelCaseUpper}(\'$shortName\');');
+    output.writeLine('const ${declaration.identifier.camelCaseUpper} ' +
+        '${identifier.underscoreUpper} = ' +
+        'const ${declaration.identifier.camelCaseUpper}(\'$shortName\');');
   }
 }
 
@@ -165,12 +184,14 @@ void test_identifier() {
   print('joined: ' + test.append(test).camelCaseLower);
 }
 
+// TODO: introduce 'namespace.dart' and declare it there
+const Namespace STYLES_NAMESPACE = const Namespace('Styles', 'styles');
+
 void main() {
   var output = Output.toStdout();
-  Identifier STYLES_NS_ID = new Identifier(['styles', 'namespace']);
 
   var decl0 = new EnumDeclarationConstruct(
-      new Identifier(['themed', 'style']), STYLES_NS_ID, new Identifier(['style']), [
+      new Identifier(['themed', 'style']), STYLES_NAMESPACE, new Identifier(['style']), [
     new EnumValueConstruct('Title'),
     new EnumValueConstruct('Subhead'),
     new EnumValueConstruct('Body'),
@@ -178,7 +199,7 @@ void main() {
     new EnumValueConstruct('Button')
   ]);
   var decl1 = new EnumDeclarationConstruct(
-      new Identifier(['named', 'color']), STYLES_NS_ID, new Identifier(['color']), [
+      new Identifier(['named', 'color']), STYLES_NAMESPACE, new Identifier(['color']), [
     new EnumValueConstruct('Black'),
     new EnumValueConstruct('Red'),
     new EnumValueConstruct('Green'),
