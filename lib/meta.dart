@@ -7,6 +7,7 @@ import 'dart:io';
 //import 'elements.dart';
 
 /// Identifier consisting of one or more segments.
+// TODO: cache different representations.
 class Identifier {
   List<String> _segments;
 
@@ -67,7 +68,21 @@ final DATA_TYPE_IDENTIFIER = new Identifier(['data', 'type']);
 final ENUM_DATA_IDENTIFIER = new Identifier(['enum', 'data']);
 final ENUM_DATA_TYPE_IDENTIFIER = new Identifier(['enum']).append(DATA_TYPE_IDENTIFIER);
 
-class EnumDeclarationConstruct {
+abstract class Construct {
+  void process() => null;
+  void write(Output output);
+}
+
+class ConstructList extends Construct {
+  final List<Construct> constructs;
+
+  ConstructList(this.constructs);
+
+  void process() => constructs.forEach((c) => c.process());
+  void write(Output output) => constructs.forEach((c) => c.write(output));
+}
+
+class EnumDeclarationConstruct extends Construct {
   final Identifier name;
   final Identifier namespace;
   final Identifier valueSuffix;
@@ -77,11 +92,11 @@ class EnumDeclarationConstruct {
 
   Identifier get enumDataTypeIdentifier => name.append(DATA_TYPE_IDENTIFIER);
 
-  void process() {
+  @override void process() {
     values.forEach((value) => value.declaration = this);
   }
 
-  void write(Output output) {
+  @override void write(Output output) {
     _writeMetaType(output);
     _writeType(output);
   }
@@ -126,7 +141,7 @@ class EnumDeclarationConstruct {
   }
 }
 
-class EnumValueConstruct {
+class EnumValueConstruct extends Construct {
   final String shortName;
   EnumDeclarationConstruct declaration;
 
@@ -134,7 +149,7 @@ class EnumValueConstruct {
 
   Identifier get identifier => new Identifier([shortName]).append(declaration.valueSuffix);
 
-  void write(Output output) {
+  @override void write(Output output) {
     output.writeLine('const ${declaration.name.camelCaseUpper} ${identifier.underscoreUpper} = ' +
         'const ${declaration.name.camelCaseUpper}(\'$shortName\');');
   }
@@ -152,14 +167,24 @@ void test_identifier() {
 
 void main() {
   var output = Output.toStdout();
-  var decl = new EnumDeclarationConstruct(new Identifier(['themed', 'style']),
-      new Identifier(['styles', 'namespace']), new Identifier(['style']), [
+  Identifier STYLES_NS_ID = new Identifier(['styles', 'namespace']);
+
+  var decl0 = new EnumDeclarationConstruct(
+      new Identifier(['themed', 'style']), STYLES_NS_ID, new Identifier(['style']), [
     new EnumValueConstruct('Title'),
     new EnumValueConstruct('Subhead'),
     new EnumValueConstruct('Body'),
     new EnumValueConstruct('Caption'),
-    new EnumValueConstruct('Button'),
+    new EnumValueConstruct('Button')
   ]);
-  decl.process();
-  decl.write(output);
+  var decl1 = new EnumDeclarationConstruct(
+      new Identifier(['named', 'color']), STYLES_NS_ID, new Identifier(['color']), [
+    new EnumValueConstruct('Black'),
+    new EnumValueConstruct('Red'),
+    new EnumValueConstruct('Green'),
+    new EnumValueConstruct('Blue')
+  ]);
+  var constructs = new ConstructList([decl0, decl1]);
+  constructs.process();
+  constructs.write(output);
 }
