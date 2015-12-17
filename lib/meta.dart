@@ -43,23 +43,51 @@ class Identifier {
 }
 
 class Output {
-  writeLine(String s) {
-    stdout.write('$s\n');
+  final IOSink _sink;
+  final String _prefix;
+
+  Output._(this._sink, this._prefix);
+
+  static Output toStdout() {
+    return new Output._(stdout, '');
   }
+
+  void writeLine(String s) {
+    _sink.write('$_prefix$s\n');
+  }
+
+  void blankLine() {
+    _sink.write('\n');
+  }
+
+  Output get indented => new Output._(_sink, _prefix + '  ');
 }
+
+final DATA_TYPE_IDENTIFIER = new Identifier(['data', 'type']);
+final ENUM_DATA_TYPE_IDENTIFIER = new Identifier(['enum']).append(DATA_TYPE_IDENTIFIER);
 
 class EnumDeclarationConstruct {
   final Identifier name;
+  final Identifier namespace;
   final Identifier valueSuffix;
   final List<EnumValueConstruct> values;
 
-  EnumDeclarationConstruct(this.name, this.valueSuffix, this.values);
+  EnumDeclarationConstruct(this.name, this.namespace, this.valueSuffix, this.values);
+
+  Identifier get enumDataTypeIdentifier => name.append(DATA_TYPE_IDENTIFIER);
 
   void process() {
     values.forEach((value) => value.declaration = this);
   }
 
   void write(Output output) {
+    output.writeLine('class ${enumDataTypeIdentifier.camelCaseUpper} ' +
+        'extends ${ENUM_DATA_TYPE_IDENTIFIER.camelCaseUpper} {');
+    output.indented.writeLine('const ${enumDataTypeIdentifier.camelCaseUpper}(): ' +
+        'super(${namespace.underscoreUpper}, \'${name.underscoreLower}\');');
+    output.writeLine('}');
+    output.blankLine();
+
     values.forEach((value) => value.write(output));
   }
 }
@@ -70,13 +98,11 @@ class EnumValueConstruct {
 
   EnumValueConstruct(this.shortName);
 
-  Identifier get identifier =>
-      new Identifier([shortName]).append(declaration.valueSuffix);
+  Identifier get identifier => new Identifier([shortName]).append(declaration.valueSuffix);
 
   void write(Output output) {
-    output.writeLine(
-        'const ${declaration.name.camelCaseUpper} ${identifier.underscoreUpper} = ' +
-            'const ${declaration.name.camelCaseUpper}(\'$shortName\');');
+    output.writeLine('const ${declaration.name.camelCaseUpper} ${identifier.underscoreUpper} = ' +
+        'const ${declaration.name.camelCaseUpper}(\'$shortName\');');
   }
 }
 
@@ -91,9 +117,9 @@ void test_identifier() {
 }
 
 void main() {
-  var output = new Output();
-  var decl = new EnumDeclarationConstruct(
-      new Identifier(['themed', 'style']), new Identifier(['style']), [
+  var output = Output.toStdout();
+  var decl = new EnumDeclarationConstruct(new Identifier(['themed', 'style']),
+      new Identifier(['styles', 'namespace']), new Identifier(['style']), [
     new EnumValueConstruct('Title'),
     new EnumValueConstruct('Subhead'),
     new EnumValueConstruct('Body'),
