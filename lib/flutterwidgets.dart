@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 
 import 'elements.dart';
 import 'elementsruntime.dart';
-import 'styles.dart';
+import 'styles_generated.dart';
 import 'views.dart';
 import 'flutterstyles.dart';
 

@@ -5,7 +5,7 @@ library flutterstyles;
 import 'dart:ui' show Color;
 import 'package:flutter/painting.dart';
 import 'package:flutter/material.dart';
-import 'styles.dart';
+import 'styles_generated.dart';
 
 Map<ThemedStyle, TextStyle> _themedStyleMap = <ThemedStyle, TextStyle>{
   TITLE_STYLE: Typography.black.title,

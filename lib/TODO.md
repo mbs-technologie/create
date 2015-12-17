@@ -13,8 +13,8 @@
 - [ ] Implement FilteredList
 - [ ] Scheduler for actions and observers
 - [ ] Parametrized operations
-- [ ] Start implementing code generation
-- [ ] Generate enum declarations for styles
+- [ ] Start implementing code generation [IN PROGRESS]
+- [ ] Generate enum declarations for styles [IN PROGRESS]
 - [ ] Add addressbook example
 - [ ] Use native Flutter dropdown component [IN PROGRESS]
 - [ ] Separate network code from syncer code
@@ -26,6 +26,8 @@
 - [ ] Reformat the code
 - [ ] Make the repository public
 - [ ] Separate browser from composer modes
+- [ ] Refactor DATA_DATATYPE into APP_STATE_DATA_TYPE
+- [ ] Refactor all DATATYPE into DATA_TYPE
 
 ----------------
 

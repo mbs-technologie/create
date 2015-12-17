@@ -12,7 +12,7 @@ Generic components:
   datastore with live query support
 - [datasync.dart](https://github.com/domokit/create/blob/master/lib/datasync.dart):
   code to synchronize the datastore state across the network
-- [styles.dart](https://github.com/domokit/create/blob/master/lib/styles.dart):
+- [styles.dart](https://github.com/domokit/create/blob/master/lib/styles_generated.dart):
   encapsulating presentation attributes
 - [views.dart](https://github.com/domokit/create/blob/master/lib/views.dart):
   abstract widgets: view = (observable) model + (observable) style

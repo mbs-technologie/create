@@ -41,31 +41,6 @@ const ThemedStyle BODY_STYLE = const ThemedStyle("Body");
 const ThemedStyle CAPTION_STYLE = const ThemedStyle("Caption");
 const ThemedStyle BUTTON_STYLE = const ThemedStyle("Button");
 
-// If you add elements here, you need to update flutterstyles
-class NamedColorDataType extends EnumDataType {
-  const NamedColorDataType(): super(STYLES_NAMESPACE, 'named_color');
-
-  List<NamedColor> get values => [
-    BLACK_COLOR,
-    RED_COLOR,
-    GREEN_COLOR,
-    BLUE_COLOR
-  ];
-}
-
-const NamedColorDataType NAMED_COLOR_DATATYPE = const NamedColorDataType();
-
-class NamedColor extends EnumData {
-  const NamedColor(String name): super(name);
-
-  EnumDataType get dataType => NAMED_COLOR_DATATYPE;
-}
-
-const NamedColor BLACK_COLOR = const NamedColor("Black");
-const NamedColor RED_COLOR = const NamedColor("Red");
-const NamedColor GREEN_COLOR = const NamedColor("Green");
-const NamedColor BLUE_COLOR = const NamedColor("Blue");
-
 // Icons from the Material Design library
 class IconId {
   final String id;
@@ -95,3 +70,27 @@ const IconId ADD_CIRCLE_ICON = const IconId('content/add_circle');
 const IconId REMOVE_CIRCLE_ICON = const IconId('content/remove_circle');
 const IconId RADIO_BUTTON_CHECKED_ICON = const IconId('toggle/radio_button_checked');
 const IconId RADIO_BUTTON_UNCHECKED_ICON = const IconId('toggle/radio_button_unchecked');
+
+class NamedColorDataType extends EnumDataType {
+  const NamedColorDataType(): super(STYLES_NAMESPACE, 'named_color');
+
+  List<NamedColor> get values => [
+    BLACK_COLOR,
+    RED_COLOR,
+    GREEN_COLOR,
+    BLUE_COLOR
+  ];
+}
+
+const NamedColorDataType NAMED_COLOR_DATA_TYPE = const NamedColorDataType();
+
+class NamedColor extends EnumData {
+  const NamedColor(String name): super(name);
+
+  EnumDataType get dataType => NAMED_COLOR_DATA_TYPE;
+}
+
+const NamedColor BLACK_COLOR = const NamedColor('Black');
+const NamedColor RED_COLOR = const NamedColor('Red');
+const NamedColor GREEN_COLOR = const NamedColor('Green');
+const NamedColor BLUE_COLOR = const NamedColor('Blue');

@@ -187,6 +187,17 @@ void test_identifier() {
 // TODO: introduce 'namespace.dart' and declare it there
 const Namespace STYLES_NAMESPACE = const Namespace('Styles', 'styles');
 
+// If you add elements here, you need to update flutterstyles
+EnumDeclarationConstruct makeNamedColors() {
+  return new EnumDeclarationConstruct(
+      new Identifier(['named', 'color']), STYLES_NAMESPACE, new Identifier(['color']), [
+    new EnumValueConstruct('Black'),
+    new EnumValueConstruct('Red'),
+    new EnumValueConstruct('Green'),
+    new EnumValueConstruct('Blue')
+  ]);
+}
+
 void main() {
   var output = Output.toStdout();
 
@@ -198,14 +209,7 @@ void main() {
     new EnumValueConstruct('Caption'),
     new EnumValueConstruct('Button')
   ]);
-  var decl1 = new EnumDeclarationConstruct(
-      new Identifier(['named', 'color']), STYLES_NAMESPACE, new Identifier(['color']), [
-    new EnumValueConstruct('Black'),
-    new EnumValueConstruct('Red'),
-    new EnumValueConstruct('Green'),
-    new EnumValueConstruct('Blue')
-  ]);
-  var constructs = new ConstructList([decl0, decl1]);
+  var constructs = new ConstructList([decl0, makeNamedColors()]);
   constructs.process();
   constructs.write(output);
 }

@@ -3,7 +3,7 @@
 library views;
 
 import 'elements.dart';
-import 'styles.dart';
+import 'styles_generated.dart';
 
 /// A view of M, which is a model type (and must be Observable)
 abstract class View<M extends Observable> {

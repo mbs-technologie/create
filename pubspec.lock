@@ -56,7 +56,7 @@ packages:
   html:
     description: html
     source: hosted
-    version: "0.12.2"
+    version: "0.12.2+1"
   http_multi_server:
     description: http_multi_server
     source: hosted

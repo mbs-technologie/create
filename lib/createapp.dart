@@ -7,7 +7,7 @@ import 'elementsruntime.dart';
 import 'config.dart';
 import 'createdata.dart';
 import 'createeval.dart';
-import 'styles.dart';
+import 'styles_generated.dart';
 import 'views.dart';
 
 const Namespace DEMOAPP_NAMESPACE = const Namespace('Demo App', 'demoapp');
@@ -297,7 +297,7 @@ class CreateApp extends BaseZone implements ApplicationState {
       ),
       new SelectionInput<NamedColor>(
         record.color,
-        new ImmutableList<NamedColor>(NAMED_COLOR_DATATYPE.values),
+        new ImmutableList<NamedColor>(NAMED_COLOR_DATA_TYPE.values),
         displayToString
       )
     ]));

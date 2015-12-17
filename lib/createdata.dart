@@ -5,7 +5,7 @@ library createdata;
 import 'elements.dart';
 import 'elementsruntime.dart';
 import 'datastore.dart';
-import 'styles.dart';
+import 'styles_generated.dart';
 
 // TODO: move to elementsruntime.
 abstract class NamedRecord extends BaseCompositeData implements Named {
@@ -185,7 +185,7 @@ Set<DataType> ALL_CREATE_TYPES = [
   TYPE_ID_DATATYPE,
   VIEW_ID_DATATYPE,
   THEMED_STYLE_DATATYPE,
-  NAMED_COLOR_DATATYPE
+  NAMED_COLOR_DATA_TYPE
 ].toSet();
 
 // TODO: move to CreateApp
