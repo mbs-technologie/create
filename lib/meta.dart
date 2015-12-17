@@ -64,6 +64,7 @@ class Output {
 }
 
 final DATA_TYPE_IDENTIFIER = new Identifier(['data', 'type']);
+final ENUM_DATA_IDENTIFIER = new Identifier(['enum', 'data']);
 final ENUM_DATA_TYPE_IDENTIFIER = new Identifier(['enum']).append(DATA_TYPE_IDENTIFIER);
 
 class EnumDeclarationConstruct {
@@ -81,10 +82,43 @@ class EnumDeclarationConstruct {
   }
 
   void write(Output output) {
+    _writeMetaType(output);
+    _writeType(output);
+  }
+
+  void _writeMetaType(Output output) {
     output.writeLine('class ${enumDataTypeIdentifier.camelCaseUpper} ' +
         'extends ${ENUM_DATA_TYPE_IDENTIFIER.camelCaseUpper} {');
-    output.indented.writeLine('const ${enumDataTypeIdentifier.camelCaseUpper}(): ' +
+    Output typeBody = output.indented;
+    typeBody.writeLine('const ${enumDataTypeIdentifier.camelCaseUpper}(): ' +
         'super(${namespace.underscoreUpper}, \'${name.underscoreLower}\');');
+    typeBody.blankLine();
+    typeBody.writeLine('List<${name.camelCaseUpper}> get values => [');
+    Output valuesList = typeBody.indented;
+    for (int i = 0; i < values.length; ++i) {
+      var comma = (i < values.length - 1) ? ',' : '';
+      valuesList.writeLine('${values[i].identifier.underscoreUpper}$comma');
+    }
+    typeBody.writeLine('];');
+
+    output.writeLine('}');
+    output.blankLine();
+
+    output.writeLine('const ${enumDataTypeIdentifier.camelCaseUpper} ' +
+        '${enumDataTypeIdentifier.underscoreUpper} = const ' +
+        '${enumDataTypeIdentifier.camelCaseUpper}();');
+    output.blankLine();
+  }
+
+  void _writeType(Output output) {
+    output.writeLine(
+        'class ${name.camelCaseUpper} ' + 'extends ${ENUM_DATA_IDENTIFIER.camelCaseUpper} {');
+    Output typeBody = output.indented;
+    typeBody.writeLine('const ${name.camelCaseUpper}(String name): super(name);');
+    typeBody.blankLine();
+    typeBody.writeLine('${ENUM_DATA_TYPE_IDENTIFIER.camelCaseUpper} get ' +
+        '${DATA_TYPE_IDENTIFIER.camelCaseLower} => ' +
+        '${enumDataTypeIdentifier.underscoreUpper};');
     output.writeLine('}');
     output.blankLine();
 
