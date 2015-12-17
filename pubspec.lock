@@ -68,7 +68,7 @@ packages:
   intl:
     description: intl
     source: hosted
-    version: "0.12.4+3"
+    version: "0.12.5"
   logging:
     description: logging
     source: hosted

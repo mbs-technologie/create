@@ -26,8 +26,8 @@
 - [ ] Reformat the code
 - [ ] Make the repository public
 - [ ] Separate browser from composer modes
-- [ ] Refactor DATA_DATATYPE into APP_STATE_DATA_TYPE
 - [ ] Refactor all DATATYPE into DATA_TYPE
+- [ ] Improve readability of Construct constructors
 
 ----------------
 
@@ -59,3 +59,4 @@
 - [x] Implement CompositeDataType.newInstance(dataId)
 - [x] Use lowercase names when serializing enum values
 - [x] Update to Flutter 2015-12-11.
+- [x] Refactor DATA_DATATYPE into APP_STATE_DATATYPE

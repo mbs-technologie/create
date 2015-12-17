@@ -21,7 +21,7 @@ run: packages
 packages: pubspec.yaml
 	pub get
 
-upgrades:
+upgrade:
 	pub upgrade
 
 build: packages

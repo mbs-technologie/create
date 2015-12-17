@@ -25,7 +25,7 @@ const AppMode OPERATIONS_MODE = const AppMode('Operations', CODE_ICON);
 const AppMode SERVICES_MODE = const AppMode('Services', EXTENSION_ICON);
 const AppMode STYLES_MODE = const AppMode('Styles', STYLE_ICON);
 const AppMode VIEWS_MODE = const AppMode('Views', VIEW_QUILT_ICON);
-const AppMode DATA_MODE = const AppMode('Data', CLOUD_ICON);
+const AppMode APP_STATE_MODE = const AppMode('State', CLOUD_ICON);
 const AppMode LAUNCH_MODE = const AppMode('Launch', LAUNCH_ICON);
 
 List<AppMode> DRAWER_MODES = [
@@ -36,7 +36,7 @@ List<AppMode> DRAWER_MODES = [
   SERVICES_MODE,
   STYLES_MODE,
   VIEWS_MODE,
-  DATA_MODE,
+  APP_STATE_MODE,
   LAUNCH_MODE
 ];
 
@@ -124,8 +124,8 @@ class CreateApp extends BaseZone implements ApplicationState {
       return stylesView(viewLifespan);
     } else if (mode == VIEWS_MODE) {
       return viewsView(viewLifespan);
-    } else if (mode == DATA_MODE) {
-      return dataView(viewLifespan);
+    } else if (mode == APP_STATE_MODE) {
+      return appStateView(viewLifespan);
     } else if (mode == LAUNCH_MODE) {
       return launchView(viewLifespan);
     } else {
@@ -136,7 +136,7 @@ class CreateApp extends BaseZone implements ApplicationState {
   Operation makeAddOperation(AppMode mode) {
     if (mode == SCHEMA_MODE) {
       return makeOperation(() {
-        datastore.add(new DataRecord(DATA_DATATYPE, idSource.nextId(),
+        datastore.add(new DataRecord(APP_STATE_DATATYPE, idSource.nextId(),
             datastore.newRecordName('data'), STRING_TYPE, '?'));
       });
     } else if (mode == PARAMETERS_MODE) {
@@ -190,7 +190,7 @@ class CreateApp extends BaseZone implements ApplicationState {
 
   View schemaView(Lifespan lifespan) {
     return new ColumnView(
-      new MappedList<DataRecord, View>(datastore.getData(lifespan), schemaRowView, lifespan)
+      new MappedList<DataRecord, View>(datastore.getAppState(lifespan), schemaRowView, lifespan)
     );
   }
 
@@ -412,13 +412,13 @@ class CreateApp extends BaseZone implements ApplicationState {
     }
   }
 
-  View dataView(Lifespan lifespan) {
+  View appStateView(Lifespan lifespan) {
     return new ColumnView(
-      new MappedList<DataRecord, View>(datastore.getData(lifespan), dataRowView, lifespan)
+      new MappedList<DataRecord, View>(datastore.getAppState(lifespan), appStateRowView, lifespan)
     );
   }
 
-  View dataRowView(DataRecord record) {
+  View appStateRowView(DataRecord record) {
     return new RowView(new ImmutableList<View>([
       new LabelView(
         record.recordName,

@@ -24,7 +24,7 @@ class DataRecordType extends CompositeDataType {
       new DataRecord(this, dataId, null, null, null);
 }
 
-const DataRecordType DATA_DATATYPE = const DataRecordType('data');
+const DataRecordType APP_STATE_DATATYPE = const DataRecordType('app_state');
 const DataRecordType PARAMETER_DATATYPE = const DataRecordType('parameter');
 const DataRecordType OPERATION_DATATYPE = const DataRecordType('operation');
 const DataRecordType SERVICE_DATATYPE = const DataRecordType('service');
@@ -176,7 +176,7 @@ class ViewRecord extends NamedRecord {
 }
 
 Set<DataType> ALL_CREATE_TYPES = [
-  DATA_DATATYPE,
+  APP_STATE_DATATYPE,
   PARAMETER_DATATYPE,
   OPERATION_DATATYPE,
   SERVICE_DATATYPE,
@@ -203,8 +203,8 @@ class CreateData extends Datastore {
   ReadList<DataRecord> getDataRecords(CompositeDataType dataType, Lifespan lifespan) =>
     runQuery((record) => record.dataType == dataType, lifespan);
 
-  ReadList<DataRecord> getData(Lifespan lifespan) =>
-    getDataRecords(DATA_DATATYPE, lifespan);
+  ReadList<DataRecord> getAppState(Lifespan lifespan) =>
+    getDataRecords(APP_STATE_DATATYPE, lifespan);
 
   ReadList<DataRecord> getParameters(Lifespan lifespan) =>
     getDataRecords(PARAMETER_DATATYPE, lifespan);

@@ -27,7 +27,7 @@ r'''{
       "state": "Hello, world!"
     },
     {
-      "#type": "create.data",
+      "#type": "create.app_state",
       "#id": "demoapp:6",
       "#version": 0,
       "record_name": "counter",
