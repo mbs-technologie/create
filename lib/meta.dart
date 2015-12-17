@@ -48,16 +48,35 @@ class Output {
   }
 }
 
-class EnumValueConstruct {
-  Identifier name;
+class EnumDeclarationConstruct {
+  final Identifier name;
+  final Identifier valueSuffix;
+  final List<EnumValueConstruct> values;
 
-  EnumValueConstruct(this.name);
+  EnumDeclarationConstruct(this.name, this.valueSuffix, this.values);
+
+  void process() {
+    values.forEach((value) => value.declaration = this);
+  }
 
   void write(Output output) {
-    var enumType = new Identifier(['Themed', 'Style']);
+    values.forEach((value) => value.write(output));
+  }
+}
+
+class EnumValueConstruct {
+  final String shortName;
+  EnumDeclarationConstruct declaration;
+
+  EnumValueConstruct(this.shortName);
+
+  Identifier get identifier =>
+      new Identifier([shortName]).append(declaration.valueSuffix);
+
+  void write(Output output) {
     output.writeLine(
-        'const ${enumType.camelCaseUpper} ${name.underscoreUpper} = ' +
-            'const ${enumType.camelCaseUpper}("Title");');
+        'const ${declaration.name.camelCaseUpper} ${identifier.underscoreUpper} = ' +
+            'const ${declaration.name.camelCaseUpper}(\'$shortName\');');
   }
 }
 
@@ -73,5 +92,14 @@ void test_identifier() {
 
 void main() {
   var output = new Output();
-  new EnumValueConstruct(new Identifier(['Title', 'style'])).write(output);
+  var decl = new EnumDeclarationConstruct(
+      new Identifier(['themed', 'style']), new Identifier(['style']), [
+    new EnumValueConstruct('Title'),
+    new EnumValueConstruct('Subhead'),
+    new EnumValueConstruct('Body'),
+    new EnumValueConstruct('Caption'),
+    new EnumValueConstruct('Button'),
+  ]);
+  decl.process();
+  decl.write(output);
 }
