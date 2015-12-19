@@ -4,7 +4,7 @@ packages:
   analyzer:
     description: analyzer
     source: hosted
-    version: "0.27.1"
+    version: "0.27.1+1"
   args:
     description: args
     source: hosted
@@ -150,11 +150,11 @@ packages:
   sky_engine:
     description: sky_engine
     source: hosted
-    version: "0.0.74"
+    version: "0.0.71"
   sky_services:
     description: sky_services
     source: hosted
-    version: "0.0.74"
+    version: "0.0.71"
   source_map_stack_trace:
     description: source_map_stack_trace
     source: hosted

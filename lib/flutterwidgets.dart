@@ -233,7 +233,9 @@ class TextComponentState extends State<TextComponent> {
 
   void modelChanged() {
     if (config.input.model.value != widgetText) {
-      setState(() { });
+      if (this.mounted) {
+        setState(() { });
+      }
     }
   }
 
