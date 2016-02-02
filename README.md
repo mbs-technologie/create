@@ -8,6 +8,8 @@ Generic components:
   a library of reactive datatypes (interfaces)
 - [elementsruntime.dart](https://github.com/domokit/create/blob/master/lib/elementsruntime.dart):
   a library of core reactive datatypes (implementation)
+- [elementstypes.dart](https://github.com/domokit/create/blob/master/lib/elementstypes.dart):
+  a library of core reactive datatypes (implementation)
 - [datastore.dart](https://github.com/domokit/create/blob/master/lib/datastore.dart):
   datastore with live query support
 - [datasync.dart](https://github.com/domokit/create/blob/master/lib/datasync.dart):
@@ -48,8 +50,8 @@ You need to clone the [Flutter repository](https://github.com/flutter/flutter) i
 
 ## Contributions
 
-This is an experimental project, we are not seeking external contributors
-at this stage.
+This is an experimental project, we are not seeking external contributions
+at this time.
 
 ## Feedback?
 
