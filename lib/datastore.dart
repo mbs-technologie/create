@@ -7,6 +7,7 @@ library datastore;
 import 'dart:collection';
 import 'elements.dart';
 import 'elementsruntime.dart';
+import 'elementstypes.dart';
 
 typedef bool QueryType(CompositeData);
 

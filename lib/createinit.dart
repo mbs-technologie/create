@@ -4,8 +4,7 @@
 
 library createinit;
 
-import 'elements.dart';
-import 'elementsruntime.dart';
+import 'elementstypes.dart';
 import 'createdata.dart';
 
 List<CompositeData> buildInitialCreateData(Namespace namespace) {

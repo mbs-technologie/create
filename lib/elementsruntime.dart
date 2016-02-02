@@ -4,8 +4,6 @@
 
 library elementsruntime;
 
-import 'dart:math' as math;
-
 import 'elements.dart';
 
 /// Adapter for converting a procedure into a disposable object.
@@ -297,81 +295,6 @@ class _ListCell<E> implements Ref<E> {
   void observe(Operation observer, Lifespan lifespan) => list.observe(observer, lifespan);
 }
 
-/// Timestamps as version identifiers.
-class Timestamp implements VersionId {
-  final int milliseconds;
-
-  const Timestamp(this.milliseconds);
-
-  VersionId nextVersion() => new Timestamp(new DateTime.now().millisecondsSinceEpoch);
-  bool isAfter(VersionId other) => milliseconds > ((other as Timestamp).milliseconds);
-
-  String toString() => milliseconds.toString();
-  bool operator ==(o) => o is Timestamp && milliseconds == o.milliseconds;
-  int get hashCode => milliseconds.hashCode;
-}
-
-/// The smallest version idnetfier.
-VersionId VERSION_ZERO = new Timestamp(0);
-
-/// String tags as DataIds.
-// TODO(dynin): switch to using UUIDs.
-class TaggedDataId implements DataId {
-  final String tag;
-
-  TaggedDataId(Namespace namespace, int id): tag = namespace.id + ':' + id.toString();
-  TaggedDataId.deserialize(this.tag);
-
-  String toString() => tag;
-  bool operator ==(o) => o is DataId && tag == o.tag;
-  int get hashCode => tag.hashCode;
-}
-
-/// Generator of sequential DataIds.
-class SequentialIdSource extends DataIdSource {
-  Namespace namespace;
-  int _nextNumber = 0;
-
-  SequentialIdSource(this.namespace);
-
-  DataId nextId() => new TaggedDataId(namespace, _nextNumber++);
-}
-
-/// Generator of random DataIds.
-class RandomIdSource extends DataIdSource {
-  Namespace namespace;
-  math.Random _random = new math.Random();
-
-  RandomIdSource(this.namespace);
-  DataId nextId() => new TaggedDataId(namespace, _random.nextInt(math.pow(2, 31)));
-}
-
-/// Base class for composite data types.
-abstract class BaseCompositeData extends CompositeData {
-  BaseCompositeData(): super(VERSION_ZERO);
-
-  void observe(Operation observer, Lifespan lifespan) {
-    visit(new _ObserveFields(observer, lifespan));
-  }
-}
-
-/// A helper class that registers and observer on all fields of a composite data type.
-class _ObserveFields implements FieldVisitor {
-  final Operation observer;
-  final Lifespan lifespan;
-
-  _ObserveFields(this.observer, this.lifespan);
-
-  void stringField(String fieldName, Ref<String> field) => process(field);
-  void doubleField(String fieldName, Ref<double> field) => process(field);
-  void dataField(String fieldName, Ref<Data> field) => process(field);
-  void listField(String fieldName, MutableList<Data> field) => process(field);
-
-  void process(Observable observable) {
-    observable.observe(observer, lifespan);
-  }
-}
-
 /// Check whether a reference is not null and holds a non-null value.
 bool isNotNull(ReadRef ref) => (ref != null && ref.value != null);
 
@@ -391,7 +314,3 @@ bool isLetter(int c) {
 bool isLetterOrDigit(int c) {
   return isLetter(c) || isDigit(c);
 }
-
-/// A function that returns a name for displaying to the user.
-DisplayFunction displayName(String nullName) =>
-  (value) => (value is Named ? value.name : nullName);

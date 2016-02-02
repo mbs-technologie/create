@@ -6,6 +6,7 @@ library createdata;
 
 import 'elements.dart';
 import 'elementsruntime.dart';
+import 'elementstypes.dart';
 import 'datastore.dart';
 import 'styles_generated.dart';
 

@@ -7,6 +7,7 @@ library meta;
 import 'dart:io';
 
 import 'elements.dart';
+import 'elementstypes.dart';
 
 /// Identifier consisting of one or more segments.
 // TODO: cache different representations.

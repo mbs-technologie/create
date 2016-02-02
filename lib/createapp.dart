@@ -6,6 +6,7 @@ library createapp;
 
 import 'elements.dart';
 import 'elementsruntime.dart';
+import 'elementstypes.dart';
 import 'config.dart';
 import 'createdata.dart';
 import 'createeval.dart';

@@ -5,6 +5,7 @@
 library views;
 
 import 'elements.dart';
+import 'elementstypes.dart';
 import 'styles_generated.dart';
 
 /// A view of M, which is a model type (and must be Observable)

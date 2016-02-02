@@ -5,6 +5,7 @@
 library styles;
 
 import 'elements.dart';
+import 'elementstypes.dart';
 
 const Namespace STYLES_NAMESPACE = const Namespace('Styles', 'styles');
 

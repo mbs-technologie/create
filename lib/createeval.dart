@@ -6,6 +6,7 @@ library createeval;
 
 import 'elements.dart';
 import 'elementsruntime.dart';
+import 'elementstypes.dart';
 import 'createdata.dart';
 
 Construct parseTemplate(String template) {
