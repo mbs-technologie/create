@@ -1,7 +1,7 @@
 # Create
 
 A reactive programming framework built with Dart and Flutter,
-along with two applcations: a simple counter demo and an app builder.
+along with two demo applcations: a simple counter demo and an app builder.
 
 Generic components:
 - [elements.dart](https://github.com/domokit/create/blob/master/lib/elements.dart):
@@ -41,4 +41,16 @@ Main function:
 - [main.dart](https://github.com/domokit/create/blob/master/lib/main.dart):
   just launch the app
 
-Feedback? [I'd love to hear it](mailto:dynin@google.com).
+## Setup instructions
+
+You need to clone the [Flutter repository](https://github.com/flutter/flutter) into
+`../flutter`, or tweak `pubspec.yaml` to use the default version.
+
+## Contributions
+
+This is an experimental project, we are not seeking external contributors
+at this stage.
+
+## Feedback?
+
+[I'd love to hear it](mailto:dynin@google.com).
