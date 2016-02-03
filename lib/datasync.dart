@@ -6,7 +6,6 @@ library datasync;
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:io';
 import 'dart:convert' as convert;
 
 import 'elements.dart';
@@ -44,16 +43,20 @@ Object _marshalVersion(VersionId versionId) =>
 VersionId _unmarshalVersion(Object object) =>
   new Timestamp(object as int);
 
+abstract class DataTransport {
+  void store(String content, Procedure onComplete);
+  void load(void onSuccess(String), Procedure onFailure, Procedure onComplete);
+}
+
 class DataSyncer {
   final Datastore datastore;
-  final String syncUri;
+  final DataTransport transport;
   final Map<String, DataType> _typesByName = new Map<String, DataType>();
   final Map<String, EnumData> _enumMap = new Map<String, EnumData>();
-  final HttpClient client = new HttpClient();
   final convert.JsonEncoder encoder = const convert.JsonEncoder.withIndent('  ');
   VersionId lastPushed;
 
-  DataSyncer(this.datastore, this.syncUri) {
+  DataSyncer(this.datastore, this.transport) {
     datastore.dataTypes.forEach(_initType);
   }
 
@@ -90,20 +93,7 @@ class DataSyncer {
     lastPushed = datastore.version;
     Map datastoreJson = { VERSION_FIELD: _marshalVersion(lastPushed), RECORDS_FIELD: jsonRecords };
 
-    client.putUrl(Uri.parse(syncUri))
-      .then((HttpClientRequest request) {
-        request.headers.contentType = new ContentType("text", "plain", charset: "utf-8");
-        request.write(encoder.convert(datastoreJson));
-        print('Pushing: write completed');
-        return request.close();
-      })
-      .then((HttpClientResponse response) {
-        response.transform(convert.UTF8.decoder).listen((contents) {
-          String responseBody = contents.toString();
-          print('Pushing: got response body: $responseBody');
-        });
-      })
-      .whenComplete(_scheduleSync);
+    transport.store(encoder.convert(datastoreJson), _scheduleSync);
   }
 
   Map<String, Object> _recordToJson(CompositeData record) {
@@ -114,40 +104,27 @@ class DataSyncer {
 
   void pull() {
     print('Pulling datastore: ${datastore.describe}');
-    doGet(datastore.version, null, null);
+    load(datastore.version, null, null);
   }
 
   void initialize(WriteRef<bool> dataReady, String fallbackDatastoreState) {
     void initCompleted() { dataReady.value = true; }
-    doGet(null, initCompleted, (() { initFallback(fallbackDatastoreState); initCompleted(); }));
+    load(null, initCompleted, (() { initFallback(fallbackDatastoreState); initCompleted(); }));
   }
 
-  void doGet(VersionId currentVersion, Procedure onSuccess, Procedure onFailure) {
-    StringBuffer responseContent = new StringBuffer();
-    client.getUrl(Uri.parse(syncUri))
-      .then((HttpClientRequest request) => request.close())
-      .then((HttpClientResponse response) {
-        response.transform(convert.UTF8.decoder)
-        .listen((response) {
-          responseContent.write(response);
-        }, onDone: () {
-          if (tryUmarshalling(responseContent.toString(), currentVersion)) {
-            print('Get: got state from server');
-            if (onSuccess != null) {
-              onSuccess();
-            }
-          } else {
-            if (onFailure != null) {
-              onFailure();
-            }
-          }
-        });
-      }, onError: (e) {
+  void load(VersionId currentVersion, Procedure onSuccess, Procedure onFailure) {
+    void unmarshal(String content) {
+      if (tryUmarshalling(content, currentVersion)) {
+        if (onSuccess != null) {
+          onSuccess();
+        }
+      } else {
         if (onFailure != null) {
           onFailure();
         }
-      })
-      .whenComplete(_scheduleSync);
+      }
+    }
+    transport.load(unmarshal, onFailure, _scheduleSync);
   }
 
   bool tryUmarshalling(String responseBody, VersionId currentVersion) {

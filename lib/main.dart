@@ -6,6 +6,7 @@ import 'elements.dart';
 import 'elementsruntime.dart';
 import 'config.dart';
 import 'datasync.dart';
+import 'httptransport.dart';
 import 'views.dart';
 import 'flutterapp.dart';
 import 'counter.dart';
@@ -29,12 +30,14 @@ void main() {
     case AppChoice.CREATE:
       CreateData datastore = new CreateData();
       Ref<bool> dataReady = new Boxed<bool>(false);
+      DataTransport transport = new HttpTransport(SYNC_URI);
       if (!RESET_DATASTORE) {
-        new DataSyncer(datastore, SYNC_URI).initialize(dataReady, INITIAL_STATE);
+        new DataSyncer(datastore, transport).initialize(
+            dataReady, INITIAL_STATE);
       } else {
         datastore.addAll(buildInitialCreateData(DEMOAPP_NAMESPACE), datastore.version);
         dataReady.value = true;
-        new DataSyncer(datastore, SYNC_URI).push();
+        new DataSyncer(datastore, transport).push();
       }
       app = new CreateApp(datastore, dataReady);
       break;
