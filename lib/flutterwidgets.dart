@@ -160,7 +160,10 @@ abstract class FlutterWidgets {
   }
 
   Row renderRow(RowView row, Lifespan lifespan) {
-    return new Row(children: _buildWidgetList(row.model, lifespan));
+    return new Row(
+      children: _buildWidgetList(row.model, lifespan),
+      mainAxisAlignment: MainAxisAlignment.start
+    );
   }
 
   Column renderColumn(ColumnView column, Lifespan lifespan) {
