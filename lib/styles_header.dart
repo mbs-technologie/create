@@ -4,6 +4,8 @@
 
 library styles;
 
+import 'package:flutter/material.dart';
+
 import 'elements.dart';
 import 'elementstypes.dart';
 
@@ -47,30 +49,37 @@ const ThemedStyle BUTTON_STYLE = const ThemedStyle("Button");
 // Icons from the Material Design library
 class IconId {
   final String id;
+  final IconData iconData;
 
-  const IconId(this.id);
+  const IconId(this.id, this.iconData);
 }
 
-const IconId MENU_ICON = const IconId('navigation/menu');
-const IconId SEARCH_ICON = const IconId('action/search');
-const IconId ARROW_DROP_DOWN_ICON = const IconId('navigation/arrow_drop_down');
-const IconId MORE_VERT_ICON = const IconId('navigation/more_vert');
-const IconId SETTINGS_ICON = const IconId('action/settings');
-const IconId HELP_ICON = const IconId('action/help');
-const IconId LAUNCH_ICON = const IconId('action/launch');
-const IconId CODE_ICON = const IconId('action/code');
-const IconId EXTENSION_ICON = const IconId('action/extension');
-const IconId VIEW_QUILT_ICON = const IconId('action/view_quilt');
-const IconId SETTINGS_SYSTEM_DAYDREAM_ICON = const IconId('device/settings_system_daydream');
-const IconId WIDGETS_ICON = const IconId('device/widgets');
-const IconId MODE_EDIT_ICON = const IconId('editor/mode_edit');
-const IconId STYLE_ICON = const IconId('image/style');
-const IconId EXPOSURE_PLUS_1_ICON = const IconId('image/exposure_plus_1');
-const IconId EXPOSURE_PLUS_2_ICON = const IconId('image/exposure_plus_2');
-const IconId CLOUD_ICON = const IconId('file/cloud');
-const IconId ADD_ICON = const IconId('content/add');
-const IconId ADD_CIRCLE_ICON = const IconId('content/add_circle');
-const IconId REMOVE_CIRCLE_ICON = const IconId('content/remove_circle');
-const IconId RADIO_BUTTON_CHECKED_ICON = const IconId('toggle/radio_button_checked');
-const IconId RADIO_BUTTON_UNCHECKED_ICON = const IconId('toggle/radio_button_unchecked');
+const IconId MENU_ICON = const IconId('navigation/menu', Icons.menu);
+const IconId SEARCH_ICON = const IconId('action/search', Icons.search);
+const IconId ARROW_DROP_DOWN_ICON = const IconId('navigation/arrow_drop_down',
+    Icons.arrow_drop_down);
+const IconId MORE_VERT_ICON = const IconId('navigation/more_vert', Icons.more_vert);
+const IconId SETTINGS_ICON = const IconId('action/settings', Icons.settings);
+const IconId HELP_ICON = const IconId('action/help', Icons.help);
+const IconId LAUNCH_ICON = const IconId('action/launch', Icons.launch);
+const IconId CODE_ICON = const IconId('action/code', Icons.code);
+const IconId EXTENSION_ICON = const IconId('action/extension', Icons.extension);
+const IconId VIEW_QUILT_ICON = const IconId('action/view_quilt', Icons.view_quilt);
+const IconId SETTINGS_SYSTEM_DAYDREAM_ICON = const IconId('device/settings_system_daydream',
+    Icons.settings_system_daydream);
+const IconId WIDGETS_ICON = const IconId('device/widgets', Icons.widgets);
+const IconId MODE_EDIT_ICON = const IconId('editor/mode_edit', Icons.mode_edit);
+const IconId STYLE_ICON = const IconId('image/style', Icons.style);
+const IconId EXPOSURE_PLUS_1_ICON = const IconId('image/exposure_plus_1', Icons.exposure_plus_1);
+const IconId EXPOSURE_PLUS_2_ICON = const IconId('image/exposure_plus_2', Icons.exposure_plus_2);
+const IconId CLOUD_ICON = const IconId('file/cloud', Icons.cloud);
+const IconId ADD_ICON = const IconId('content/add', Icons.add);
+const IconId ADD_CIRCLE_ICON = const IconId('content/add_circle', Icons.add_circle);
+const IconId REMOVE_CIRCLE_ICON = const IconId('content/remove_circle', Icons.remove_circle);
+const IconId RADIO_BUTTON_CHECKED_ICON = const IconId('toggle/radio_button_checked',
+    Icons.radio_button_checked);
+const IconId RADIO_BUTTON_UNCHECKED_ICON = const IconId('toggle/radio_button_unchecked',
+    Icons.radio_button_unchecked);
 
+// TODO(dynin): re-introduce icon size?
+const double ICON_SIZE_S24 = 24.0;

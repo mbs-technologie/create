@@ -96,7 +96,7 @@ abstract class FlutterWidgets {
   Widget renderLabel(LabelView label) {
     return new Container(
       child: new Text(label.model.value, style: textStyleOf(label)),
-      padding: const EdgeDims.symmetric(horizontal: 5.0)
+      padding: const EdgeInsets.symmetric(horizontal: 5.0)
     );
   }
 
@@ -104,7 +104,7 @@ abstract class FlutterWidgets {
     // TODO: two-way binding
     return new Container(
       child: new Checkbox(value: input.model.value, onChanged: (ignored) => null),
-      padding: const EdgeDims.all(5.0)
+      padding: const EdgeInsets.all(5.0)
     );
   }
 
@@ -128,7 +128,10 @@ abstract class FlutterWidgets {
   }
 
   IconButton renderIconButton(IconButtonView button) {
-    return new IconButton(icon: button.model.value.id, onPressed: _scheduleAction(button.action));
+    return new IconButton(
+      icon: button.model.value.iconData,
+      onPressed: _scheduleAction(button.action)
+    );
   }
 
   DrawerHeader renderHeader(HeaderView header) {
@@ -140,7 +143,7 @@ abstract class FlutterWidgets {
   DrawerItem renderItem(ItemView item) {
     return new DrawerItem(
       child: new Text(item.model.value, style: textStyleOf(item)),
-      icon: item.icon.value != null ? item.icon.value.id : null,
+      icon: item.icon.value != null ? item.icon.value.iconData : null,
       selected: item.selected.value,
       onPressed: () {
         dismissDrawer();
@@ -152,23 +155,23 @@ abstract class FlutterWidgets {
     );
   }
 
-  DrawerDivider renderDivider(DividerView divider) {
-    return new DrawerDivider();
+  Divider renderDivider(DividerView divider) {
+    return new Divider();
   }
 
   Row renderRow(RowView row, Lifespan lifespan) {
-    return new Row(_buildWidgetList(row.model, lifespan));
+    return new Row(children: _buildWidgetList(row.model, lifespan));
   }
 
   Column renderColumn(ColumnView column, Lifespan lifespan) {
     return new Column(
-      _buildWidgetList(column.model, lifespan),
-      alignItems: FlexAlignItems.start
+      children: _buildWidgetList(column.model, lifespan),
+      mainAxisAlignment: MainAxisAlignment.start
     );
   }
 
   Drawer renderDrawer(DrawerView drawer, Lifespan lifespan) {
-    return new Drawer(child: new Block(_buildWidgetList(drawer.model, lifespan)));
+    return new Drawer(child: new Block(children: _buildWidgetList(drawer.model, lifespan)));
   }
 
   Function _scheduleAction(ReadRef<Operation> action) => () {
@@ -192,7 +195,7 @@ TextStyle textStyleOf(View view) {
 }
 
 // TODO: Make better use of Flutter widgets
-class TextComponent extends StatefulComponent {
+class TextComponent extends StatefulWidget {
   final TextInput input;
   final Lifespan lifespan;
 
@@ -214,11 +217,12 @@ class TextComponentState extends State<TextComponent> {
     registerOberverIfNeeded();
     return new Container(
       width: 300.0,
-      child: new Row([
-        new IconButton(icon: MODE_EDIT_ICON.id, onPressed: _editPressed),
+      child: new Row(children: [
+        new IconButton(icon: MODE_EDIT_ICON.iconData, onPressed: _editPressed),
         new Flexible(
           child: editing || _USE_FLUTTER_INPUT
-            ? new Input(key: inputKey, initialValue: config.input.model.value,
+            ? new Input(key: inputKey,
+                        value: new InputValue(text: config.input.model.value),
                         onChanged: widgetChanged)
             : new Text(config.input.model.value, style: textStyle)
         )
@@ -241,9 +245,9 @@ class TextComponentState extends State<TextComponent> {
     }
   }
 
-  void widgetChanged(String newValue) {
-    widgetText = newValue;
-    config.input.model.value = newValue;
+  void widgetChanged(InputValue newValue) {
+    widgetText = newValue.text;
+    config.input.model.value = newValue.text;
   }
 
   void _editPressed() {
@@ -295,7 +299,7 @@ class _FlutterDropDownButton<T> {
 }
 
 // TODO: this code should be retired once we commit to using Flutter dropdown buttons
-class _EmulatedDropDownButton<T> extends StatelessComponent {
+class _EmulatedDropDownButton<T> extends StatelessWidget {
   _EmulatedDropDownButton(this.selection);
 
   final SelectionInput<T> selection;
@@ -304,9 +308,9 @@ class _EmulatedDropDownButton<T> extends StatelessComponent {
 
   Widget build(BuildContext context) {
     return new FlatButton(
-      child: new Row([
+      child: new Row(children: [
         new Text(selection.display(selection.model.value), style: textStyle),
-        new Icon(icon: ARROW_DROP_DOWN_ICON.id, size: IconSize.s24)
+        new Icon(icon: ARROW_DROP_DOWN_ICON.iconData, size: ICON_SIZE_S24)
       ]),
       onPressed: () { showSelectionMenu(context); }
     );
@@ -318,10 +322,10 @@ class _EmulatedDropDownButton<T> extends StatelessComponent {
 
     final List<PopupMenuItem> menuItems = new List.from(selection.options.elements.map(
       (T option) => new PopupMenuItem(
-          child: new Row([
+          child: new Row(children: [
             new IconButton(icon: (option == selection.model.value
                 ? RADIO_BUTTON_CHECKED_ICON
-                : RADIO_BUTTON_UNCHECKED_ICON).id),
+                : RADIO_BUTTON_UNCHECKED_ICON).iconData),
             new Text(selection.display(option), style: textStyle)]),
           value: option
       )));
