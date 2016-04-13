@@ -4,6 +4,8 @@
 
 library counter;
 
+import 'package:firebase/firebase.dart';
+
 import 'elements.dart';
 import 'elementsruntime.dart';
 import 'styles_generated.dart';
@@ -45,6 +47,12 @@ class CounterApp extends BaseZone implements ApplicationState {
         )
       ]
     ));
+  }
+
+  @override initState() {
+    Firebase firebase = new Firebase("https://create-dev.firebaseio.com/");
+    var record = { 'value': 566 };
+    firebase.push().set(record);
   }
 
   @override DrawerView makeDrawer() {

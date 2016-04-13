@@ -42,6 +42,8 @@ class FlutterAppState extends State<FlutterApp> with FlutterWidgets {
 
   void initState() {
     super.initState();
+    config.appState.initState();
+
     Operation rebuildOperation = viewZone.makeOperation(rebuildApp);
     config.appState.appTitle.observe(rebuildOperation, viewZone);
     config.appState.mainView.observe(rebuildOperation, viewZone);

@@ -1,2 +1,4 @@
 name: create
 uses-material-design: true
+services:
+  - firebase

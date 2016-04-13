@@ -101,6 +101,7 @@ class DrawerView extends ContainerView {
 
 /// Application state
 abstract class ApplicationState implements Zone {
+  void initState();
   ReadRef<String> get appTitle;
   ReadRef<String> get appVersion;
   ReadRef<View> get mainView;

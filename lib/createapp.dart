@@ -99,6 +99,8 @@ class CreateApp extends BaseZone implements ApplicationState {
     }
   }
 
+  @override initState() => null;
+
   void _checkInitDone() {
     if (appMode.value == INITIALIZING_MODE && dataReady.value) {
       appMode.value = STARTUP_MODE;
