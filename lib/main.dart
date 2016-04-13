@@ -19,8 +19,7 @@ enum AppChoice { COUNTER, CREATE }
 const String SYNC_URI = 'http://create-ledger.appspot.com/data?id=$CREATE_VERSION';
 const bool RESET_DATASTORE = false;
 
-void main() {
-  AppChoice appChoice = AppChoice.CREATE;  // Change to run the Counter app
+void start(AppChoice appChoice) {
   ApplicationState app;
 
   switch (appChoice) {
@@ -44,4 +43,8 @@ void main() {
   }
 
   new FlutterApp(app).run();
+}
+
+void main() {
+  start(AppChoice.CREATE);
 }

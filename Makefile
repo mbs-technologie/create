@@ -5,7 +5,7 @@
 MAIN_DART := lib/main.dart
 META_DART := lib/meta.dart
 
-.PHONY: analyze format meta generate run upgrade build
+.PHONY: analyze format meta generate run upgrade build counter
 
 # TODO: eliminate verbose warnings caused by comments with TODOs
 analyze: packages
@@ -23,6 +23,9 @@ generate:
 
 run: packages
 	flutter start && flutter logs --clear
+
+counter: packages
+	flutter start -t lib/countermain.dart && flutter logs --clear
 
 packages: pubspec.yaml
 	pub get

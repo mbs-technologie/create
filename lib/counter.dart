@@ -52,7 +52,7 @@ class CounterApp extends BaseZone implements ApplicationState {
   @override initState() {
     Firebase firebase = new Firebase("https://create-dev.firebaseio.com/");
     var record = { 'value': 566 };
-    firebase.push().set(record);
+    firebase.child('foo-key').set(record);
   }
 
   @override DrawerView makeDrawer() {
