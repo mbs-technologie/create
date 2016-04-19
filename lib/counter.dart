@@ -50,9 +50,7 @@ class CounterApp extends BaseZone implements ApplicationState {
   }
 
   @override initState() {
-    Firebase firebase = new Firebase("https://create-dev.firebaseio.com/");
-    var record = { 'value': 566 };
-    firebase.child('foo-key').set(record);
+    new FirebaseSync("https://create-dev.firebaseio.com/", datastore).startSync();
   }
 
   @override DrawerView makeDrawer() {
@@ -92,4 +90,27 @@ class CounterApp extends BaseZone implements ApplicationState {
   Operation get increaseByTwo => makeOperation(() {
     datastore.increaseBy.value = 2;
   });
+}
+
+const String FIREBASE_KEY = 'counter';
+
+class FirebaseSync {
+  Firebase counterNode;
+  CounterData datastore;
+
+  FirebaseSync(String firebaseUrl, CounterData datastore) {
+    Firebase firebase = new Firebase(firebaseUrl);
+    counterNode = firebase.child(FIREBASE_KEY);
+    this.datastore = datastore;
+  }
+
+  void startSync() {
+    Operation updateOperation = datastore.makeOperation(counterUpdated);
+    datastore.counter.observe(updateOperation, datastore);
+  }
+
+  void counterUpdated() {
+    var record = { 'value': datastore.counter.value };
+    counterNode.set(record);
+  }
 }
