@@ -93,24 +93,40 @@ class CounterApp extends BaseZone implements ApplicationState {
 }
 
 const String FIREBASE_KEY = 'counter';
+const String FIREBASE_VALUE_FIELD = 'value';
 
 class FirebaseSync {
   Firebase counterNode;
   CounterData datastore;
+  bool initInProgress;
 
   FirebaseSync(String firebaseUrl, CounterData datastore) {
     Firebase firebase = new Firebase(firebaseUrl);
-    counterNode = firebase.child(FIREBASE_KEY);
+    this.counterNode = firebase.child(FIREBASE_KEY);
     this.datastore = datastore;
+    this.initInProgress = true;
   }
 
   void startSync() {
     Operation updateOperation = datastore.makeOperation(counterUpdated);
     datastore.counter.observe(updateOperation, datastore);
+    counterNode.onValue.listen(counterNodeUpdated);
+  }
+
+  void counterNodeUpdated(Event event) {
+    Map record = event.snapshot.val();
+    if (initInProgress) {
+      int value = record[FIREBASE_VALUE_FIELD];
+      print('Init with $value');
+      initInProgress = false;
+      datastore.counter.value = value;
+    } else {
+      print('Got $record');
+    }
   }
 
   void counterUpdated() {
-    var record = { 'value': datastore.counter.value };
+    var record = { FIREBASE_VALUE_FIELD: datastore.counter.value };
     counterNode.set(record);
   }
 }
