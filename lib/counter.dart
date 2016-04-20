@@ -5,6 +5,7 @@
 library counter;
 
 import 'package:firebase/firebase.dart';
+import 'elementstypes.dart';
 
 import 'elements.dart';
 import 'elementsruntime.dart';
@@ -93,18 +94,39 @@ class CounterApp extends BaseZone implements ApplicationState {
 }
 
 const String FIREBASE_KEY = 'counter';
-const String FIREBASE_VALUE_FIELD = 'value';
+const String VERSION_FIELD = '_version';
+const String VALUE_FIELD = 'value';
+
+//const String RECORDS_FIELD = 'records';
+//const String TYPE_FIELD = '#type';
+//const String ID_FIELD = '#id';
+
+Object _marshalVersion(VersionId versionId) =>
+  (versionId as Timestamp).milliseconds;
+
+// TODO: error handling
+VersionId _unmarshalVersion(Object object) =>
+  new Timestamp(object as int);
+
+enum FirebaseSyncState {
+  INITIALIZING,
+  WRITING,
+  IDLE
+}
 
 class FirebaseSync {
   Firebase counterNode;
   CounterData datastore;
-  bool initInProgress;
+  FirebaseSyncState state;
+  VersionId version;
+  bool updateInProgress;
 
   FirebaseSync(String firebaseUrl, CounterData datastore) {
-    Firebase firebase = new Firebase(firebaseUrl);
-    this.counterNode = firebase.child(FIREBASE_KEY);
+    this.counterNode = new Firebase(firebaseUrl).child(FIREBASE_KEY);
     this.datastore = datastore;
-    this.initInProgress = true;
+    this.state = FirebaseSyncState.INITIALIZING;
+    this.version = VERSION_ZERO;
+    this.updateInProgress = false;
   }
 
   void startSync() {
@@ -113,20 +135,54 @@ class FirebaseSync {
     counterNode.onValue.listen(counterNodeUpdated);
   }
 
-  void counterNodeUpdated(Event event) {
-    Map record = event.snapshot.val();
-    if (initInProgress) {
-      int value = record[FIREBASE_VALUE_FIELD];
-      print('Init with $value');
-      initInProgress = false;
-      datastore.counter.value = value;
-    } else {
-      print('Got $record');
+  void counterUpdated() {
+    if (updateInProgress) {
+      print('Update in progress.');
+      return;
+    }
+
+    version = version.nextVersion();
+    if (state == FirebaseSyncState.IDLE) {
+      _doWriteRecord();
     }
   }
 
-  void counterUpdated() {
-    var record = { FIREBASE_VALUE_FIELD: datastore.counter.value };
-    counterNode.set(record);
+  void _doWriteRecord() {
+    state = FirebaseSyncState.WRITING;
+    var record = {
+        VERSION_FIELD: _marshalVersion(version),
+        VALUE_FIELD: datastore.counter.value
+    };
+    VersionId versionSet = version;
+    counterNode.set(record).then((value) => setCompleted(versionSet));
+    print('Set started: $versionSet');
+  }
+
+  void setCompleted(VersionId versionSet) {
+    print('Set completed: $versionSet');
+    if (version.isAfter(versionSet)) {
+      _doWriteRecord();
+    } else {
+      state = FirebaseSyncState.IDLE;
+    }
+  }
+
+  void counterNodeUpdated(Event event) {
+    Map record = event.snapshot.val();
+    VersionId gotVersion = _unmarshalVersion(record[VERSION_FIELD]);
+    int gotValue = record[VALUE_FIELD];
+    print('Got $record');
+
+    if (gotVersion.isAfter(version)) {
+      version = gotVersion;
+      updateInProgress = true;
+      datastore.counter.value = gotValue;
+      updateInProgress = false;
+      state = FirebaseSyncState.IDLE;
+    } else if (gotVersion == version) {
+      state = FirebaseSyncState.IDLE;
+    } else {
+      _doWriteRecord();
+    }
   }
 }
