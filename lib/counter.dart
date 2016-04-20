@@ -4,11 +4,9 @@
 
 library counter;
 
-import 'package:firebase/firebase.dart';
-import 'elementstypes.dart';
-
 import 'elements.dart';
 import 'elementsruntime.dart';
+import 'countersyncfb.dart';
 import 'styles_generated.dart';
 import 'views.dart';
 
@@ -51,7 +49,8 @@ class CounterApp extends BaseZone implements ApplicationState {
   }
 
   @override initState() {
-    new FirebaseSync("https://create-dev.firebaseio.com/", datastore).startSync();
+    new CounterSyncFirebase("https://create-dev.firebaseio.com/",
+        datastore.counter, this).startSync();
   }
 
   @override DrawerView makeDrawer() {
@@ -91,98 +90,4 @@ class CounterApp extends BaseZone implements ApplicationState {
   Operation get increaseByTwo => makeOperation(() {
     datastore.increaseBy.value = 2;
   });
-}
-
-const String FIREBASE_KEY = 'counter';
-const String VERSION_FIELD = '_version';
-const String VALUE_FIELD = 'value';
-
-//const String RECORDS_FIELD = 'records';
-//const String TYPE_FIELD = '#type';
-//const String ID_FIELD = '#id';
-
-Object _marshalVersion(VersionId versionId) =>
-  (versionId as Timestamp).milliseconds;
-
-// TODO: error handling
-VersionId _unmarshalVersion(Object object) =>
-  new Timestamp(object as int);
-
-enum FirebaseSyncState {
-  INITIALIZING,
-  UPDATING_LOCAL,
-  WRITING,
-  IDLE
-}
-
-class FirebaseSync {
-  Firebase counterNode;
-  CounterData datastore;
-  FirebaseSyncState state;
-  VersionId localVersion;
-
-  FirebaseSync(String firebaseUrl, CounterData datastore) {
-    this.counterNode = new Firebase(firebaseUrl).child(FIREBASE_KEY);
-    this.datastore = datastore;
-    this.state = FirebaseSyncState.INITIALIZING;
-    this.localVersion = VERSION_ZERO;
-  }
-
-  void startSync() {
-    Operation updateOperation = datastore.makeOperation(counterUpdated);
-    datastore.counter.observe(updateOperation, datastore);
-    counterNode.onValue.listen(counterNodeUpdated);
-  }
-
-  void counterUpdated() {
-    if (state == FirebaseSyncState.UPDATING_LOCAL) {
-      print('Local update in progress.');
-      return;
-    }
-
-    localVersion = localVersion.nextVersion();
-    if (state == FirebaseSyncState.IDLE) {
-      _doWriteRecord();
-    }
-  }
-
-  void _doWriteRecord() {
-    state = FirebaseSyncState.WRITING;
-    var record = {
-        VERSION_FIELD: _marshalVersion(localVersion),
-        VALUE_FIELD: datastore.counter.value
-    };
-    VersionId networkVersion = localVersion;
-    counterNode.set(record).then((value) => setCompleted(networkVersion));
-    print('Set started: $networkVersion');
-  }
-
-  void setCompleted(VersionId networkVersion) {
-  }
-
-  void writeIfNewLocalData(VersionId networkVersion) {
-    if (localVersion.isAfter(networkVersion)) {
-      print('Fresh data: $localVersion newer than $networkVersion');
-      _doWriteRecord();
-    } else {
-      print('No local updates: $localVersion');
-      state = FirebaseSyncState.IDLE;
-    }
-  }
-
-  void counterNodeUpdated(Event event) {
-    Map record = event.snapshot.val();
-    print('Got $record');
-    VersionId networkVersion = _unmarshalVersion(record[VERSION_FIELD]);
-    int networkValue = record[VALUE_FIELD];
-
-    if (networkVersion.isAfter(localVersion)) {
-      state = FirebaseSyncState.UPDATING_LOCAL;
-      localVersion = networkVersion;
-      datastore.counter.value = networkValue;
-      state = FirebaseSyncState.IDLE;
-    } else {
-      writeIfNewLocalData(networkVersion);
-    }
-  }
 }
