@@ -4,7 +4,7 @@
      found in the LICENSE file.
  -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.domokit.create.Fire"
+    package="org.domokit.create.Fire_v01"
     android:versionCode="1"
     android:versionName="0.0.1">
 
@@ -12,7 +12,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application android:name="org.domokit.sky.shell.SkyApplication"
-            android:label="Create! Fire">
+            android:label="Create! Fire v01">
         <activity android:name="org.domokit.sky.shell.SkyActivity"
                   android:launchMode="singleTask"
                   android:theme="@android:style/Theme.Black.NoTitleBar"

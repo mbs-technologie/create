@@ -14,8 +14,8 @@ import 'createdata.dart';
 import 'createinit.dart';
 import 'createapp.dart';
 
-const String SYNC_URI = 'http://create-ledger.appspot.com/data?id=$CREATE_VERSION';
-const String FIREBASE_URI = 'https://create-dev.firebaseio.com/$CREATE_VERSION';
+String SYNC_URI = 'http://create-ledger.appspot.com/data?id=$CREATE_ID';
+String FIREBASE_URI = 'https://create-dev.firebaseio.com/$CREATE_ID';
 
 const bool RESET_DATASTORE = false;
 

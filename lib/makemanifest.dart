@@ -10,7 +10,7 @@ String MANIFEST = '''<?xml version="1.0" encoding="utf-8"?>
      found in the LICENSE file.
  -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.domokit.create.$CREATE_VERSION"
+    package="org.domokit.create.$CREATE_ID"
     android:versionCode="1"
     android:versionName="0.0.1">
 

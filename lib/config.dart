@@ -5,4 +5,6 @@
 enum AppChoice { COUNTER, CREATE }
 
 const AppChoice DEFAULT_APP = AppChoice.COUNTER;
-const String CREATE_VERSION = 'Fire';
+
+const String CREATE_VERSION = 'Fire v01';
+String CREATE_ID = CREATE_VERSION.replaceAll(' ', '_');
