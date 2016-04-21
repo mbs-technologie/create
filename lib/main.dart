@@ -14,8 +14,6 @@ import 'createdata.dart';
 import 'createinit.dart';
 import 'createapp.dart';
 
-enum AppChoice { COUNTER, CREATE }
-
 const String SYNC_URI = 'http://create-ledger.appspot.com/data?id=$CREATE_VERSION';
 const bool RESET_DATASTORE = false;
 
@@ -46,5 +44,5 @@ void start(AppChoice appChoice) {
 }
 
 void main() {
-  start(AppChoice.CREATE);
+  start(DEFAULT_APP);
 }

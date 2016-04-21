@@ -5,7 +5,7 @@
 MAIN_DART := lib/main.dart
 META_DART := lib/meta.dart
 
-.PHONY: analyze format meta generate run upgrade build counter
+.PHONY: analyze format meta generate run upgrade build counter install clean
 
 # TODO: eliminate verbose warnings caused by comments with TODOs
 analyze: packages
@@ -35,3 +35,11 @@ upgrade:
 
 build: packages
 	pub run flutter_tools build
+
+install: packages
+	dart lib/makemanifest.dart > android/AndroidManifest.xml
+	flutter build apk
+	flutter install
+
+clean:
+	flutter build clean

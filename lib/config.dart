@@ -2,4 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-const String CREATE_VERSION = 'DEV';
+enum AppChoice { COUNTER, CREATE }
+
+const AppChoice DEFAULT_APP = AppChoice.COUNTER;
+const String CREATE_VERSION = 'Fire';
