@@ -84,6 +84,13 @@ class CounterSyncFirebase {
   void counterNodeUpdated(Event event) {
     Map record = event.snapshot.val();
     print('Got $record');
+
+    if (record == null) {
+      print('Writing local $localVersion');
+      _doWriteRecord();
+      return;
+    }
+
     VersionId networkVersion = _unmarshalVersion(record[VERSION_FIELD]);
     int networkValue = record[VALUE_FIELD];
 

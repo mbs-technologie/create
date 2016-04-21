@@ -27,12 +27,13 @@ class CounterData extends BaseZone {
 
 class CounterApp extends BaseZone implements ApplicationState {
   final CounterData datastore;
+  final String firebaseUri;
   final ReadRef<String> appTitle = new Constant<String>('Create!');
   ReadRef<String> appVersion = new Constant<String>('');
   final Ref<View> mainView = new Boxed<View>();
   final ReadRef<Operation> addOperation = new Constant<Operation>(null);
 
-  CounterApp(this.datastore) {
+  CounterApp(this.datastore, this.firebaseUri) {
     mainView.value = new ColumnView(
       new ImmutableList<View>([
         new LabelView(
@@ -49,8 +50,7 @@ class CounterApp extends BaseZone implements ApplicationState {
   }
 
   @override initState() {
-    new CounterSyncFirebase("https://create-dev.firebaseio.com/",
-        datastore.counter, this).startSync();
+    new CounterSyncFirebase(firebaseUri, datastore.counter, this).startSync();
   }
 
   @override DrawerView makeDrawer() {

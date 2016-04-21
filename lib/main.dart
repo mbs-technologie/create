@@ -15,6 +15,8 @@ import 'createinit.dart';
 import 'createapp.dart';
 
 const String SYNC_URI = 'http://create-ledger.appspot.com/data?id=$CREATE_VERSION';
+const String FIREBASE_URI = 'https://create-dev.firebaseio.com/$CREATE_VERSION';
+
 const bool RESET_DATASTORE = false;
 
 void start(AppChoice appChoice) {
@@ -22,7 +24,7 @@ void start(AppChoice appChoice) {
 
   switch (appChoice) {
     case AppChoice.COUNTER:
-      app = new CounterApp(new CounterData());
+      app = new CounterApp(new CounterData(), FIREBASE_URI);
       break;
     case AppChoice.CREATE:
       CreateData datastore = new CreateData();
