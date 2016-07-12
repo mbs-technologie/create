@@ -14,7 +14,7 @@ import 'views.dart';
 import 'flutterwidgets.dart';
 
 ThemeData _APP_THEME = new ThemeData(
-  brightness: ThemeBrightness.light,
+  brightness: Brightness.light,
   primarySwatch: Colors.teal
 );
 const EdgeInsets _MAIN_VIEW_PADDING = const EdgeInsets.all(10.0);
@@ -83,10 +83,10 @@ class FlutterAppState extends State<FlutterApp> with FlutterWidgets {
         actions: <Widget>[
           new Text(config.appState.appVersion.value),
           new IconButton(
-            icon: SEARCH_ICON.iconData,
+            icon: new Icon(SEARCH_ICON.iconData),
             onPressed: _handleBeginSearch),
           new IconButton(
-            icon: MORE_VERT_ICON.iconData,
+            icon: new Icon(MORE_VERT_ICON.iconData),
             onPressed: _handleShowMenu)
         ]
       );
@@ -96,7 +96,7 @@ class FlutterAppState extends State<FlutterApp> with FlutterWidgets {
     if (isNotNull(config.appState.addOperation)) {
       Operation addOperation = config.appState.addOperation.value;
       return new FloatingActionButton(
-        child: new Icon(icon: ADD_ICON.iconData, size: ICON_SIZE_S24),
+        child: new Icon(ADD_ICON.iconData, size: ICON_SIZE_S24),
         backgroundColor: Colors.redAccent[200],
         onPressed: () => addOperation.scheduleAction()
       );

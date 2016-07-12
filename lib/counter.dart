@@ -6,7 +6,7 @@ library counter;
 
 import 'elements.dart';
 import 'elementsruntime.dart';
-import 'countersyncfb.dart';
+// import 'countersyncfb.dart';
 import 'styles_generated.dart';
 import 'views.dart';
 
@@ -50,7 +50,7 @@ class CounterApp extends BaseZone implements ApplicationState {
   }
 
   @override initState() {
-    new CounterSyncFirebase(firebaseUri, datastore.counter, this).startSync();
+    // new CounterSyncFirebase(firebaseUri, datastore.counter, this).startSync();
   }
 
   @override DrawerView makeDrawer() {

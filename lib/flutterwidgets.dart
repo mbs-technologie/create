@@ -4,7 +4,7 @@
 
 library flutterwidgets;
 
-import 'dart:async';
+//import 'dart:async';
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
@@ -113,14 +113,14 @@ abstract class FlutterWidgets {
   }
 
   Widget renderSelection(SelectionInput selection) {
-    if (_USE_FLUTTER_DROPDOWN) {
+    //if (_USE_FLUTTER_DROPDOWN) {
       return new _FlutterDropDownButton(selection).build();
-    } else {
+    /*} else {
       return new _EmulatedDropDownButton(selection);
-    }
+    }*/
   }
 
-  MaterialButton renderButton(ButtonView button) {
+  Widget renderButton(ButtonView button) {
     return new RaisedButton(
       child: new Text(button.model.value, style: textStyleOf(button)),
       onPressed: _scheduleAction(button.action)
@@ -129,21 +129,21 @@ abstract class FlutterWidgets {
 
   IconButton renderIconButton(IconButtonView button) {
     return new IconButton(
-      icon: button.model.value.iconData,
+      icon: new Icon(button.model.value.iconData),
       onPressed: _scheduleAction(button.action)
     );
   }
 
   DrawerHeader renderHeader(HeaderView header) {
     return new DrawerHeader(
-      child: new Text(header.model.value, style: textStyleOf(header))
+      content: new Text(header.model.value, style: textStyleOf(header))
     );
   }
 
   DrawerItem renderItem(ItemView item) {
     return new DrawerItem(
       child: new Text(item.model.value, style: textStyleOf(item)),
-      icon: item.icon.value != null ? item.icon.value.iconData : null,
+      icon: item.icon.value != null ? new Icon(item.icon.value.iconData) : null,
       selected: item.selected.value,
       onPressed: () {
         dismissDrawer();
@@ -221,7 +221,7 @@ class TextComponentState extends State<TextComponent> {
     return new Container(
       width: 300.0,
       child: new Row(children: [
-        new IconButton(icon: MODE_EDIT_ICON.iconData, onPressed: _editPressed),
+        new IconButton(icon: new Icon(MODE_EDIT_ICON.iconData), onPressed: _editPressed),
         new Flexible(
           child: editing || _USE_FLUTTER_INPUT
             ? new Input(key: inputKey,
@@ -301,6 +301,7 @@ class _FlutterDropDownButton<T> {
   }
 }
 
+/*
 // TODO: this code should be retired once we commit to using Flutter dropdown buttons
 class _EmulatedDropDownButton<T> extends StatelessWidget {
   _EmulatedDropDownButton(this.selection);
@@ -313,7 +314,7 @@ class _EmulatedDropDownButton<T> extends StatelessWidget {
     return new FlatButton(
       child: new Row(children: [
         new Text(selection.display(selection.model.value), style: textStyle),
-        new Icon(icon: ARROW_DROP_DOWN_ICON.iconData, size: ICON_SIZE_S24)
+        new Icon(ARROW_DROP_DOWN_ICON.iconData, size: ICON_SIZE_S24)
       ]),
       onPressed: () { showSelectionMenu(context); }
     );
@@ -326,9 +327,9 @@ class _EmulatedDropDownButton<T> extends StatelessWidget {
     final List<PopupMenuItem> menuItems = new List.from(selection.options.elements.map(
       (T option) => new PopupMenuItem(
           child: new Row(children: [
-            new IconButton(icon: (option == selection.model.value
+            new IconButton(icon: new Icon((option == selection.model.value
                 ? RADIO_BUTTON_CHECKED_ICON
-                : RADIO_BUTTON_UNCHECKED_ICON).iconData),
+                : RADIO_BUTTON_UNCHECKED_ICON).iconData)),
             new Text(selection.display(option), style: textStyle)]),
           value: option
       )));
@@ -346,3 +347,4 @@ class _EmulatedDropDownButton<T> extends StatelessWidget {
     return showMenu(context: context, position: position, items: menuItems);
   }
 }
+*/

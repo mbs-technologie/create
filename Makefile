@@ -2,14 +2,15 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-MAIN_DART := lib/main.dart
-META_DART := lib/meta.dart
+MAIN_DART        := lib/main.dart
+COUNTERMAIN_DART := lib/countermain.dart
+META_DART        := lib/meta.dart
 
 .PHONY: analyze format meta generate run upgrade build counter install clean
 
 # TODO: eliminate verbose warnings caused by comments with TODOs
 analyze: packages
-	dartanalyzer $(MAIN_DART) $(META_DART) | grep -v TODO
+	dartanalyzer $(MAIN_DART) $(COUNTERMAIN_DART) $(META_DART)
 
 format: packages
 	dartfmt --overwrite -l 100 $(META_DART)
@@ -22,10 +23,10 @@ generate:
 	dartanalyzer lib/styles_generated.dart
 
 run: packages
-	flutter start && flutter logs --clear
+	flutter run && flutter logs --clear
 
 counter: packages
-	flutter start -t lib/countermain.dart && flutter logs --clear
+	flutter run -t $(COUNTERMAIN_DART) && flutter logs --clear
 
 packages: pubspec.yaml
 	pub get

@@ -4,7 +4,7 @@
 
 enum AppChoice { COUNTER, CREATE }
 
-const AppChoice DEFAULT_APP = AppChoice.COUNTER;
+const AppChoice DEFAULT_APP = AppChoice.CREATE;
 
-const String CREATE_VERSION = 'Fire v01';
+const String CREATE_VERSION = 'DEV';
 String CREATE_ID = CREATE_VERSION.replaceAll(' ', '_');
